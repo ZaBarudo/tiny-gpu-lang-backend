@@ -44,23 +44,32 @@ RISCWTargetLowering::RISCWTargetLowering(const TargetMachine &TM,
   // added, this allows us to compute derived properties we expose.
   computeRegisterProperties(Subtarget.getRegisterInfo());
 
-  setStackPointerRegisterToSaveRestore(RISCW::X2);
-
-  // Set scheduling preference. There are a few options:
-  //    - None: No preference
-  //    - Source: Follow source order
-  //    - RegPressure: Scheduling for lowest register pressure
-  //    - Hybrid: Scheduling for both latency and register pressure
-  // Source (the option used by XCore) is no good when there are few registers
-  // because the compiler will try to keep a lot more things into the register
-  // which eventually results in a lot of stack spills for no good reason. So
-  // use either RegPressure or Hybrid
+  // Set scheduling preference
   setSchedulingPreference(Sched::RegPressure);
+
+  setStackPointerRegisterToSaveRestore(RISCW::X2);
 
   // Use i32 for setcc operations results (slt, sgt, ...).
   setBooleanContents(ZeroOrOneBooleanContent);
-  setBooleanVectorContents(ZeroOrOneBooleanContent);
 
+  // Arithmetic operations
+  setOperationAction(ISD::SDIVREM,   MVT::i32, Expand);
+  setOperationAction(ISD::UDIVREM,   MVT::i32, Expand);
+  setOperationAction(ISD::SMUL_LOHI, MVT::i32, Expand);
+  setOperationAction(ISD::UMUL_LOHI, MVT::i32, Expand);
+
+  setOperationAction(ISD::SHL_PARTS, MVT::i32, Custom);
+  setOperationAction(ISD::SRL_PARTS, MVT::i32, Custom);
+  setOperationAction(ISD::SRA_PARTS, MVT::i32, Custom);
+
+  setOperationAction(ISD::ROTL,  MVT::i32, Expand);
+  setOperationAction(ISD::ROTR,  MVT::i32, Expand);
+  setOperationAction(ISD::BSWAP, MVT::i32, Expand);
+  setOperationAction(ISD::CTTZ,  MVT::i32, Expand);
+  setOperationAction(ISD::CTLZ,  MVT::i32, Expand);
+  setOperationAction(ISD::CTPOP, MVT::i32, Expand);
+
+  // Address resolution and constant pool
   setOperationAction(ISD::GlobalAddress, MVT::i32, Custom);
   setOperationAction(ISD::BlockAddress,  MVT::i32, Custom);
   setOperationAction(ISD::ConstantPool,  MVT::i32, Custom);
@@ -328,6 +337,143 @@ RISCWTargetLowering::LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const {
 }
 
 SDValue
+RISCWTargetLowering::LowerShlParts(SDValue Op, SelectionDAG &DAG) const {
+  assert(Op.getNumOperands() == 3 && "Not a long shift");
+
+  EVT VT = Op.getValueType();
+  unsigned VTBits = VT.getSizeInBits();
+  SDLoc DL(Op);
+
+  // if Shamt-32 < 0: // Shamt < 32
+  //   Lo = Lo << Shamt
+  //   Hi = (Hi << Shamt) | ((Lo >>u 1) >>u (32-1 - Shamt))
+  // else:
+  //   Lo = 0
+  //   Hi = Lo << (Shamt-32)
+
+  SDValue Lo = Op.getOperand(0);
+  SDValue Hi = Op.getOperand(1);
+  SDValue Shamt = Op.getOperand(2);
+
+  // Precompute a node with ...
+  // ... constant value 0
+  SDValue Zero = DAG.getConstant(0, DL, VT);
+  // ... constant value 1
+  SDValue One = DAG.getConstant(1, DL, VT);
+  // ... -32
+  SDValue NegWsize = DAG.getConstant(-VTBits, DL, VT);
+  // ... 32 - 1
+  SDValue WsizeMinus1 = DAG.getConstant(VTBits - 1, DL, VT);
+  // ... shamt - 32
+  SDValue ShamtMinusWsize = DAG.getNode(ISD::ADD, DL, VT, Shamt, NegWsize);
+  // ... (32 - 1) - shamt
+  SDValue WsizeMinus1MinusShamt =
+      DAG.getNode(ISD::SUB, DL, VT, WsizeMinus1, Shamt);
+
+  // Compute the 'then' part of the if
+  // Lo << Shamt
+  SDValue LoTrue = DAG.getNode(ISD::SHL, DL, VT, Lo, Shamt);
+  // Lo >> 1
+  SDValue LoShr1 = DAG.getNode(ISD::SRL, DL, VT, Lo, One);
+  // (Lo >> 1) >> (32-1 - Shamt)
+  SDValue HiLsb = DAG.getNode(ISD::SRL, DL, VT, LoShr1, WsizeMinus1MinusShamt);
+  // Hi << Shamt
+  SDValue HiMsb = DAG.getNode(ISD::SHL, DL, VT, Hi, Shamt);
+  // (Hi << Shamt) | ((Lo >>u 1) >>u (32-1 - Shamt))
+  SDValue HiTrue = DAG.getNode(ISD::OR, DL, VT, HiMsb, HiLsb);
+
+  // Compute the 'else' part of the if
+  SDValue LoFalse = Zero;
+  SDValue HiFalse = DAG.getNode(ISD::SHL, DL, VT, Lo, ShamtMinusWsize);
+
+  // Compute the if condition
+  SDValue CC = DAG.getSetCC(DL, VT, ShamtMinusWsize, Zero, ISD::SETLT);
+
+  // and (finally) select the results based on the condition!
+  Lo = DAG.getNode(ISD::SELECT, DL, VT, CC, LoTrue, LoFalse);
+  Hi = DAG.getNode(ISD::SELECT, DL, VT, CC, HiTrue, HiFalse);
+
+  SDValue Ops[2] = {Lo, Hi};
+  return DAG.getMergeValues(Ops, DL);
+}
+
+SDValue
+RISCWTargetLowering::LowerShrParts(SDValue Op, SelectionDAG &DAG,
+                                   bool arith) const {
+  assert(Op.getNumOperands() == 3 && "Not a long shift");
+
+  EVT VT = Op.getValueType();
+  unsigned VTBits = VT.getSizeInBits();
+  SDLoc DL(Op);
+
+  // SRA expansion:
+  //   if Shamt-32 < 0: // Shamt < 32
+  //     Lo = (Lo >>u Shamt) | ((Hi << 1) << (32-1 - Shamt))
+  //     Hi = Hi >>s Shamt
+  //   else:
+  //     Lo = Hi >>s (Shamt-32);
+  //     Hi = Hi >>s (32-1)
+  //
+  // SRL expansion:
+  //   if Shamt-32 < 0: // Shamt < 32
+  //     Lo = (Lo >>u Shamt) | ((Hi << 1) << (32-1 - Shamt))
+  //     Hi = Hi >>u Shamt
+  //   else:
+  //     Lo = Hi >>u (Shamt-32);
+  //     Hi = 0;
+
+  SDValue Lo = Op.getOperand(0);
+  SDValue Hi = Op.getOperand(1);
+  SDValue Shamt = Op.getOperand(2);
+
+  // The only differences between the SRA and SRL expansions are the right
+  // shift operations: arithmetic for SRA and logical for SRL; and Hi
+  unsigned ShrOp = arith ? ISD::SRA : ISD::SRL;
+
+  // Precompute a node with ...
+  // ... constant value 0
+  SDValue Zero = DAG.getConstant(0, DL, VT);
+  // ... constant value 1
+  SDValue One = DAG.getConstant(1, DL, VT);
+  // ... -32
+  SDValue NegWsize = DAG.getConstant(-VTBits, DL, VT);
+  // ... 32 - 1
+  SDValue WsizeMinus1 = DAG.getConstant(VTBits - 1, DL, VT);
+  // ... shamt - 32
+  SDValue ShamtMinusWsize = DAG.getNode(ISD::ADD, DL, VT, Shamt, NegWsize);
+  // ... (32 - 1) - shamt
+  SDValue WsizeMinus1MinusShamt =
+      DAG.getNode(ISD::SUB, DL, VT, WsizeMinus1, Shamt);
+
+  // Compute the 'then' part of the if
+  // Hi << 1
+  SDValue HiShr1 = DAG.getNode(ISD::SHL, DL, VT, Lo, One);
+  // (Hi << 1) << (32-1 - Shamt)
+  SDValue LoMsb = DAG.getNode(ISD::SRL, DL, VT, HiShr1, WsizeMinus1MinusShamt);
+  // Lo >>u Shamt
+  SDValue LoLsb = DAG.getNode(ISD::SRL, DL, VT, Lo, Shamt);
+  // (Lo >>u Shamt) | ((Hi << 1) << (32-1 - Shamt))
+  SDValue LoTrue = DAG.getNode(ISD::OR, DL, VT, LoMsb, LoLsb);
+  // Hi >>s Shamt
+  SDValue HiTrue = DAG.getNode(ShrOp, DL, VT, Hi, Shamt);
+
+  // Compute the 'else' part of the if
+  SDValue LoFalse = DAG.getNode(ShrOp, DL, VT, Hi, ShamtMinusWsize);
+  SDValue HiFalse =
+      arith ? DAG.getNode(ISD::SRA, DL, VT, Hi, WsizeMinus1) : Zero;
+
+  // Compute the if condition
+  SDValue CC = DAG.getSetCC(DL, VT, ShamtMinusWsize, Zero, ISD::SETLT);
+
+  // and (finally) select the results based on the condition!
+  Lo = DAG.getNode(ISD::SELECT, DL, VT, CC, LoTrue, LoFalse);
+  Hi = DAG.getNode(ISD::SELECT, DL, VT, CC, HiTrue, HiFalse);
+
+  SDValue Ops[2] = {Lo, Hi};
+  return DAG.getMergeValues(Ops, DL);
+}
+
+SDValue
 RISCWTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
   default:                        llvm_unreachable("unimplemented operand");
@@ -335,5 +481,8 @@ RISCWTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   case ISD::BlockAddress:         return LowerBlockAddress(Op, DAG);
   case ISD::ConstantPool:         return LowerConstantPool(Op, DAG);
   case ISD::RETURNADDR:           return LowerRETURNADDR(Op, DAG);
+  case ISD::SHL_PARTS:            return LowerShlParts(Op, DAG);
+  case ISD::SRL_PARTS:            return LowerShrParts(Op, DAG, false);
+  case ISD::SRA_PARTS:            return LowerShrParts(Op, DAG, true);
   }
 }

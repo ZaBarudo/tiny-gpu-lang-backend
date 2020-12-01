@@ -72,6 +72,8 @@ private:
   SDValue LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerConstantPool(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerShlParts(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerShrParts(SDValue Op, SelectionDAG &DAG, bool arith) const;
 };
 }
 

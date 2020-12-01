@@ -26,8 +26,6 @@ bool RISCWDAGToDAGISel::runOnMachineFunction(MachineFunction &MF) {
 }
 
 void RISCWDAGToDAGISel::Select(SDNode *Node) {
-  unsigned Opcode = Node->getOpcode();
-
   // If we have a custom node, we already have selected!
   if (Node->isMachineOpcode()) {
     LLVM_DEBUG(errs() << "== "; Node->dump(CurDAG); errs() << "\n");
@@ -37,7 +35,20 @@ void RISCWDAGToDAGISel::Select(SDNode *Node) {
 
   // Instruction Selection not handled by the auto-generated tablegen selection
   // should be handled here.
+  unsigned Opcode = Node->getOpcode();
+  SDLoc DL(Node);
+
   switch(Opcode) {
+  case ISD::Constant: {
+    auto ConstNode = cast<ConstantSDNode>(Node);
+    if (ConstNode->isNullValue()) {
+      SDValue New = CurDAG->getCopyFromReg(CurDAG->getEntryNode(), SDLoc(Node),
+                                           RISCW::X0, MVT::i32);
+      ReplaceNode(Node, New.getNode());
+      return;
+    }
+    break;
+  }
   default: break;
   }
 
