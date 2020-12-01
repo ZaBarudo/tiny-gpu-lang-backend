@@ -50,17 +50,6 @@ protected:
   const RISCWSubtarget &Subtarget;
 
 private:
-  SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerConstantPool(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const;
-
-  using RegsToPassVector = SmallVector<std::pair<unsigned, SDValue>, 8>;
-
-  SDValue getGlobalAddressWrapper(SDValue GA,
-                                  const GlobalValue *GV,
-                                  SelectionDAG &DAG) const;
-
   SDValue LowerFormalArguments(SDValue Chain,
                          CallingConv::ID CallConv, bool IsVarArg,
                          const SmallVectorImpl<ISD::InputArg> &Ins,
@@ -76,20 +65,13 @@ private:
                       MachineFunction &MF, bool isVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &Outs,
                       LLVMContext &Context) const override;
-
   SDValue LowerCall(TargetLowering::CallLoweringInfo &CLI,
                     SmallVectorImpl<SDValue> &InVals) const override;
-  void HandleByVal(CCState *, unsigned &, unsigned) const override;
-  SDValue LowerCallResult(SDValue Chain, SDValue InFlag,
-                          CallingConv::ID CallConv, bool IsVarArg,
-                          const SmallVectorImpl<ISD::InputArg> &Ins,
-                          const SDLoc &dl, SelectionDAG &DAG,
-                          SmallVectorImpl<SDValue> &InVals,
-                          bool isThisReturn, SDValue ThisVal) const;
-  SDValue LowerMemOpCallTo(SDValue Chain,
-                           SDValue Arg, const SDLoc &dl,
-                           SelectionDAG &DAG, const CCValAssign &VA,
-                           ISD::ArgFlagsTy Flags) const;
+
+  SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerConstantPool(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const;
 };
 }
 

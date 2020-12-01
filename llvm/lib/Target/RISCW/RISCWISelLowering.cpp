@@ -106,8 +106,7 @@ SDValue RISCWTargetLowering::LowerFormalArguments(
                                     bool isVarArg,
                                     const SmallVectorImpl<ISD::InputArg> &Ins,
                                     const SDLoc &dl, SelectionDAG &DAG,
-                                    SmallVectorImpl<SDValue> &InVals) const
-{
+                                    SmallVectorImpl<SDValue> &InVals) const {
   assert((CallingConv::C == CallConv || CallingConv::Fast == CallConv) &&
 		 "Unsupported CallingConv to FORMAL_ARGS");
 
@@ -232,131 +231,15 @@ SDValue RISCWTargetLowering::LowerFormalArguments(
 bool RISCWTargetLowering::CanLowerReturn(CallingConv::ID CallConv,
                                 MachineFunction &MF, bool isVarArg,
                                 const SmallVectorImpl<ISD::OutputArg> &Outs,
-                                LLVMContext &Context) const
-{
+                                LLVMContext &Context) const {
   SmallVector<CCValAssign, 16> RVLocs;
   CCState CCInfo(CallConv, isVarArg, MF, RVLocs, Context);
   return CCInfo.CheckReturn(Outs, RISCW_CRetConv);
 }
 
-/// LowerMemOpCallTo - Store the argument to the stack.
-SDValue RISCWTargetLowering::LowerMemOpCallTo(SDValue Chain,
-                                              SDValue Arg, const SDLoc &dl,
-                                              SelectionDAG &DAG,
-                                              const CCValAssign &VA,
-                                              ISD::ArgFlagsTy Flags) const {
-  llvm_unreachable("Cannot store arguments to stack");
-}
-
-/// LowerCallResult - Lower the result values of a call into the
-/// appropriate copies out of appropriate physical registers.
-SDValue
-RISCWTargetLowering::LowerCallResult(SDValue Chain, SDValue InFlag,
-                                     CallingConv::ID CallConv, bool isVarArg,
-                                     const SmallVectorImpl<ISD::InputArg> &Ins,
-                                     const SDLoc &dl, SelectionDAG &DAG,
-                                     SmallVectorImpl<SDValue> &InVals,
-                                     bool isThisReturn, SDValue ThisVal) const {
-  // Assign locations to each value returned by this call.
-  SmallVector<CCValAssign, 16> RVLocs;
-  CCState CCInfo(CallConv, isVarArg, DAG.getMachineFunction(), RVLocs,
-                 *DAG.getContext());
-  CCInfo.AnalyzeCallResult(Ins, RISCW_CRetConv);
-
-  // Copy all of the result registers out of their specified physreg.
-  for (unsigned i = 0; i != RVLocs.size(); ++i) {
-    CCValAssign VA = RVLocs[i];
-
-    // Pass 'this' value directly from the argument to return value, to avoid
-    // reg unit interference
-    if (i == 0 && isThisReturn) {
-      assert(!VA.needsCustom() && VA.getLocVT() == MVT::i32 &&
-             "unexpected return calling convention register assignment");
-      InVals.push_back(ThisVal);
-      continue;
-    }
-
-    SDValue Val;
-    if (VA.needsCustom()) {
-        llvm_unreachable("Vector and floating point values not supported yet");
-    } else {
-      Val = DAG.getCopyFromReg(Chain, dl, VA.getLocReg(), VA.getLocVT(),
-                               InFlag);
-      Chain = Val.getValue(1);
-      InFlag = Val.getValue(2);
-    }
-
-    switch (VA.getLocInfo()) {
-    default: llvm_unreachable("Unknown loc info!");
-    case CCValAssign::Full: break;
-    case CCValAssign::BCvt:
-      Val = DAG.getNode(ISD::BITCAST, dl, VA.getValVT(), Val);
-      break;
-    }
-
-    InVals.push_back(Val);
-  }
-
-  return Chain;
-}
-
 SDValue RISCWTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
                                        SmallVectorImpl<SDValue> &InVals) const {
   llvm_unreachable("Cannot lower call");
-}
-
-/// HandleByVal - Every parameter *after* a byval parameter is passed
-/// on the stack.  Remember the next parameter register to allocate,
-/// and then confiscate the rest of the parameter registers to insure
-/// this.
-void RISCWTargetLowering::HandleByVal(CCState *State, unsigned &Size,
-                                      unsigned Align) const {
-  // Byval (as with any stack) slots are always at least 4 byte aligned.
-  Align = std::max(Align, 4U);
-
-  unsigned Reg = State->AllocateReg(GPRArgRegs);
-  if (!Reg)
-    return;
-
-  unsigned AlignInRegs = Align / 4;
-  unsigned Waste = (RISCW::X4 - Reg) % AlignInRegs;
-  for (unsigned i = 0; i < Waste; ++i)
-    Reg = State->AllocateReg(GPRArgRegs);
-
-  if (!Reg)
-    return;
-
-  unsigned Excess = 4 * (RISCW::X4 - Reg);
-
-  // Special case when NSAA != SP and parameter size greater than size of
-  // all remained GPR regs. In that case we can't split parameter, we must
-  // send it to stack. We also must set NCRN to X4, so waste all
-  // remained registers.
-  const unsigned NSAAOffset = State->getNextStackOffset();
-  if (NSAAOffset != 0 && Size > Excess) {
-    while (State->AllocateReg(GPRArgRegs))
-      ;
-    return;
-  }
-
-  // First register for byval parameter is the first register that wasn't
-  // allocated before this method call, so it would be "reg".
-  // If parameter is small enough to be saved in range [reg, r4), then
-  // the end (first after last) register would be reg + param-size-in-regs,
-  // else parameter would be splitted between registers and stack,
-  // end register would be r4 in this case.
-  unsigned ByValRegBegin = Reg;
-  unsigned ByValRegEnd = std::min<unsigned>(Reg + Size / 4, RISCW::X4);
-  State->addInRegsParamInfo(ByValRegBegin, ByValRegEnd);
-  // Note, first register is allocated in the beginning of function already,
-  // allocate remained amount of registers we need.
-  for (unsigned i = Reg + 1; i != ByValRegEnd; ++i)
-    State->AllocateReg(GPRArgRegs);
-  // A byval parameter that is split between registers and memory needs its
-  // size truncated here.
-  // In the case where the entire structure fits in registers, we set the
-  // size in memory to zero.
-  Size = std::max<int>(Size - Excess, 0);
 }
 
 SDValue
@@ -421,32 +304,22 @@ RISCWTargetLowering::LowerReturn(SDValue Chain,
 }
 
 //===----------------------------------------------------------------------===//
-//  Lower helper functions
-//===----------------------------------------------------------------------===//
-
-SDValue RISCWTargetLowering::getGlobalAddressWrapper(SDValue GA,
-                                                     const GlobalValue *GV,
-                                                     SelectionDAG &DAG) const {
-  llvm_unreachable("Unhandled global variable");
-}
-
-//===----------------------------------------------------------------------===//
 //  Misc Lower Operation implementation
 //===----------------------------------------------------------------------===//
 
-SDValue RISCWTargetLowering::
-LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const {
+SDValue
+RISCWTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const {
   llvm_unreachable("Unsupported global address");
 }
 
-SDValue RISCWTargetLowering::
-LowerConstantPool(SDValue Op, SelectionDAG &DAG) const {
-  llvm_unreachable("Unsupported constant pool");
+SDValue
+RISCWTargetLowering::LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const {
+  llvm_unreachable("Unsupported block address");
 }
 
-SDValue RISCWTargetLowering::
-LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const {
-  llvm_unreachable("Unsupported block address");
+SDValue
+RISCWTargetLowering::LowerConstantPool(SDValue Op, SelectionDAG &DAG) const {
+  llvm_unreachable("Unsupported constant pool");
 }
 
 SDValue
@@ -457,10 +330,10 @@ RISCWTargetLowering::LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const {
 SDValue
 RISCWTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
+  default:                        llvm_unreachable("unimplemented operand");
   case ISD::GlobalAddress:        return LowerGlobalAddress(Op, DAG);
   case ISD::BlockAddress:         return LowerBlockAddress(Op, DAG);
   case ISD::ConstantPool:         return LowerConstantPool(Op, DAG);
   case ISD::RETURNADDR:           return LowerRETURNADDR(Op, DAG);
-  default: llvm_unreachable("unimplemented operand");
   }
 }
