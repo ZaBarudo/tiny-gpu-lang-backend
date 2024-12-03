@@ -1,3 +1,10 @@
-add_llvm_library(LLVMRISCWInfo
+add_llvm_component_library(LLVMRISCWInfo
   RISCWTargetInfo.cpp
+
+  LINK_COMPONENTS
+  MC
+  Support
+
+  ADD_TO_COMPONENT
+  RISCW
 )

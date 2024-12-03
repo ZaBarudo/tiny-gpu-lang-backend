@@ -20,9 +20,13 @@
 
 namespace llvm {
   class FunctionPass;
+  class PassRegistry;
+  class RISCWTargetMachine;
 
-  // Declare functions to create passes here!
+  void initializeRISCWDAGToDAGISelLegacyPass(PassRegistry &);
 
+  FunctionPass *createRISCWISelDag(RISCWTargetMachine &TM,
+                                   CodeGenOptLevel OptLevel);
 } // end namespace llvm;
 
 #endif // end LLVM_LIB_TARGET_RISCW_RISCW_H

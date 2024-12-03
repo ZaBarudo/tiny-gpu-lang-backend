@@ -18,7 +18,7 @@
 #include "TargetInfo/RISCWTargetInfo.h"
 #include "llvm/CodeGen/Passes.h"
 #include "llvm/CodeGen/TargetPassConfig.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 
 using namespace llvm;
 
@@ -26,6 +26,8 @@ extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeRISCWTarget() {
   // Register the target.
   //- Little endian Target Machine
   RegisterTargetMachine<RISCWTargetMachine> X(getTheRISCWTarget());
+  PassRegistry &PR = *PassRegistry::getPassRegistry();
+  initializeRISCWDAGToDAGISelLegacyPass(PR);
 }
 
 static std::string computeDataLayout() {
@@ -52,21 +54,19 @@ static std::string computeDataLayout() {
   return Ret;
 }
 
-static Reloc::Model getEffectiveRelocModel(Optional<CodeModel::Model> CM,
-                                           Optional<Reloc::Model> RM) {
-  if (!RM.hasValue())
-    return Reloc::Static;
-  return *RM;
+static Reloc::Model getEffectiveRelocModel(std::optional<CodeModel::Model> CM,
+                                           std::optional<Reloc::Model> RM) {
+  return RM.value_or(Reloc::Static);
 }
 
 RISCWTargetMachine::RISCWTargetMachine(const Target &T, const Triple &TT,
                                        StringRef CPU, StringRef FS,
                                        const TargetOptions &Options,
-                                       Optional<Reloc::Model> RM,
-                                       Optional<CodeModel::Model> CM,
-                                       CodeGenOpt::Level OL,
+                                       std::optional<Reloc::Model> RM,
+                                       std::optional<CodeModel::Model> CM,
+                                       CodeGenOptLevel OL,
                                        bool JIT)
-    : LLVMTargetMachine(T, computeDataLayout(), TT, CPU, FS, Options,
+    : CodeGenTargetMachineImpl(T, computeDataLayout(), TT, CPU, FS, Options,
                         getEffectiveRelocModel(CM, RM),
                         getEffectiveCodeModel(CM, CodeModel::Medium), OL),
       TLOF(std::make_unique<RISCWTargetObjectFile>()) {
@@ -119,7 +119,7 @@ TargetPassConfig *RISCWTargetMachine::createPassConfig(PassManagerBase &PM) {
 // Install an instruction selector pass using
 // the ISelDag to gen RISCW code.
 bool RISCWPassConfig::addInstSelector() {
-  addPass(new RISCWDAGToDAGISel(getRISCWTargetMachine(), getOptLevel()));
+  addPass(createRISCWISelDag(getRISCWTargetMachine(), getOptLevel()));
   return false;
 }
 

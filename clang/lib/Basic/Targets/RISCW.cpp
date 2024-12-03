@@ -36,11 +36,11 @@ const TargetInfo::GCCRegAlias GCCRegAliases[] = {
   {{"t3"}, "x28"},  {{"t4"}, "x29"},  {{"t5"}, "x30"},   {{"t6"}, "x31"}};
 
 ArrayRef<const char *> RISCWTargetInfo::getGCCRegNames() const {
-  return llvm::makeArrayRef(GCCRegNames);
+  return llvm::ArrayRef(GCCRegNames);
 }
 
 ArrayRef<TargetInfo::GCCRegAlias> RISCWTargetInfo::getGCCRegAliases() const {
-  return llvm::makeArrayRef(GCCRegAliases);
+  return llvm::ArrayRef(GCCRegAliases);
 }
 
 void RISCWTargetInfo::getTargetDefines(const LangOptions &Opts,

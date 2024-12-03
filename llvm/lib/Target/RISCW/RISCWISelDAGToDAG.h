@@ -21,13 +21,8 @@
 namespace llvm {
 class RISCWDAGToDAGISel : public SelectionDAGISel {
 public:
-  explicit RISCWDAGToDAGISel(RISCWTargetMachine &TM, CodeGenOpt::Level OL)
+  explicit RISCWDAGToDAGISel(RISCWTargetMachine &TM, CodeGenOptLevel OL)
       : SelectionDAGISel(TM, OL), Subtarget(nullptr) {}
-
-  // Pass Name
-  StringRef getPassName() const override {
-    return "CPU0 DAG->DAG Pattern Instruction Selection";
-  }
 
   bool runOnMachineFunction(MachineFunction &MF) override;
 

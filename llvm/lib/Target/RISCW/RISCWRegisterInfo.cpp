@@ -52,10 +52,9 @@ BitVector RISCWRegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   return Reserved;
 }
 
-void RISCWRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
-                                           int SPAdj,
-                                           unsigned FIOperandNum,
-                                           RegScavenger *RS) const {
+bool RISCWRegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator MI,
+                                            int SPAdj, unsigned FIOperandNum,
+                                            RegScavenger *RS) const {
   llvm_unreachable("Unsupported eliminateFrameIndex");
 }
 
@@ -82,6 +81,8 @@ RISCWRegisterInfo::trackLivenessAfterRegAlloc(const MachineFunction &MF) const {
 }
 
 Register RISCWRegisterInfo::getFrameRegister(const MachineFunction &MF) const {
-  llvm_unreachable("Unsupported getFrameRegister");
+  // Note: was added just to make it work (compile c to riscw asm).
+  // I don't know whether it is correct.
+  return RISCW::SP;
 }
 

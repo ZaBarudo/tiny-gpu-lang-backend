@@ -15,7 +15,7 @@
 
 #include "clang/Basic/TargetInfo.h"
 #include "clang/Basic/TargetOptions.h"
-#include "llvm/ADT/Triple.h"
+#include "llvm/TargetParser/Triple.h"
 #include "llvm/Support/Compiler.h"
 
 namespace clang {
@@ -61,7 +61,7 @@ public:
   }
 
   ArrayRef<Builtin::Info> getTargetBuiltins() const override {
-    return None;
+    return {};
   }
 
   bool validateAsmConstraint(const char *&Name,
@@ -69,7 +69,7 @@ public:
     return false;
   }
 
-  const char *getClobbers() const override {
+   std::string_view getClobbers() const override {
     return "";
   }
 };

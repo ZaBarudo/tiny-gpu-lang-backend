@@ -26,7 +26,7 @@ RISCWToolChain::RISCWToolChain(const Driver &D, const llvm::Triple &Triple,
 
 bool RISCWToolChain::isPICDefault() const { return true; }
 
-bool RISCWToolChain::isPIEDefault() const { return false; }
+bool RISCWToolChain::isPIEDefault(const llvm::opt::ArgList &Args) const { return false; }
 
 bool RISCWToolChain::isPICDefaultForced() const { return true; }
 

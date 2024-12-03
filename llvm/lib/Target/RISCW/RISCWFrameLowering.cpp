@@ -23,7 +23,7 @@ using namespace llvm;
 // pointer register.  This is true if the function has variable sized allocas,
 // if it needs dynamic stack realignment, if frame pointer elimination is
 // disabled, or if the frame address is taken.
-bool RISCWFrameLowering::hasFP(const MachineFunction &MF) const {
+bool RISCWFrameLowering::hasFPImpl(const MachineFunction &MF) const {
   return false;
 }
 

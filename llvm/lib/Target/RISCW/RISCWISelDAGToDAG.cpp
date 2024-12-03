@@ -19,6 +19,7 @@
 using namespace llvm;
 
 #define DEBUG_TYPE "riscw-isel"
+#define PASS_NAME "CPU0 DAG->DAG Pattern Instruction Selection"
 
 bool RISCWDAGToDAGISel::runOnMachineFunction(MachineFunction &MF) {
   Subtarget = &static_cast<const RISCWSubtarget &>(MF.getSubtarget());
@@ -41,7 +42,7 @@ void RISCWDAGToDAGISel::Select(SDNode *Node) {
   switch(Opcode) {
   case ISD::Constant: {
     auto ConstNode = cast<ConstantSDNode>(Node);
-    if (ConstNode->isNullValue()) {
+    if (ConstNode->isZero()) {
       SDValue New = CurDAG->getCopyFromReg(CurDAG->getEntryNode(), SDLoc(Node),
                                            RISCW::X0, MVT::i32);
       ReplaceNode(Node, New.getNode());
@@ -55,3 +56,23 @@ void RISCWDAGToDAGISel::Select(SDNode *Node) {
   // Select the default instruction
   SelectCode(Node);
 }
+
+namespace {
+  class RISCWDAGToDAGISelLegacy : public SelectionDAGISelLegacy {
+  public:
+    static char ID;
+    RISCWDAGToDAGISelLegacy(RISCWTargetMachine &TM, CodeGenOptLevel OptLevel)
+    : SelectionDAGISelLegacy(ID, std::make_unique<RISCWDAGToDAGISel>(TM, OptLevel)) {}
+  };
+}
+
+// This pass converts a legalized DAG into a RISCW-specific DAG, ready
+// for instruction scheduling.
+FunctionPass *llvm::createRISCWISelDag(RISCWTargetMachine &TM,
+                                       CodeGenOptLevel OptLevel) {
+  return new RISCWDAGToDAGISelLegacy(TM, OptLevel);
+}
+
+char RISCWDAGToDAGISelLegacy::ID = 0;
+
+INITIALIZE_PASS(RISCWDAGToDAGISelLegacy, DEBUG_TYPE, PASS_NAME, false, false)

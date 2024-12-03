@@ -14,7 +14,7 @@
 #define LLVM_LIB_TARGET_RISCW_MCTARGETDESC_RISCWBASEINFO_H
 
 #include "llvm/MC/MCInstrDesc.h"
-#include "llvm/MC/SubtargetFeature.h"
+//#include "Common/SubtargetFeatureInfo.h"
 
 namespace llvm {
 

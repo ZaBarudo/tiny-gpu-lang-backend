@@ -20,7 +20,7 @@
 #include "llvm/IR/Function.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 
 using namespace llvm;
 
@@ -32,7 +32,7 @@ using namespace llvm;
 
 RISCWSubtarget::RISCWSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
                                const TargetMachine &TM)
-    : RISCWGenSubtargetInfo(TT, CPU, FS),
+    : RISCWGenSubtargetInfo(TT, CPU, /*TuneCPU*/ CPU, FS),
       TSInfo(),
       InstrInfo(initializeSubtargetDependencies(TT, CPU, FS, TM)),
       FrameLowering(*this),
@@ -44,12 +44,12 @@ RISCWSubtarget &
 RISCWSubtarget::initializeSubtargetDependencies(const Triple &TT, StringRef CPU,
                                                 StringRef FS,
                                                 const TargetMachine &TM) {
-  std::string CPUName = CPU;
+  std::string CPUName(CPU);
   if (CPUName.empty())
     CPUName = "generic";
 
   // Parse features string.
-  ParseSubtargetFeatures(CPUName, FS);
+  ParseSubtargetFeatures(CPUName, /*TuneCPU*/ CPUName, FS);
 
   return *this;
 }

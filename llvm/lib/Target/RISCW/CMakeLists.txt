@@ -1,3 +1,5 @@
+add_llvm_component_group(RISCW)
+
 set(LLVM_TARGET_DEFINITIONS RISCW.td)
 
 tablegen(LLVM RISCWGenRegisterInfo.inc -gen-register-info)
@@ -24,6 +26,22 @@ add_llvm_target(RISCWCodeGen
   RISCWTargetObjectFile.cpp
   RISCWISelDAGToDAG.cpp
   RISCWTargetMachine.cpp
+  
+  LINK_COMPONENTS
+  AsmPrinter
+  CodeGen
+  CodeGenTypes
+  Core
+  MC
+  RISCWDesc
+  RISCWInfo
+  SelectionDAG
+  Support
+  Target
+  TargetParser
+
+  ADD_TO_COMPONENT
+  RISCW
 )
 
 # Should match with "subdirectories =  MCTargetDesc TargetInfo" in LLVMBuild.txt
