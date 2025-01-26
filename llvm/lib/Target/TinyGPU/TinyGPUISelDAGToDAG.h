@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_TINYGPUISELDAGTODAG_H
-#define LLVM_LIB_TARGET_TINYGPU_TINYGPUISELDAGTODAG_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPUISELDAGTODAG_H
+#define LLVM_LIB_TARGET_TinyGPU_TinyGPUISELDAGTODAG_H
 
 #include "TinyGPUSubtarget.h"
 #include "TinyGPUTargetMachine.h"
@@ -21,13 +21,8 @@
 namespace llvm {
 class TinyGPUDAGToDAGISel : public SelectionDAGISel {
 public:
-  explicit TinyGPUDAGToDAGISel(TinyGPUTargetMachine &TM, CodeGenOpt::Level OL)
+  explicit TinyGPUDAGToDAGISel(TinyGPUTargetMachine &TM, CodeGenOptLevel OL)
       : SelectionDAGISel(TM, OL), Subtarget(nullptr) {}
-
-  // Pass Name
-  StringRef getPassName() const override {
-    return "CPU0 DAG->DAG Pattern Instruction Selection";
-  }
 
   bool runOnMachineFunction(MachineFunction &MF) override;
 
@@ -40,4 +35,4 @@ private:
 };
 }
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_TINYGPUISELDAGTODAG_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUISELDAGTODAG_H

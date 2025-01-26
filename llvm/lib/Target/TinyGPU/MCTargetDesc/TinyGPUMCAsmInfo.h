@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_MCTARGETDESC_TINYGPUMCASMINFO_H
-#define LLVM_LIB_TARGET_TINYGPU_MCTARGETDESC_TINYGPUMCASMINFO_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_MCTARGETDESC_TinyGPUMCASMINFO_H
+#define LLVM_LIB_TARGET_TinyGPU_MCTARGETDESC_TinyGPUMCASMINFO_H
 
 #include "llvm/MC/MCAsmInfoELF.h"
 
@@ -28,4 +28,4 @@ public:
 
 } // namespace llvm
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_MCTARGETDESC_TINYGPUMCASMINFO_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_MCTARGETDESC_TinyGPUMCASMINFO_H

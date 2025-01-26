@@ -23,7 +23,7 @@
 #include "llvm/Support/raw_ostream.h"
 using namespace llvm;
 
-#define DEBUG_TYPE "tinygpu-isel"
+#define DEBUG_TYPE "TinyGPU-isel"
 
 #define PRINT_ALIAS_INSTR
 #include "TinyGPUGenAsmWriter.inc"
@@ -32,7 +32,7 @@ TinyGPUInstPrinter::TinyGPUInstPrinter(const MCAsmInfo &MAI, const MCInstrInfo &
                                    const MCRegisterInfo &MRI)
     : MCInstPrinter(MAI, MII, MRI) {}
 
-void TinyGPUInstPrinter::printRegName(raw_ostream &OS, unsigned RegNo) const {
+void TinyGPUInstPrinter::printRegName(raw_ostream &OS, MCRegister RegNo) {
   OS << StringRef(getRegisterName(RegNo)).lower();
 }
 
@@ -40,7 +40,7 @@ void TinyGPUInstPrinter::printInst(const MCInst *MI, uint64_t Address,
                                  StringRef Annot, const MCSubtargetInfo &STI,
                                  raw_ostream &O) {
   // Try to print any aliases first.
-  if (!printAliasInstr(MI, O)) {
+  if (!printAliasInstr(MI, Address, O)) {
     printInstruction(MI, Address, O);
   }
   printAnnotation(O, Annot);

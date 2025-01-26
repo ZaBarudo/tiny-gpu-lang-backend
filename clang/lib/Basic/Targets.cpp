@@ -471,8 +471,6 @@ std::unique_ptr<TargetInfo> AllocateTarget(const llvm::Triple &Triple,
       return std::make_unique<RISCV64TargetInfo>(Triple, Opts);
     }
 
-  case llvm::Triple::tinygpu:
-    return new TinyGPUTargetInfo(Triple, Opts);
 
   case llvm::Triple::sparc:
     switch (os) {
@@ -531,6 +529,9 @@ std::unique_ptr<TargetInfo> AllocateTarget(const llvm::Triple &Triple,
     default:
       return std::make_unique<SystemZTargetInfo>(Triple, Opts);
     }
+
+  case llvm::Triple::tinygpu:
+    return std::make_unique<TinyGPUTargetInfo>(Triple, Opts);
 
   case llvm::Triple::tce:
     return std::make_unique<TCETargetInfo>(Triple, Opts);

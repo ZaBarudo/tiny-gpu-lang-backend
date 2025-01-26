@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_TINYGPUREGISTERINFO_H
-#define LLVM_LIB_TARGET_TINYGPU_TINYGPUREGISTERINFO_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPUREGISTERINFO_H
+#define LLVM_LIB_TARGET_TinyGPU_TinyGPUREGISTERINFO_H
 
 #include "llvm/CodeGen/TargetRegisterInfo.h"
 
@@ -43,9 +43,9 @@ public:
 
   bool trackLivenessAfterRegAlloc(const MachineFunction &MF) const override;
 
-  void eliminateFrameIndex(MachineBasicBlock::iterator II, int SPAdj,
-                           unsigned FIOperandNum,
-                           RegScavenger *RS = nullptr) const override;
+  bool eliminateFrameIndex(MachineBasicBlock::iterator MI,
+                                int SPAdj, unsigned FIOperandNum,
+                                RegScavenger *RS = nullptr) const override;
 
   Register getFrameRegister(const MachineFunction &MF) const override;
 
@@ -54,4 +54,4 @@ public:
 
 } // end namespace llvm
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_TINYGPUREGISTERINFO_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUREGISTERINFO_H

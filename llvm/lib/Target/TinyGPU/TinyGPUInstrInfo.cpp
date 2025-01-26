@@ -18,12 +18,12 @@
 #include "llvm/ADT/STLExtras.h"
 #include "llvm/CodeGen/MachineInstrBuilder.h"
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 #include "llvm/Support/Debug.h"
 
 using namespace llvm;
 
-#define DEBUG_TYPE "tinygpu-instrinfo"
+#define DEBUG_TYPE "TinyGPU-instrinfo"
 
 #define GET_INSTRINFO_CTOR_DTOR
 #include "TinyGPUGenInstrInfo.inc"

@@ -21,7 +21,7 @@
 #include "llvm/MC/MCInstrInfo.h"
 #include "llvm/MC/MCRegisterInfo.h"
 #include "llvm/MC/MCSubtargetInfo.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 
 using namespace llvm;
 
@@ -47,10 +47,10 @@ static MCRegisterInfo *createTinyGPUMCRegisterInfo(const Triple &TT) {
 
 static MCSubtargetInfo *
 createTinyGPUMCSubtargetInfo(const Triple &TT, StringRef CPU, StringRef FS) {
-  std::string CPUName = CPU;
+  std::string CPUName(CPU);
   if (CPUName.empty())
     CPUName = "generic";
-  return createTinyGPUMCSubtargetInfoImpl(TT, CPUName, FS);
+  return createTinyGPUMCSubtargetInfoImpl(TT, CPUName, CPUName, FS);
 }
 
 static MCInstPrinter *createTinyGPUMCInstPrinter(const Triple &T,
@@ -67,7 +67,7 @@ static MCAsmInfo *createTinyGPUMCAsmInfo(const MCRegisterInfo &MRI,
   MCAsmInfo *MAI = new TinyGPUMCAsmInfo(TT);
 
   unsigned WP = MRI.getDwarfRegNum(TinyGPU::X2, true);
-  MCCFIInstruction Inst = MCCFIInstruction::createDefCfa(nullptr, WP, 0);
+  MCCFIInstruction Inst = MCCFIInstruction::cfiDefCfa(nullptr, WP, 0);
   MAI->addInitialFrameState(Inst);
 
   return MAI;

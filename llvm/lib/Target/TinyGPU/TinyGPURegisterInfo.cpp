@@ -18,12 +18,12 @@
 #define GET_REGINFO_TARGET_DESC
 #include "TinyGPUGenRegisterInfo.inc"
 
-#define DEBUG_TYPE "tinygpu-reginfo"
+#define DEBUG_TYPE "TinyGPU-reginfo"
 
 using namespace llvm;
 
 TinyGPURegisterInfo::TinyGPURegisterInfo(const TinyGPUSubtarget &ST)
-  : TinyGPUGenRegisterInfo(TinyGPU::R1, /*DwarfFlavour*/0, /*EHFlavor*/0,
+  : TinyGPUGenRegisterInfo(TinyGPU::X1, /*DwarfFlavour*/0, /*EHFlavor*/0,
                          /*PC*/0), Subtarget(ST) {}
 
 const MCPhysReg *
@@ -44,18 +44,17 @@ TinyGPURegisterInfo::getCallPreservedMask(const MachineFunction &MF,
 BitVector TinyGPURegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   BitVector Reserved(getNumRegs());
 
-  markSuperRegs(Reserved, TinyGPU::R0); // zero
-  markSuperRegs(Reserved, TinyGPU::R2); // sp
-  markSuperRegs(Reserved, TinyGPU::R3); // gp
-  markSuperRegs(Reserved, TinyGPU::R4); // tp
+  markSuperRegs(Reserved, TinyGPU::X0); // zero
+  markSuperRegs(Reserved, TinyGPU::X2); // sp
+  markSuperRegs(Reserved, TinyGPU::X3); // gp
+  markSuperRegs(Reserved, TinyGPU::X4); // tp
 
   return Reserved;
 }
 
-void TinyGPURegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
-                                           int SPAdj,
-                                           unsigned FIOperandNum,
-                                           RegScavenger *RS) const {
+bool TinyGPURegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator MI,
+                                            int SPAdj, unsigned FIOperandNum,
+                                            RegScavenger *RS) const {
   llvm_unreachable("Unsupported eliminateFrameIndex");
 }
 
@@ -82,6 +81,8 @@ TinyGPURegisterInfo::trackLivenessAfterRegAlloc(const MachineFunction &MF) const
 }
 
 Register TinyGPURegisterInfo::getFrameRegister(const MachineFunction &MF) const {
-  llvm_unreachable("Unsupported getFrameRegister");
+  // Note: was added just to make it work (compile c to TinyGPU asm).
+  // I don't know whether it is correct.
+  return TinyGPU::SP;
 }
 

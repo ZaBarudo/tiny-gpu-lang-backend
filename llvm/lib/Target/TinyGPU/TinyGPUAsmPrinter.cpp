@@ -22,11 +22,11 @@
 #include "llvm/MC/MCInst.h"
 #include "llvm/MC/MCStreamer.h"
 #include "llvm/MC/MCContext.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 
 using namespace llvm;
 
-#define DEBUG_TYPE "tinygpu-asm-printer"
+#define DEBUG_TYPE "TinyGPU-asm-printer"
 
 namespace llvm {
 class TinyGPUAsmPrinter : public AsmPrinter {
@@ -39,16 +39,15 @@ public:
     return "TinyGPU Assembly Printer";
   }
 
-  void EmitInstruction(const MachineInstr *MI) override;
+  void emitInstruction(const MachineInstr *MI) override;
 
   // This function must be present as it is internally used by the
   // auto-generated function emitPseudoExpansionLowering to expand pseudo
   // instruction
   void EmitToStreamer(MCStreamer &S, const MCInst &Inst);
   // Auto-generated function in TinyGPUGenMCPseudoLowering.inc
-  bool emitPseudoExpansionLowering(MCStreamer &OutStreamer,
-                                   const MachineInstr *MI);
-
+  bool lowerPseudoInstExpansion(const MachineInstr *MI, MCInst &Inst);
+  
 private:
   void LowerInstruction(const MachineInstr *MI, MCInst &OutMI) const;
   MCOperand LowerOperand(const MachineOperand& MO) const;
@@ -63,10 +62,12 @@ void TinyGPUAsmPrinter::EmitToStreamer(MCStreamer &S, const MCInst &Inst) {
   AsmPrinter::EmitToStreamer(*OutStreamer, Inst);
 }
 
-void TinyGPUAsmPrinter::EmitInstruction(const MachineInstr *MI) {
+void TinyGPUAsmPrinter::emitInstruction(const MachineInstr *MI) {
   // Do any auto-generated pseudo lowerings.
-  if (emitPseudoExpansionLowering(*OutStreamer, MI))
+  if (MCInst OutInst; lowerPseudoInstExpansion(MI, OutInst)) {
+    EmitToStreamer(*OutStreamer, OutInst);
     return;
+  }
 
   MCInst TmpInst;
   LowerInstruction(MI, TmpInst);

@@ -20,11 +20,11 @@
 #include "llvm/IR/Function.h"
 #include "llvm/Support/CommandLine.h"
 #include "llvm/Support/ErrorHandling.h"
-#include "llvm/Support/TargetRegistry.h"
+#include "llvm/MC/TargetRegistry.h"
 
 using namespace llvm;
 
-#define DEBUG_TYPE "tinygpu-subtarget"
+#define DEBUG_TYPE "TinyGPU-subtarget"
 
 #define GET_SUBTARGETINFO_TARGET_DESC
 #define GET_SUBTARGETINFO_CTOR
@@ -32,7 +32,7 @@ using namespace llvm;
 
 TinyGPUSubtarget::TinyGPUSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
                                const TargetMachine &TM)
-    : TinyGPUGenSubtargetInfo(TT, CPU, FS),
+    : TinyGPUGenSubtargetInfo(TT, CPU, /*TuneCPU*/ CPU, FS),
       TSInfo(),
       InstrInfo(initializeSubtargetDependencies(TT, CPU, FS, TM)),
       FrameLowering(*this),
@@ -44,12 +44,12 @@ TinyGPUSubtarget &
 TinyGPUSubtarget::initializeSubtargetDependencies(const Triple &TT, StringRef CPU,
                                                 StringRef FS,
                                                 const TargetMachine &TM) {
-  std::string CPUName = CPU;
+  std::string CPUName(CPU);
   if (CPUName.empty())
     CPUName = "generic";
 
   // Parse features string.
-  ParseSubtargetFeatures(CPUName, FS);
+  ParseSubtargetFeatures(CPUName, /*TuneCPU*/ CPUName, FS);
 
   return *this;
 }

@@ -12,8 +12,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_TINYGPUISELLOWERING_H
-#define LLVM_LIB_TARGET_TINYGPU_TINYGPUISELLOWERING_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPUISELLOWERING_H
+#define LLVM_LIB_TARGET_TinyGPU_TinyGPUISELLOWERING_H
 
 #include "llvm/CodeGen/CallingConvLower.h"
 #include "llvm/CodeGen/SelectionDAG.h"
@@ -50,17 +50,6 @@ protected:
   const TinyGPUSubtarget &Subtarget;
 
 private:
-  SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerConstantPool(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const;
-
-  using RegsToPassVector = SmallVector<std::pair<unsigned, SDValue>, 8>;
-
-  SDValue getGlobalAddressWrapper(SDValue GA,
-                                  const GlobalValue *GV,
-                                  SelectionDAG &DAG) const;
-
   SDValue LowerFormalArguments(SDValue Chain,
                          CallingConv::ID CallConv, bool IsVarArg,
                          const SmallVectorImpl<ISD::InputArg> &Ins,
@@ -75,22 +64,17 @@ private:
   bool CanLowerReturn(CallingConv::ID CallConv,
                       MachineFunction &MF, bool isVarArg,
                       const SmallVectorImpl<ISD::OutputArg> &Outs,
-                      LLVMContext &Context) const override;
-
+                      LLVMContext &Context) const ;
   SDValue LowerCall(TargetLowering::CallLoweringInfo &CLI,
                     SmallVectorImpl<SDValue> &InVals) const override;
-  void HandleByVal(CCState *, unsigned &, unsigned) const override;
-  SDValue LowerCallResult(SDValue Chain, SDValue InFlag,
-                          CallingConv::ID CallConv, bool IsVarArg,
-                          const SmallVectorImpl<ISD::InputArg> &Ins,
-                          const SDLoc &dl, SelectionDAG &DAG,
-                          SmallVectorImpl<SDValue> &InVals,
-                          bool isThisReturn, SDValue ThisVal) const;
-  SDValue LowerMemOpCallTo(SDValue Chain,
-                           SDValue Arg, const SDLoc &dl,
-                           SelectionDAG &DAG, const CCValAssign &VA,
-                           ISD::ArgFlagsTy Flags) const;
+
+  SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerConstantPool(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerShlParts(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerShrParts(SDValue Op, SelectionDAG &DAG, bool arith) const;
 };
 }
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_TINYGPUISELLOWERING_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUISELLOWERING_H

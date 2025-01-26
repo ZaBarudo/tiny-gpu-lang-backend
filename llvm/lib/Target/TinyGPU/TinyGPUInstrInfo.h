@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_TINYGPUINSTRINFO_H
-#define LLVM_LIB_TARGET_TINYGPU_TINYGPUINSTRINFO_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPUINSTRINFO_H
+#define LLVM_LIB_TARGET_TinyGPU_TinyGPUINSTRINFO_H
 
 #include "TinyGPU.h"
 #include "TinyGPURegisterInfo.h"
@@ -33,4 +33,4 @@ protected:
 };
 }
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_TINYGPUINSTRINFO_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUINSTRINFO_H

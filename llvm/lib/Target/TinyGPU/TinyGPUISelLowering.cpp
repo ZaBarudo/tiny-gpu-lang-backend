@@ -29,7 +29,7 @@
 
 using namespace llvm;
 
-#define DEBUG_TYPE "riscw-isellower"
+#define DEBUG_TYPE "TinyGPU-isellower"
 
 #include "TinyGPUGenCallingConv.inc"
 
@@ -44,23 +44,32 @@ TinyGPUTargetLowering::TinyGPUTargetLowering(const TargetMachine &TM,
   // added, this allows us to compute derived properties we expose.
   computeRegisterProperties(Subtarget.getRegisterInfo());
 
-  setStackPointerRegisterToSaveRestore(TinyGPU::X2);
-
-  // Set scheduling preference. There are a few options:
-  //    - None: No preference
-  //    - Source: Follow source order
-  //    - RegPressure: Scheduling for lowest register pressure
-  //    - Hybrid: Scheduling for both latency and register pressure
-  // Source (the option used by XCore) is no good when there are few registers
-  // because the compiler will try to keep a lot more things into the register
-  // which eventually results in a lot of stack spills for no good reason. So
-  // use either RegPressure or Hybrid
+  // Set scheduling preference
   setSchedulingPreference(Sched::RegPressure);
+
+  setStackPointerRegisterToSaveRestore(TinyGPU::X2);
 
   // Use i32 for setcc operations results (slt, sgt, ...).
   setBooleanContents(ZeroOrOneBooleanContent);
-  setBooleanVectorContents(ZeroOrOneBooleanContent);
 
+  // Arithmetic operations
+  setOperationAction(ISD::SDIVREM,   MVT::i32, Expand);
+  setOperationAction(ISD::UDIVREM,   MVT::i32, Expand);
+  setOperationAction(ISD::SMUL_LOHI, MVT::i32, Expand);
+  setOperationAction(ISD::UMUL_LOHI, MVT::i32, Expand);
+
+  setOperationAction(ISD::SHL_PARTS, MVT::i32, Custom);
+  setOperationAction(ISD::SRL_PARTS, MVT::i32, Custom);
+  setOperationAction(ISD::SRA_PARTS, MVT::i32, Custom);
+
+  setOperationAction(ISD::ROTL,  MVT::i32, Expand);
+  setOperationAction(ISD::ROTR,  MVT::i32, Expand);
+  setOperationAction(ISD::BSWAP, MVT::i32, Expand);
+  setOperationAction(ISD::CTTZ,  MVT::i32, Expand);
+  setOperationAction(ISD::CTLZ,  MVT::i32, Expand);
+  setOperationAction(ISD::CTPOP, MVT::i32, Expand);
+
+  // Address resolution and constant pool
   setOperationAction(ISD::GlobalAddress, MVT::i32, Custom);
   setOperationAction(ISD::BlockAddress,  MVT::i32, Custom);
   setOperationAction(ISD::ConstantPool,  MVT::i32, Custom);
@@ -106,8 +115,7 @@ SDValue TinyGPUTargetLowering::LowerFormalArguments(
                                     bool isVarArg,
                                     const SmallVectorImpl<ISD::InputArg> &Ins,
                                     const SDLoc &dl, SelectionDAG &DAG,
-                                    SmallVectorImpl<SDValue> &InVals) const
-{
+                                    SmallVectorImpl<SDValue> &InVals) const {
   assert((CallingConv::C == CallConv || CallingConv::Fast == CallConv) &&
 		 "Unsupported CallingConv to FORMAL_ARGS");
 
@@ -153,7 +161,7 @@ SDValue TinyGPUTargetLowering::LowerFormalArguments(
   int lastInsIndex = -1;
   if (isVarArg && MFI.hasVAStart()) {
     unsigned RegIdx = CCInfo.getFirstUnallocated(GPRArgRegs);
-    if (RegIdx != array_lengthof(GPRArgRegs))
+    if (RegIdx != std::size(GPRArgRegs))
       ArgRegBegin = std::min(ArgRegBegin, (unsigned)GPRArgRegs[RegIdx]);
   }
 
@@ -232,131 +240,15 @@ SDValue TinyGPUTargetLowering::LowerFormalArguments(
 bool TinyGPUTargetLowering::CanLowerReturn(CallingConv::ID CallConv,
                                 MachineFunction &MF, bool isVarArg,
                                 const SmallVectorImpl<ISD::OutputArg> &Outs,
-                                LLVMContext &Context) const
-{
+                                LLVMContext &Context) const {
   SmallVector<CCValAssign, 16> RVLocs;
   CCState CCInfo(CallConv, isVarArg, MF, RVLocs, Context);
   return CCInfo.CheckReturn(Outs, TinyGPU_CRetConv);
 }
 
-/// LowerMemOpCallTo - Store the argument to the stack.
-SDValue TinyGPUTargetLowering::LowerMemOpCallTo(SDValue Chain,
-                                              SDValue Arg, const SDLoc &dl,
-                                              SelectionDAG &DAG,
-                                              const CCValAssign &VA,
-                                              ISD::ArgFlagsTy Flags) const {
-  llvm_unreachable("Cannot store arguments to stack");
-}
-
-/// LowerCallResult - Lower the result values of a call into the
-/// appropriate copies out of appropriate physical registers.
-SDValue
-TinyGPUTargetLowering::LowerCallResult(SDValue Chain, SDValue InFlag,
-                                     CallingConv::ID CallConv, bool isVarArg,
-                                     const SmallVectorImpl<ISD::InputArg> &Ins,
-                                     const SDLoc &dl, SelectionDAG &DAG,
-                                     SmallVectorImpl<SDValue> &InVals,
-                                     bool isThisReturn, SDValue ThisVal) const {
-  // Assign locations to each value returned by this call.
-  SmallVector<CCValAssign, 16> RVLocs;
-  CCState CCInfo(CallConv, isVarArg, DAG.getMachineFunction(), RVLocs,
-                 *DAG.getContext());
-  CCInfo.AnalyzeCallResult(Ins, TinyGPU_CRetConv);
-
-  // Copy all of the result registers out of their specified physreg.
-  for (unsigned i = 0; i != RVLocs.size(); ++i) {
-    CCValAssign VA = RVLocs[i];
-
-    // Pass 'this' value directly from the argument to return value, to avoid
-    // reg unit interference
-    if (i == 0 && isThisReturn) {
-      assert(!VA.needsCustom() && VA.getLocVT() == MVT::i32 &&
-             "unexpected return calling convention register assignment");
-      InVals.push_back(ThisVal);
-      continue;
-    }
-
-    SDValue Val;
-    if (VA.needsCustom()) {
-        llvm_unreachable("Vector and floating point values not supported yet");
-    } else {
-      Val = DAG.getCopyFromReg(Chain, dl, VA.getLocReg(), VA.getLocVT(),
-                               InFlag);
-      Chain = Val.getValue(1);
-      InFlag = Val.getValue(2);
-    }
-
-    switch (VA.getLocInfo()) {
-    default: llvm_unreachable("Unknown loc info!");
-    case CCValAssign::Full: break;
-    case CCValAssign::BCvt:
-      Val = DAG.getNode(ISD::BITCAST, dl, VA.getValVT(), Val);
-      break;
-    }
-
-    InVals.push_back(Val);
-  }
-
-  return Chain;
-}
-
 SDValue TinyGPUTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
                                        SmallVectorImpl<SDValue> &InVals) const {
   llvm_unreachable("Cannot lower call");
-}
-
-/// HandleByVal - Every parameter *after* a byval parameter is passed
-/// on the stack.  Remember the next parameter register to allocate,
-/// and then confiscate the rest of the parameter registers to insure
-/// this.
-void TinyGPUTargetLowering::HandleByVal(CCState *State, unsigned &Size,
-                                      unsigned Align) const {
-  // Byval (as with any stack) slots are always at least 4 byte aligned.
-  Align = std::max(Align, 4U);
-
-  unsigned Reg = State->AllocateReg(GPRArgRegs);
-  if (!Reg)
-    return;
-
-  unsigned AlignInRegs = Align / 4;
-  unsigned Waste = (TinyGPU::X4 - Reg) % AlignInRegs;
-  for (unsigned i = 0; i < Waste; ++i)
-    Reg = State->AllocateReg(GPRArgRegs);
-
-  if (!Reg)
-    return;
-
-  unsigned Excess = 4 * (TinyGPU::X4 - Reg);
-
-  // Special case when NSAA != SP and parameter size greater than size of
-  // all remained GPR regs. In that case we can't split parameter, we must
-  // send it to stack. We also must set NCRN to X4, so waste all
-  // remained registers.
-  const unsigned NSAAOffset = State->getNextStackOffset();
-  if (NSAAOffset != 0 && Size > Excess) {
-    while (State->AllocateReg(GPRArgRegs))
-      ;
-    return;
-  }
-
-  // First register for byval parameter is the first register that wasn't
-  // allocated before this method call, so it would be "reg".
-  // If parameter is small enough to be saved in range [reg, r4), then
-  // the end (first after last) register would be reg + param-size-in-regs,
-  // else parameter would be splitted between registers and stack,
-  // end register would be r4 in this case.
-  unsigned ByValRegBegin = Reg;
-  unsigned ByValRegEnd = std::min<unsigned>(Reg + Size / 4, TinyGPU::X4);
-  State->addInRegsParamInfo(ByValRegBegin, ByValRegEnd);
-  // Note, first register is allocated in the beginning of function already,
-  // allocate remained amount of registers we need.
-  for (unsigned i = Reg + 1; i != ByValRegEnd; ++i)
-    State->AllocateReg(GPRArgRegs);
-  // A byval parameter that is split between registers and memory needs its
-  // size truncated here.
-  // In the case where the entire structure fits in registers, we set the
-  // size in memory to zero.
-  Size = std::max<int>(Size - Excess, 0);
 }
 
 SDValue
@@ -421,32 +313,22 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
 }
 
 //===----------------------------------------------------------------------===//
-//  Lower helper functions
-//===----------------------------------------------------------------------===//
-
-SDValue TinyGPUTargetLowering::getGlobalAddressWrapper(SDValue GA,
-                                                     const GlobalValue *GV,
-                                                     SelectionDAG &DAG) const {
-  llvm_unreachable("Unhandled global variable");
-}
-
-//===----------------------------------------------------------------------===//
 //  Misc Lower Operation implementation
 //===----------------------------------------------------------------------===//
 
-SDValue TinyGPUTargetLowering::
-LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const {
+SDValue
+TinyGPUTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const {
   llvm_unreachable("Unsupported global address");
 }
 
-SDValue TinyGPUTargetLowering::
-LowerConstantPool(SDValue Op, SelectionDAG &DAG) const {
-  llvm_unreachable("Unsupported constant pool");
+SDValue
+TinyGPUTargetLowering::LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const {
+  llvm_unreachable("Unsupported block address");
 }
 
-SDValue TinyGPUTargetLowering::
-LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const {
-  llvm_unreachable("Unsupported block address");
+SDValue
+TinyGPUTargetLowering::LowerConstantPool(SDValue Op, SelectionDAG &DAG) const {
+  llvm_unreachable("Unsupported constant pool");
 }
 
 SDValue
@@ -455,12 +337,152 @@ TinyGPUTargetLowering::LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const {
 }
 
 SDValue
+TinyGPUTargetLowering::LowerShlParts(SDValue Op, SelectionDAG &DAG) const {
+  assert(Op.getNumOperands() == 3 && "Not a long shift");
+
+  EVT VT = Op.getValueType();
+  unsigned VTBits = VT.getSizeInBits();
+  SDLoc DL(Op);
+
+  // if Shamt-32 < 0: // Shamt < 32
+  //   Lo = Lo << Shamt
+  //   Hi = (Hi << Shamt) | ((Lo >>u 1) >>u (32-1 - Shamt))
+  // else:
+  //   Lo = 0
+  //   Hi = Lo << (Shamt-32)
+
+  SDValue Lo = Op.getOperand(0);
+  SDValue Hi = Op.getOperand(1);
+  SDValue Shamt = Op.getOperand(2);
+
+  // Precompute a node with ...
+  // ... constant value 0
+  SDValue Zero = DAG.getConstant(0, DL, VT);
+  // ... constant value 1
+  SDValue One = DAG.getConstant(1, DL, VT);
+  // ... -32
+  SDValue NegWsize = DAG.getConstant(-VTBits, DL, VT);
+  // ... 32 - 1
+  SDValue WsizeMinus1 = DAG.getConstant(VTBits - 1, DL, VT);
+  // ... shamt - 32
+  SDValue ShamtMinusWsize = DAG.getNode(ISD::ADD, DL, VT, Shamt, NegWsize);
+  // ... (32 - 1) - shamt
+  SDValue WsizeMinus1MinusShamt =
+      DAG.getNode(ISD::SUB, DL, VT, WsizeMinus1, Shamt);
+
+  // Compute the 'then' part of the if
+  // Lo << Shamt
+  SDValue LoTrue = DAG.getNode(ISD::SHL, DL, VT, Lo, Shamt);
+  // Lo >> 1
+  SDValue LoShr1 = DAG.getNode(ISD::SRL, DL, VT, Lo, One);
+  // (Lo >> 1) >> (32-1 - Shamt)
+  SDValue HiLsb = DAG.getNode(ISD::SRL, DL, VT, LoShr1, WsizeMinus1MinusShamt);
+  // Hi << Shamt
+  SDValue HiMsb = DAG.getNode(ISD::SHL, DL, VT, Hi, Shamt);
+  // (Hi << Shamt) | ((Lo >>u 1) >>u (32-1 - Shamt))
+  SDValue HiTrue = DAG.getNode(ISD::OR, DL, VT, HiMsb, HiLsb);
+
+  // Compute the 'else' part of the if
+  SDValue LoFalse = Zero;
+  SDValue HiFalse = DAG.getNode(ISD::SHL, DL, VT, Lo, ShamtMinusWsize);
+
+  // Compute the if condition
+  SDValue CC = DAG.getSetCC(DL, VT, ShamtMinusWsize, Zero, ISD::SETLT);
+
+  // and (finally) select the results based on the condition!
+  Lo = DAG.getNode(ISD::SELECT, DL, VT, CC, LoTrue, LoFalse);
+  Hi = DAG.getNode(ISD::SELECT, DL, VT, CC, HiTrue, HiFalse);
+
+  SDValue Ops[2] = {Lo, Hi};
+  return DAG.getMergeValues(Ops, DL);
+}
+
+SDValue
+TinyGPUTargetLowering::LowerShrParts(SDValue Op, SelectionDAG &DAG,
+                                   bool arith) const {
+  assert(Op.getNumOperands() == 3 && "Not a long shift");
+
+  EVT VT = Op.getValueType();
+  unsigned VTBits = VT.getSizeInBits();
+  SDLoc DL(Op);
+
+  // SRA expansion:
+  //   if Shamt-32 < 0: // Shamt < 32
+  //     Lo = (Lo >>u Shamt) | ((Hi << 1) << (32-1 - Shamt))
+  //     Hi = Hi >>s Shamt
+  //   else:
+  //     Lo = Hi >>s (Shamt-32);
+  //     Hi = Hi >>s (32-1)
+  //
+  // SRL expansion:
+  //   if Shamt-32 < 0: // Shamt < 32
+  //     Lo = (Lo >>u Shamt) | ((Hi << 1) << (32-1 - Shamt))
+  //     Hi = Hi >>u Shamt
+  //   else:
+  //     Lo = Hi >>u (Shamt-32);
+  //     Hi = 0;
+
+  SDValue Lo = Op.getOperand(0);
+  SDValue Hi = Op.getOperand(1);
+  SDValue Shamt = Op.getOperand(2);
+
+  // The only differences between the SRA and SRL expansions are the right
+  // shift operations: arithmetic for SRA and logical for SRL; and Hi
+  unsigned ShrOp = arith ? ISD::SRA : ISD::SRL;
+
+  // Precompute a node with ...
+  // ... constant value 0
+  SDValue Zero = DAG.getConstant(0, DL, VT);
+  // ... constant value 1
+  SDValue One = DAG.getConstant(1, DL, VT);
+  // ... -32
+  SDValue NegWsize = DAG.getConstant(-VTBits, DL, VT);
+  // ... 32 - 1
+  SDValue WsizeMinus1 = DAG.getConstant(VTBits - 1, DL, VT);
+  // ... shamt - 32
+  SDValue ShamtMinusWsize = DAG.getNode(ISD::ADD, DL, VT, Shamt, NegWsize);
+  // ... (32 - 1) - shamt
+  SDValue WsizeMinus1MinusShamt =
+      DAG.getNode(ISD::SUB, DL, VT, WsizeMinus1, Shamt);
+
+  // Compute the 'then' part of the if
+  // Hi << 1
+  SDValue HiShr1 = DAG.getNode(ISD::SHL, DL, VT, Lo, One);
+  // (Hi << 1) << (32-1 - Shamt)
+  SDValue LoMsb = DAG.getNode(ISD::SRL, DL, VT, HiShr1, WsizeMinus1MinusShamt);
+  // Lo >>u Shamt
+  SDValue LoLsb = DAG.getNode(ISD::SRL, DL, VT, Lo, Shamt);
+  // (Lo >>u Shamt) | ((Hi << 1) << (32-1 - Shamt))
+  SDValue LoTrue = DAG.getNode(ISD::OR, DL, VT, LoMsb, LoLsb);
+  // Hi >>s Shamt
+  SDValue HiTrue = DAG.getNode(ShrOp, DL, VT, Hi, Shamt);
+
+  // Compute the 'else' part of the if
+  SDValue LoFalse = DAG.getNode(ShrOp, DL, VT, Hi, ShamtMinusWsize);
+  SDValue HiFalse =
+      arith ? DAG.getNode(ISD::SRA, DL, VT, Hi, WsizeMinus1) : Zero;
+
+  // Compute the if condition
+  SDValue CC = DAG.getSetCC(DL, VT, ShamtMinusWsize, Zero, ISD::SETLT);
+
+  // and (finally) select the results based on the condition!
+  Lo = DAG.getNode(ISD::SELECT, DL, VT, CC, LoTrue, LoFalse);
+  Hi = DAG.getNode(ISD::SELECT, DL, VT, CC, HiTrue, HiFalse);
+
+  SDValue Ops[2] = {Lo, Hi};
+  return DAG.getMergeValues(Ops, DL);
+}
+
+SDValue
 TinyGPUTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
+  default:                        llvm_unreachable("unimplemented operand");
   case ISD::GlobalAddress:        return LowerGlobalAddress(Op, DAG);
   case ISD::BlockAddress:         return LowerBlockAddress(Op, DAG);
   case ISD::ConstantPool:         return LowerConstantPool(Op, DAG);
   case ISD::RETURNADDR:           return LowerRETURNADDR(Op, DAG);
-  default: llvm_unreachable("unimplemented operand");
+  case ISD::SHL_PARTS:            return LowerShlParts(Op, DAG);
+  case ISD::SRL_PARTS:            return LowerShrParts(Op, DAG, false);
+  case ISD::SRA_PARTS:            return LowerShrParts(Op, DAG, true);
   }
 }

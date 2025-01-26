@@ -12,29 +12,29 @@
 def TinyGPU_CCallingConv : CallingConv<[
   // Handles byval parameters. Tell LLVM what the size and alignment
   // requirements of each stack slot are
-  CCIfByVal<CCPassByVal<1, 1>>,
+  CCIfByVal<CCPassByVal<4, 4>>,
 
-  // Promote i8/i16 to i8
-  // CCIfType<[i1, i8, i16], CCPromoteToType<i8>>,
+  // Promote i8/i16 to i32
+  CCIfType<[i1, i8, i16], CCPromoteToType<i32>>,
 
   // The first 4 arguments are passed in X0, X1, X2, X3
-  CCIfType<[i8], CCAssignToReg<[R0, R1, R2, R3]>>,
+  CCIfType<[i32], CCAssignToReg<[X0, X1, X2, X3]>>,
 
   // Integer values get stored in stack slots that are 4 bytes in size and
   // 4-byte aligned
-  CCIfType<[i8], CCAssignToStack<1, 1>>
+  CCIfType<[i32], CCAssignToStack<4, 4>>
 ]>;
 
 // BeyondRISC C Return Convention
 def TinyGPU_CRetConv : CallingConv<[
-  // CCIfType<[i1, i8, i16], CCPromoteToType<i8>>,
+  CCIfType<[i1, i8, i16], CCPromoteToType<i32>>,
 
-  // i8 are returned in registers X0, X1
-  CCIfType<[i8], CCAssignToReg<[R0, R1, R2, R3]>>,
+  // i32 are returned in registers X0, X1
+  CCIfType<[i32], CCAssignToReg<[X0, X1, X2, X3]>>,
 
   // Integer values get stored in stack slots that are 4 bytes in size and
   // 4-byte aligned
-  CCIfType<[i8], CCAssignToStack<1, 1>>
+  CCIfType<[i32], CCAssignToStack<4, 4>>
 ]>;
 
-def TinyGPU_CalleeSavedRegs : CalleeSavedRegs<(add R8, R9)>;
+def TinyGPU_CalleeSavedRegs : CalleeSavedRegs<(add X8, X9)>;

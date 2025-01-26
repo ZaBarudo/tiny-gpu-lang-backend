@@ -1,4 +1,4 @@
-//===--- RISCW.cpp - Implement RISCW target feature support ---------------===//
+//===--- TinyGPU.cpp - Implement TinyGPU target feature support ---------------===//
 //
 // Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
 // See https://llvm.org/LICENSE.txt for license information.
@@ -6,7 +6,7 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This file implements RISCWTargetInfo objects.
+// This file implements TinyGPUTargetInfo objects.
 //
 //===----------------------------------------------------------------------===//
 
@@ -30,15 +30,15 @@ const TargetInfo::GCCRegAlias GCCRegAliases[] = {
   {{"a2"}, "R12"},  {{"a3"}, "R13"},  {{"a4"}, "R14"},   {{"a5"}, "R15"}};
 
 ArrayRef<const char *> TinyGPUTargetInfo::getGCCRegNames() const {
-  return llvm::makeArrayRef(GCCRegNames);
+  return llvm::ArrayRef(GCCRegNames);
 }
 
 ArrayRef<TargetInfo::GCCRegAlias> TinyGPUTargetInfo::getGCCRegAliases() const {
-  return llvm::makeArrayRef(GCCRegAliases);
+  return llvm::ArrayRef(GCCRegAliases);
 }
 
 void TinyGPUTargetInfo::getTargetDefines(const LangOptions &Opts,
                                        MacroBuilder &Builder) const {
-  // Define the __RISCW__ macro when building for this target
+  // Define the __TinyGPU__ macro when building for this target
   Builder.defineMacro("__TINY_GPU__");
 }
