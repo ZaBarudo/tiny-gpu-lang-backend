@@ -44,7 +44,7 @@ void TinyGPUDAGToDAGISel::Select(SDNode *Node) {
     auto ConstNode = cast<ConstantSDNode>(Node);
     if (ConstNode->isZero()) {
       SDValue New = CurDAG->getCopyFromReg(CurDAG->getEntryNode(), SDLoc(Node),
-                                           TinyGPU::X0, MVT::i32);
+                                           TinyGPU::R0, MVT::i32);
       ReplaceNode(Node, New.getNode());
       return;
     }

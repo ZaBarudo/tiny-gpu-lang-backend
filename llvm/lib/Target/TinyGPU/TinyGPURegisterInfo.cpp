@@ -23,7 +23,7 @@
 using namespace llvm;
 
 TinyGPURegisterInfo::TinyGPURegisterInfo(const TinyGPUSubtarget &ST)
-  : TinyGPUGenRegisterInfo(TinyGPU::X1, /*DwarfFlavour*/0, /*EHFlavor*/0,
+  : TinyGPUGenRegisterInfo(TinyGPU::R1, /*DwarfFlavour*/0, /*EHFlavor*/0,
                          /*PC*/0), Subtarget(ST) {}
 
 const MCPhysReg *
@@ -44,10 +44,10 @@ TinyGPURegisterInfo::getCallPreservedMask(const MachineFunction &MF,
 BitVector TinyGPURegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   BitVector Reserved(getNumRegs());
 
-  markSuperRegs(Reserved, TinyGPU::X0); // zero
-  markSuperRegs(Reserved, TinyGPU::X2); // sp
-  markSuperRegs(Reserved, TinyGPU::X3); // gp
-  markSuperRegs(Reserved, TinyGPU::X4); // tp
+  markSuperRegs(Reserved, TinyGPU::R0); // zero
+  markSuperRegs(Reserved, TinyGPU::R2); // sp
+  markSuperRegs(Reserved, TinyGPU::R3); // gp
+  markSuperRegs(Reserved, TinyGPU::R4); // tp
 
   return Reserved;
 }

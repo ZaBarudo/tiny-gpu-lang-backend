@@ -47,7 +47,7 @@ TinyGPUTargetLowering::TinyGPUTargetLowering(const TargetMachine &TM,
   // Set scheduling preference
   setSchedulingPreference(Sched::RegPressure);
 
-  setStackPointerRegisterToSaveRestore(TinyGPU::X2);
+  setStackPointerRegisterToSaveRestore(TinyGPU::R2);
 
   // Use i32 for setcc operations results (slt, sgt, ...).
   setBooleanContents(ZeroOrOneBooleanContent);
@@ -104,7 +104,7 @@ void TinyGPUTargetLowering::ReplaceNodeResults(SDNode *N,
 
 // The BeyondRISC calling convention parameter registers.
 static const MCPhysReg GPRArgRegs[] = {
-  TinyGPU::X0, TinyGPU::X1, TinyGPU::X2, TinyGPU::X3
+  TinyGPU::R0, TinyGPU::R1, TinyGPU::R2, TinyGPU::R3
 };
 
 /// LowerFormalArguments - transform physical registers into virtual registers
@@ -138,7 +138,7 @@ SDValue TinyGPUTargetLowering::LowerFormalArguments(
   // We need to know this before we allocate the first byval or variadic
   // argument, as they will be allocated a stack slot below the CFA (Canonical
   // Frame Address, the stack pointer at entry to the function).
-  unsigned ArgRegBegin = TinyGPU::X4;
+  unsigned ArgRegBegin = TinyGPU::R4;
   for (unsigned i = 0, e = ArgLocs.size(); i != e; ++i) {
     if (CCInfo.getInRegsParamsProcessed() >= CCInfo.getInRegsParamsCount())
       break;

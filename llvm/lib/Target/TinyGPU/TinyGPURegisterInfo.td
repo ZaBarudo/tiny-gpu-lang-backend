@@ -18,48 +18,48 @@ class TinyGPUReg<bits<5> Enc, string n, list<string> alt = []> : Register<n> {
 }
 } // end Namespace
 
-def X0  : TinyGPUReg<0, "x0", ["zero"]>, DwarfRegNum<[0]>;
-def X1  : TinyGPUReg<1, "x1", ["ra"]>, DwarfRegNum<[1]>;
-def X2  : TinyGPUReg<2, "x2", ["sp"]>, DwarfRegNum<[2]>;
-def X3  : TinyGPUReg<3, "x3", ["gp"]>, DwarfRegNum<[3]>;
-def X4  : TinyGPUReg<4, "x4", ["tp"]>, DwarfRegNum<[4]>;
-def X5  : TinyGPUReg<5, "x5", ["t0"]>, DwarfRegNum<[5]>;
-def X6  : TinyGPUReg<6, "x6", ["t1"]>, DwarfRegNum<[6]>;
-def X7  : TinyGPUReg<7, "x7", ["t2"]>, DwarfRegNum<[7]>;
-def X8  : TinyGPUReg<8, "x8", ["s0", "fp"]>, DwarfRegNum<[8]>;
-def X9  : TinyGPUReg<9, "x9", ["s1"]>, DwarfRegNum<[9]>;
-def X10 : TinyGPUReg<10,"x10", ["a0"]>, DwarfRegNum<[10]>;
-def X11 : TinyGPUReg<11,"x11", ["a1"]>, DwarfRegNum<[11]>;
-def X12 : TinyGPUReg<12,"x12", ["a2"]>, DwarfRegNum<[12]>;
-def X13 : TinyGPUReg<13,"x13", ["a3"]>, DwarfRegNum<[13]>;
-def X14 : TinyGPUReg<14,"x14", ["a4"]>, DwarfRegNum<[14]>;
-def X15 : TinyGPUReg<15,"x15", ["a5"]>, DwarfRegNum<[15]>;
-def X16 : TinyGPUReg<16,"x16", ["a6"]>, DwarfRegNum<[16]>;
-def X17 : TinyGPUReg<17,"x17", ["a7"]>, DwarfRegNum<[17]>;
-def X18 : TinyGPUReg<18,"x18", ["s2"]>, DwarfRegNum<[18]>;
-def X19 : TinyGPUReg<19,"x19", ["s3"]>, DwarfRegNum<[19]>;
-def X20 : TinyGPUReg<20,"x20", ["s4"]>, DwarfRegNum<[20]>;
-def X21 : TinyGPUReg<21,"x21", ["s5"]>, DwarfRegNum<[21]>;
-def X22 : TinyGPUReg<22,"x22", ["s6"]>, DwarfRegNum<[22]>;
-def X23 : TinyGPUReg<23,"x23", ["s7"]>, DwarfRegNum<[23]>;
-def X24 : TinyGPUReg<24,"x24", ["s8"]>, DwarfRegNum<[24]>;
-def X25 : TinyGPUReg<25,"x25", ["s9"]>, DwarfRegNum<[25]>;
-def X26 : TinyGPUReg<26,"x26", ["s10"]>, DwarfRegNum<[26]>;
-def X27 : TinyGPUReg<27,"x27", ["s11"]>, DwarfRegNum<[27]>;
-def X28 : TinyGPUReg<28,"x28", ["t3"]>, DwarfRegNum<[28]>;
-def X29 : TinyGPUReg<29,"x29", ["t4"]>, DwarfRegNum<[29]>;
-def X30 : TinyGPUReg<30,"x30", ["t5"]>, DwarfRegNum<[30]>;
-def X31 : TinyGPUReg<31,"x31", ["t6"]>, DwarfRegNum<[31]>;
+def R0  : TinyGPUReg<0, "R0", ["zero"]>, DwarfRegNum<[0]>;
+def R1  : TinyGPUReg<1, "R1", ["ra"]>, DwarfRegNum<[1]>;
+def R2  : TinyGPUReg<2, "R2", ["sp"]>, DwarfRegNum<[2]>;
+def R3  : TinyGPUReg<3, "R3", ["gp"]>, DwarfRegNum<[3]>;
+def R4  : TinyGPUReg<4, "R4", ["tp"]>, DwarfRegNum<[4]>;
+def R5  : TinyGPUReg<5, "R5", ["t0"]>, DwarfRegNum<[5]>;
+def R6  : TinyGPUReg<6, "R6", ["t1"]>, DwarfRegNum<[6]>;
+def R7  : TinyGPUReg<7, "R7", ["t2"]>, DwarfRegNum<[7]>;
+def R8  : TinyGPUReg<8, "R8", ["s0", "fp"]>, DwarfRegNum<[8]>;
+def R9  : TinyGPUReg<9, "R9", ["s1"]>, DwarfRegNum<[9]>;
+def R10 : TinyGPUReg<10,"R10", ["a0"]>, DwarfRegNum<[10]>;
+def R11 : TinyGPUReg<11,"R11", ["a1"]>, DwarfRegNum<[11]>;
+def R12 : TinyGPUReg<12,"R12", ["a2"]>, DwarfRegNum<[12]>;
+def R13 : TinyGPUReg<13,"R13", ["a3"]>, DwarfRegNum<[13]>;
+def R14 : TinyGPUReg<14,"R14", ["a4"]>, DwarfRegNum<[14]>;
+def R15 : TinyGPUReg<15,"R15", ["a5"]>, DwarfRegNum<[15]>;
+def R16 : TinyGPUReg<16,"R16", ["a6"]>, DwarfRegNum<[16]>;
+def R17 : TinyGPUReg<17,"R17", ["a7"]>, DwarfRegNum<[17]>;
+def R18 : TinyGPUReg<18,"R18", ["s2"]>, DwarfRegNum<[18]>;
+def R19 : TinyGPUReg<19,"R19", ["s3"]>, DwarfRegNum<[19]>;
+def R20 : TinyGPUReg<20,"R20", ["s4"]>, DwarfRegNum<[20]>;
+def R21 : TinyGPUReg<21,"R21", ["s5"]>, DwarfRegNum<[21]>;
+def R22 : TinyGPUReg<22,"R22", ["s6"]>, DwarfRegNum<[22]>;
+def R23 : TinyGPUReg<23,"R23", ["s7"]>, DwarfRegNum<[23]>;
+def R24 : TinyGPUReg<24,"R24", ["s8"]>, DwarfRegNum<[24]>;
+def R25 : TinyGPUReg<25,"R25", ["s9"]>, DwarfRegNum<[25]>;
+def R26 : TinyGPUReg<26,"R26", ["s10"]>, DwarfRegNum<[26]>;
+def R27 : TinyGPUReg<27,"R27", ["s11"]>, DwarfRegNum<[27]>;
+def R28 : TinyGPUReg<28,"R28", ["t3"]>, DwarfRegNum<[28]>;
+def R29 : TinyGPUReg<29,"R29", ["t4"]>, DwarfRegNum<[29]>;
+def R30 : TinyGPUReg<30,"R30", ["t5"]>, DwarfRegNum<[30]>;
+def R31 : TinyGPUReg<31,"R31", ["t6"]>, DwarfRegNum<[31]>;
 
 // The order of registers represents the preferred allocation sequence.
 // Registers are listed in the order caller-save, callee-save, specials.
 def GPR : RegisterClass<"TinyGPU", [i32], 32, (add
-    (sequence "X%u", 10, 17),
-    (sequence "X%u", 5, 7),
-    (sequence "X%u", 28, 31),
-    (sequence "X%u", 8, 9),
-    (sequence "X%u", 18, 27),
-    (sequence "X%u", 0, 4)
+    (sequence "R%u", 10, 17),
+    (sequence "R%u", 5, 7),
+    (sequence "R%u", 28, 31),
+    (sequence "R%u", 8, 9),
+    (sequence "R%u", 18, 27),
+    (sequence "R%u", 0, 4)
   )>;
 
-def SP : RegisterClass<"TinyGPU", [i32], 32, (add X2)>;
+def SP : RegisterClass<"TinyGPU", [i32], 32, (add R2)>;

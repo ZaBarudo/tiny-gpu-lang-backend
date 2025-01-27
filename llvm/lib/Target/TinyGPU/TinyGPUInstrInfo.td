@@ -228,16 +228,16 @@ def JALR : RWInstI<0b000, OPC_JALR, (outs GPR:$rd),
 
 let isReturn = 1, isBarrier = 1, isTerminator = 1 in
 def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>,
-                PseudoInstExpansion<(JALR X0, X1, 0)>;
+                PseudoInstExpansion<(JALR R0, R1, 0)>;
 
 def : InstAlias<"mv $rd, $rs",   (ADDI GPR:$rd, GPR:$rs,       0)>;
 def : InstAlias<"not $rd, $rs",  (XORI GPR:$rd, GPR:$rs,      -1)>;
-def : InstAlias<"neg $rd, $rs",  (SUB  GPR:$rd,      X0, GPR:$rs)>;
+def : InstAlias<"neg $rd, $rs",  (SUB  GPR:$rd,      R0, GPR:$rs)>;
 
 def : InstAlias<"seqz $rd, $rs", (SLTIU GPR:$rd, GPR:$rs,       1)>;
-def : InstAlias<"snez $rd, $rs", (SLTU  GPR:$rd,      X0, GPR:$rs)>;
-def : InstAlias<"sltz $rd, $rs", (SLT   GPR:$rd, GPR:$rs,      X0)>;
-def : InstAlias<"sgtz $rd, $rs", (SLT   GPR:$rd,      X0, GPR:$rs)>;
+def : InstAlias<"snez $rd, $rs", (SLTU  GPR:$rd,      R0, GPR:$rs)>;
+def : InstAlias<"sltz $rd, $rs", (SLT   GPR:$rd, GPR:$rs,      R0)>;
+def : InstAlias<"sgtz $rd, $rs", (SLT   GPR:$rd,      R0, GPR:$rs)>;
 
 // sgt/sgtu are recognised by the GNU assembler but the canonical slt/sltu
 // form will always be printed. Therefore, set a zero weight.
@@ -251,7 +251,7 @@ def : InstAlias<"sltu $rd, $rs1, $imm12",
                 (SLTIU  GPR:$rd, GPR:$rs1, simm12:$imm12)>;
 }
 
-def : InstAlias<"ret",                   (JALR      X0,      X1, 0), 4>;
+def : InstAlias<"ret",                   (JALR      R0,      R1, 0), 4>;
 
 def : MnemonicAlias<"move", "mv">;
 
@@ -275,7 +275,7 @@ class PatGprUimmLog2WSize<SDPatternOperator OpNode, RWInstIShift Inst>
 
 /// Immediates
 
-def : Pat<(simm12:$imm), (ADDI X0, simm12:$imm)>;
+def : Pat<(simm12:$imm), (ADDI R0, simm12:$imm)>;
 def : Pat<(simm32hi20:$imm), (LUI (HI20 imm:$imm))>;
 def : Pat<(simm32:$imm), (ADDI (LUI (HI20 imm:$imm)), (LO12Sext imm:$imm))>;
 
@@ -316,7 +316,7 @@ def : PatGprGpr<shiftop<shl>, SLL>;
 def : PatGprGpr<shiftop<srl>, SRL>;
 def : PatGprGpr<shiftop<sra>, SRA>;
 
-let Defs = [X2], Uses = [X2] in {
+let Defs = [R2], Uses = [R2] in {
 def ADJCALLSTACKDOWN : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
                               [(callseq_start timm:$amt1, timm:$amt2)]>;
 def ADJCALLSTACKUP   : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),

@@ -25,7 +25,7 @@ using namespace llvm;
 extern "C" LLVM_EXTERNAL_VISIBILITY void LLVMInitializeTinyGPUTarget() {
   // Register the target.
   //- Little endian Target Machine
-  RegisterTargetMachine<TinyGPUTargetMachine> X(getTheTinyGPUTarget());
+  RegisterTargetMachine<TinyGPUTargetMachine> R(getTheTinyGPUTarget());
   PassRegistry &PR = *PassRegistry::getPassRegistry();
   initializeTinyGPUDAGToDAGISelLegacyPass(PR);
 }
