@@ -12,8 +12,8 @@
 //===----------------------------------------------------------------------===//
 
 let Namespace = "TinyGPU" in {
-class TinyGPUReg<bits<5> Enc, string n, list<string> alt = []> : Register<n> {
-  let HWEncoding{4-0} = Enc;
+class TinyGPUReg<bits<4> Enc, string n, list<string> alt = []> : Register<n> {
+  let HWEncoding{3-0} = Enc;
   let AltNames = alt;
 }
 } // end Namespace
@@ -34,32 +34,15 @@ def R12 : TinyGPUReg<12,"R12", ["a2"]>, DwarfRegNum<[12]>;
 def R13 : TinyGPUReg<13,"R13", ["a3"]>, DwarfRegNum<[13]>;
 def R14 : TinyGPUReg<14,"R14", ["a4"]>, DwarfRegNum<[14]>;
 def R15 : TinyGPUReg<15,"R15", ["a5"]>, DwarfRegNum<[15]>;
-def R16 : TinyGPUReg<16,"R16", ["a6"]>, DwarfRegNum<[16]>;
-def R17 : TinyGPUReg<17,"R17", ["a7"]>, DwarfRegNum<[17]>;
-def R18 : TinyGPUReg<18,"R18", ["s2"]>, DwarfRegNum<[18]>;
-def R19 : TinyGPUReg<19,"R19", ["s3"]>, DwarfRegNum<[19]>;
-def R20 : TinyGPUReg<20,"R20", ["s4"]>, DwarfRegNum<[20]>;
-def R21 : TinyGPUReg<21,"R21", ["s5"]>, DwarfRegNum<[21]>;
-def R22 : TinyGPUReg<22,"R22", ["s6"]>, DwarfRegNum<[22]>;
-def R23 : TinyGPUReg<23,"R23", ["s7"]>, DwarfRegNum<[23]>;
-def R24 : TinyGPUReg<24,"R24", ["s8"]>, DwarfRegNum<[24]>;
-def R25 : TinyGPUReg<25,"R25", ["s9"]>, DwarfRegNum<[25]>;
-def R26 : TinyGPUReg<26,"R26", ["s10"]>, DwarfRegNum<[26]>;
-def R27 : TinyGPUReg<27,"R27", ["s11"]>, DwarfRegNum<[27]>;
-def R28 : TinyGPUReg<28,"R28", ["t3"]>, DwarfRegNum<[28]>;
-def R29 : TinyGPUReg<29,"R29", ["t4"]>, DwarfRegNum<[29]>;
-def R30 : TinyGPUReg<30,"R30", ["t5"]>, DwarfRegNum<[30]>;
-def R31 : TinyGPUReg<31,"R31", ["t6"]>, DwarfRegNum<[31]>;
 
 // The order of registers represents the preferred allocation sequence.
 // Registers are listed in the order caller-save, callee-save, specials.
 def GPR : RegisterClass<"TinyGPU", [i32], 32, (add
-    (sequence "R%u", 10, 17),
-    (sequence "R%u", 5, 7),
-    (sequence "R%u", 28, 31),
-    (sequence "R%u", 8, 9),
-    (sequence "R%u", 18, 27),
-    (sequence "R%u", 0, 4)
+    (sequence "R%u", 0, 11)
   )>;
 
-def SP : RegisterClass<"TinyGPU", [i32], 32, (add R2)>;
+def SPR : RegisterClass<"TinyGPU", [i32], 32, (add 
+    (sequence "R%u", 13, 15)
+ )>;
+
+def SP : RegisterClass<"TinyGPU", [i32], 32, (add R12)>;

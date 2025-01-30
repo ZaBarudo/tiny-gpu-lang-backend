@@ -40,7 +40,6 @@ enum {
   InstFormatCB = 15,
   InstFormatCJ = 16,
   InstFormatOther = 17,
-
   InstFormatMask = 31
 };
 

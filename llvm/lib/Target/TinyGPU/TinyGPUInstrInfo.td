@@ -188,8 +188,8 @@ def SLLI : Shift_ri<0, 0b001, "slli">;
 def SRLI : Shift_ri<0, 0b101, "srli">;
 def SRAI : Shift_ri<1, 0b101, "srai">;
 
-def ADD  : ALU_rr<0b0000000, 0b000, "add">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
-def SUB  : ALU_rr<0b0100000, 0b000, "sub">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+def ADD  : ALU_rr<0b0000000, 0b000, "ADD">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+def SUB  : ALU_rr<0b0100000, 0b000, "SUB">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 def SLL  : ALU_rr<0b0000000, 0b001, "sll">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 def SLT  : ALU_rr<0b0000000, 0b010, "slt">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 def SLTU : ALU_rr<0b0000000, 0b011, "sltu">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
@@ -200,11 +200,11 @@ def OR   : ALU_rr<0b0000000, 0b110, "or">, Sched<[WriteIALU, ReadIALU, ReadIALU]
 def AND  : ALU_rr<0b0000000, 0b111, "and">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 
 // M extension
-def MUL     : ALU_rr<0b0000001, 0b000, "mul">, Sched<[WriteIMul, ReadIMul, ReadIMul]>;
+def MUL     : ALU_rr<0b0000001, 0b000, "MUL">, Sched<[WriteIMul, ReadIMul, ReadIMul]>;
 def MULH    : ALU_rr<0b0000001, 0b001, "mulh">, Sched<[WriteIMul, ReadIMul, ReadIMul]>;
 def MULHSU  : ALU_rr<0b0000001, 0b010, "mulhsu">, Sched<[WriteIMul, ReadIMul, ReadIMul]>;
 def MULHU   : ALU_rr<0b0000001, 0b011, "mulhu">, Sched<[WriteIMul, ReadIMul, ReadIMul]>;
-def DIV     : ALU_rr<0b0000001, 0b100, "div">,
+def DIV     : ALU_rr<0b0000001, 0b100, "DIV">,
               Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
 def DIVU    : ALU_rr<0b0000001, 0b101, "divu">,
               Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
@@ -251,7 +251,7 @@ def : InstAlias<"sltu $rd, $rs1, $imm12",
                 (SLTIU  GPR:$rd, GPR:$rs1, simm12:$imm12)>;
 }
 
-def : InstAlias<"ret",                   (JALR      R0,      R1, 0), 4>;
+def : InstAlias<"RET",(JALR R0,  R1, 0), 4>;
 
 def : MnemonicAlias<"move", "mv">;
 

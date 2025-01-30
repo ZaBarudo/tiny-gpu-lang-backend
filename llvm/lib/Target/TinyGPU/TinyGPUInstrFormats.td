@@ -118,15 +118,15 @@ class Pseudo<dag outs, dag ins, list<dag> pattern, string opcodestr = "",
 class RWInstR<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
               dag ins, string opcodestr, string argstr>
     : RWInst<outs, ins, opcodestr, argstr, [], InstFormatR> {
-  bits<5> rs2;
-  bits<5> rs1;
-  bits<5> rd;
+  bits<4> rs2;
+  bits<4> rs1;
+  bits<4> rd;
 
   let Inst{31-25} = funct7;
-  let Inst{24-20} = rs2;
-  let Inst{19-15} = rs1;
+  let Inst{24-21} = rs2;
+  let Inst{19-16} = rs1;
   let Inst{14-12} = funct3;
-  let Inst{11-7} = rd;
+  let Inst{11-8} = rd;
   let Opcode = opcode.Value;
 }
 
@@ -134,13 +134,13 @@ class RWInstI<bits<3> funct3, TinyGPUOpcode opcode, dag outs, dag ins,
               string opcodestr, string argstr>
     : RWInst<outs, ins, opcodestr, argstr, [], InstFormatI> {
   bits<12> imm12;
-  bits<5> rs1;
-  bits<5> rd;
+  bits<4> rs1;
+  bits<4> rd;
 
   let Inst{31-20} = imm12;
-  let Inst{19-15} = rs1;
+  let Inst{19-16} = rs1;
   let Inst{14-12} = funct3;
-  let Inst{11-7} = rd;
+  let Inst{11-8} = rd;
   let Opcode = opcode.Value;
 }
 
@@ -148,16 +148,16 @@ class RWInstIShift<bit arithshift, bits<3> funct3, TinyGPUOpcode opcode,
                    dag outs, dag ins, string opcodestr, string argstr>
     : RWInst<outs, ins, opcodestr, argstr, [], InstFormatI> {
   bits<6> shamt;
-  bits<5> rs1;
-  bits<5> rd;
+  bits<4> rs1;
+  bits<4> rd;
 
   let Inst{31} = 0;
   let Inst{30} = arithshift;
   let Inst{29-26} = 0;
   let Inst{25-20} = shamt;
-  let Inst{19-15} = rs1;
+  let Inst{19-16} = rs1;
   let Inst{14-12} = funct3;
-  let Inst{11-7} = rd;
+  let Inst{11-8} = rd;
   let Opcode = opcode.Value;
 }
 
@@ -165,9 +165,9 @@ class RWInstU<TinyGPUOpcode opcode, dag outs, dag ins, string opcodestr,
               string argstr>
     : RWInst<outs, ins, opcodestr, argstr, [], InstFormatU> {
   bits<20> imm20;
-  bits<5> rd;
+  bits<4> rd;
 
   let Inst{31-12} = imm20;
-  let Inst{11-7} = rd;
+  let Inst{11-8} = rd;
   let Opcode = opcode.Value;
 }

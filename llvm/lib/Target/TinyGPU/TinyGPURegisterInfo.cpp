@@ -44,10 +44,11 @@ TinyGPURegisterInfo::getCallPreservedMask(const MachineFunction &MF,
 BitVector TinyGPURegisterInfo::getReservedRegs(const MachineFunction &MF) const {
   BitVector Reserved(getNumRegs());
 
-  markSuperRegs(Reserved, TinyGPU::R0); // zero
-  markSuperRegs(Reserved, TinyGPU::R2); // sp
-  markSuperRegs(Reserved, TinyGPU::R3); // gp
-  markSuperRegs(Reserved, TinyGPU::R4); // tp
+  markSuperRegs(Reserved, TinyGPU::R12); // zero
+  markSuperRegs(Reserved, TinyGPU::R13); // zero
+  markSuperRegs(Reserved, TinyGPU::R14); // zero
+  markSuperRegs(Reserved, TinyGPU::R15); // zero
+
 
   return Reserved;
 }
