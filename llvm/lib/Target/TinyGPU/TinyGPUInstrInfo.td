@@ -156,6 +156,15 @@ class ALU_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWInstR<funct7, funct3, OPC_OP, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
               opcodestr, "$rd, $rs1, $rs2">;
 
+let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in
+class LDR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
+    : RWInstRR<funct7, funct3, OPC_OP, (outs GPR:$rd), (ins GPR:$rs),
+              opcodestr, "$rd, $rs">;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
+class STR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
+    : RWInstRR<funct7, funct3, OPC_OP, (outs), (ins GPR:$rd, GPR:$rs),
+              opcodestr, "$rd, $rs">;
 //===----------------------------------------------------------------------===//
 // Instructions
 //===----------------------------------------------------------------------===//
@@ -212,6 +221,10 @@ def DIV     : ALU_rr<0b0000001, 0b100, "DIV">,
 //               Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
 // def REMU    : ALU_rr<0b0000001, 0b111, "remu">,
 //               Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
+def LDR : LDR_rr<0b0000010, 0b000, "LDR">,
+              Sched<[WriteLoad, ReadLoad]>;
+def STR : STR_rr<0b0000010, 0b001, "STR">,
+              Sched<[ReadLoad, WriteLoad]>;
 
 /* Procedure calling instructions */
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
@@ -272,12 +285,19 @@ class PatGprSimm12<SDPatternOperator OpNode, RWInstI Inst>
 class PatGprUimmLog2WSize<SDPatternOperator OpNode, RWInstIShift Inst>
     : Pat<(OpNode GPR:$rs1, uimmlog2wsize:$shamt),
           (Inst GPR:$rs1, uimmlog2wsize:$shamt)>;
+class PatGpr<SDPatternOperator OpNode, RWInstRR Inst>
+    : Pat<(OpNode GPR:$rs), (Inst GPR:$rs)>;
+
 
 /// Immediates
 
 // def : Pat<(simm12:$imm), (ADDI R0, simm12:$imm)>;
 def : Pat<(simm32hi20:$imm), (LUI (HI20 imm:$imm))>;
 // def : Pat<(simm32:$imm), (ADDI (LUI (HI20 imm:$imm)), (LO12Sext imm:$imm))>;
+
+def : PatGpr<load, LDR>;
+
+def : Pat<(store GPR:$rd, GPR:$rs), (STR $rd, $rs)>;
 
 /// Simple arithmetic operations
 

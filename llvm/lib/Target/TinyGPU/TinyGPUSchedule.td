@@ -20,6 +20,7 @@ def WriteJal        : SchedWrite;    // Jump and link
 def WriteJalr       : SchedWrite;    // Jump and link register
 def WriteJmpReg     : SchedWrite;    // Jump register
 def WriteNop        : SchedWrite;
+def WriteLoad       : SchedWrite;
 def WriteLDB        : SchedWrite;    // Load byte
 def WriteLDH        : SchedWrite;    // Load half-word
 def WriteLDW        : SchedWrite;    // Load word
@@ -85,6 +86,8 @@ def WriteFST32        : SchedWrite;    // Floating point sp store
 def WriteFST64        : SchedWrite;    // Floating point dp store
 
 /// Define scheduler resources associated with use operands.
+def ReadLoad       : SchedRead;
+
 def ReadJmp         : SchedRead;
 def ReadJalr        : SchedRead;
 def ReadCSR         : SchedRead;

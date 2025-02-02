@@ -115,6 +115,24 @@ class Pseudo<dag outs, dag ins, list<dag> pattern, string opcodestr = "",
 // instruction set manual (R, I, S, B, U, J) with sub-formats (e.g. RWInstR4,
 // RWInstRAtomic) sorted alphabetically.
 
+class RWInstRR<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
+              dag ins, string opcodestr, string argstr>
+    : RWInst<outs, ins, opcodestr, argstr, [], InstFormatR> {
+  // bits<4> rs2;
+  // bits<4> rs1;
+  // bits<4> rd;
+  bits<4> rs;
+  bits<4> rd;
+
+  let Inst{31-25} = funct7;
+  // let Inst{24-21} = rs2;
+  // let Inst{19-16} = rs1;
+  let Inst{19-16} = rs;
+  let Inst{14-12} = funct3;
+  let Inst{11-8} = rd;
+  let Opcode = opcode.Value;
+}
+
 class RWInstR<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
               dag ins, string opcodestr, string argstr>
     : RWInst<outs, ins, opcodestr, argstr, [], InstFormatR> {

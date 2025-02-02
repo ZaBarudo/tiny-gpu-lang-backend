@@ -116,7 +116,7 @@ SDValue TinyGPUTargetLowering::LowerFormalArguments(
                                     const SmallVectorImpl<ISD::InputArg> &Ins,
                                     const SDLoc &dl, SelectionDAG &DAG,
                                     SmallVectorImpl<SDValue> &InVals) const {
-  assert((CallingConv::C == CallConv || CallingConv::Fast == CallConv) &&
+  assert((CallingConv::C == CallConv || CallingConv::Fast == CallConv || CallConv == CallingConv::SPIR_KERNEL) &&
 		 "Unsupported CallingConv to FORMAL_ARGS");
 
   MachineFunction &MF = DAG.getMachineFunction();
