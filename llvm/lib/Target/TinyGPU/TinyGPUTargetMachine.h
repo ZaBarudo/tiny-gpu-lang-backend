@@ -1,9 +1,8 @@
 //===-- TinyGPUTargetMachine.h - Define TargetMachine for TinyGPU ---*- C++ -*-===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 //
@@ -14,33 +13,77 @@
 #ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPUTARGETMACHINE_H
 #define LLVM_LIB_TARGET_TinyGPU_TinyGPUTARGETMACHINE_H
 
+#include "TinyGPUInstrInfo.h"
 #include "TinyGPUSubtarget.h"
-#include "llvm/CodeGen/Passes.h"
-#include "llvm/CodeGen/SelectionDAGISel.h"
-#include "llvm/CodeGen/TargetFrameLowering.h"
-#include "llvm/Target/TargetMachine.h"
 #include "llvm/CodeGen/CodeGenTargetMachineImpl.h"
+#include "llvm/Target/TargetMachine.h"
+#include <optional>
 
 namespace llvm {
+
 class TinyGPUTargetMachine : public CodeGenTargetMachineImpl {
   std::unique_ptr<TargetLoweringObjectFile> TLOF;
+  bool is64Bit;
   mutable StringMap<std::unique_ptr<TinyGPUSubtarget>> SubtargetMap;
 
 public:
   TinyGPUTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
-                    StringRef FS, const TargetOptions &Options,
-                    std::optional<Reloc::Model> RM, std::optional<CodeModel::Model> CM,
-                    CodeGenOptLevel OL, bool JIT);
+                     StringRef FS, const TargetOptions &Options,
+                     std::optional<Reloc::Model> RM,
+                     std::optional<CodeModel::Model> CM, CodeGenOptLevel OL,
+                     bool JIT, bool is64bit);
+  ~TinyGPUTargetMachine() override;
 
   const TinyGPUSubtarget *getSubtargetImpl(const Function &F) const override;
-  const TinyGPUSubtarget *getSubtargetImpl() const = delete;
 
+  // Pass Pipeline Configuration
   TargetPassConfig *createPassConfig(PassManagerBase &PM) override;
-
   TargetLoweringObjectFile *getObjFileLowering() const override {
     return TLOF.get();
   }
-};
-}
 
-#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUTARGETMACHINE_H
+  MachineFunctionInfo *
+  createMachineFunctionInfo(BumpPtrAllocator &Allocator, const Function &F,
+                            const TargetSubtargetInfo *STI) const override;
+};
+
+/// TinyGPU 32-bit target machine
+///
+class TinyGPUV8TargetMachine : public TinyGPUTargetMachine {
+  virtual void anchor();
+
+public:
+  TinyGPUV8TargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                       StringRef FS, const TargetOptions &Options,
+                       std::optional<Reloc::Model> RM,
+                       std::optional<CodeModel::Model> CM, CodeGenOptLevel OL,
+                       bool JIT);
+};
+
+/// TinyGPU 64-bit target machine
+///
+class TinyGPUV9TargetMachine : public TinyGPUTargetMachine {
+  virtual void anchor();
+
+public:
+  TinyGPUV9TargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                       StringRef FS, const TargetOptions &Options,
+                       std::optional<Reloc::Model> RM,
+                       std::optional<CodeModel::Model> CM, CodeGenOptLevel OL,
+                       bool JIT);
+};
+
+class TinyGPUelTargetMachine : public TinyGPUTargetMachine {
+  virtual void anchor();
+
+public:
+  TinyGPUelTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
+                       StringRef FS, const TargetOptions &Options,
+                       std::optional<Reloc::Model> RM,
+                       std::optional<CodeModel::Model> CM, CodeGenOptLevel OL,
+                       bool JIT);
+};
+
+} // end namespace llvm
+
+#endif

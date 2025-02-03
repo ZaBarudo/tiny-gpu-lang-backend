@@ -1,9 +1,8 @@
 //===-- TinyGPUTargetObjectFile.h - TinyGPU Object Info -------------*- C++ -*-===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 
@@ -13,10 +12,23 @@
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
 
 namespace llvm {
-class TinyGPUTargetObjectFile : public TargetLoweringObjectFileELF {
+
+class MCContext;
+class TargetMachine;
+
+class TinyGPUELFTargetObjectFile : public TargetLoweringObjectFileELF {
 public:
+  TinyGPUELFTargetObjectFile() = default;
+
   void Initialize(MCContext &Ctx, const TargetMachine &TM) override;
+
+  const MCExpr *getTTypeGlobalReference(const GlobalValue *GV,
+                                        unsigned Encoding,
+                                        const TargetMachine &TM,
+                                        MachineModuleInfo *MMI,
+                                        MCStreamer &Streamer) const override;
 };
+
 } // end namespace llvm
 
-#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUTARGETOBJECTFILE_H
+#endif

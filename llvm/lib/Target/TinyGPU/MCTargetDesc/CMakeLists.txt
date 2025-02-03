@@ -1,14 +1,19 @@
-add_llvm_component_library(LLVMTinyGPUDesc
-  TinyGPUMCAsmInfo.cpp
-  TinyGPUMCTargetDesc.cpp
-  TinyGPUInstPrinter.cpp
-  
+add_llvm_component_library(LLVMSparcDesc
+  SparcAsmBackend.cpp
+  SparcELFObjectWriter.cpp
+  SparcInstPrinter.cpp
+  SparcMCAsmInfo.cpp
+  SparcMCCodeEmitter.cpp
+  SparcMCTargetDesc.cpp
+  SparcMCExpr.cpp
+  SparcTargetStreamer.cpp
+
   LINK_COMPONENTS
   MC
-  TinyGPUInfo
+  SparcInfo
   Support
   TargetParser
 
   ADD_TO_COMPONENT
-  TinyGPU
-)
+  Sparc
+  )

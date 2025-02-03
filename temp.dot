@@ -1,0 +1,46 @@
+digraph "isel input for _Z3addiiii:entry" {
+	rankdir="BT";
+	label="isel input for _Z3addiiii:entry";
+
+	Node0x62cdb897b070 [shape=record,shape=Mrecord,label="{EntryToken|t0|{<d0>ch|<d1>glue}}"];
+	Node0x62cdb89997b0 [shape=record,shape=Mrecord,label="{Register %0|t1|{<d0>i32}}"];
+	Node0x62cdb8999890 [shape=record,shape=Mrecord,label="{Register %1|t3|{<d0>i32}}"];
+	Node0x62cdb8999970 [shape=record,shape=Mrecord,label="{Register %2|t5|{<d0>i32}}"];
+	Node0x62cdb8999a50 [shape=record,shape=Mrecord,label="{Register %3|t7|{<d0>i32}}"];
+	Node0x62cdb8999b30 [shape=record,shape=Mrecord,label="{Constant\<1\>|t9|{<d0>i32}}"];
+	Node0x62cdb8999d60 [shape=record,shape=Mrecord,label="{Register $r0|t14|{<d0>i32}}"];
+	Node0x62cdb8999820 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1}|CopyFromReg|t2|{<d0>i32|<d1>ch}}"];
+	Node0x62cdb8999820:s0 -> Node0x62cdb897b070:d0[color=blue,style=dashed];
+	Node0x62cdb8999820:s1 -> Node0x62cdb89997b0:d0;
+	Node0x62cdb8999900 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1}|CopyFromReg|t4|{<d0>i32|<d1>ch}}"];
+	Node0x62cdb8999900:s0 -> Node0x62cdb897b070:d0[color=blue,style=dashed];
+	Node0x62cdb8999900:s1 -> Node0x62cdb8999890:d0;
+	Node0x62cdb89999e0 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1}|CopyFromReg|t6|{<d0>i32|<d1>ch}}"];
+	Node0x62cdb89999e0:s0 -> Node0x62cdb897b070:d0[color=blue,style=dashed];
+	Node0x62cdb89999e0:s1 -> Node0x62cdb8999970:d0;
+	Node0x62cdb8999ac0 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1}|CopyFromReg|t8|{<d0>i32|<d1>ch}}"];
+	Node0x62cdb8999ac0:s0 -> Node0x62cdb897b070:d0[color=blue,style=dashed];
+	Node0x62cdb8999ac0:s1 -> Node0x62cdb8999a50:d0;
+	Node0x62cdb8999eb0 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1}|add|t17|{<d0>i32}}"];
+	Node0x62cdb8999eb0:s0 -> Node0x62cdb8999820:d0;
+	Node0x62cdb8999eb0:s1 -> Node0x62cdb8999900:d0;
+	Node0x62cdb8999ba0 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1}|add|t19|{<d0>i32}}"];
+	Node0x62cdb8999ba0:s0 -> Node0x62cdb8999eb0:d0;
+	Node0x62cdb8999ba0:s1 -> Node0x62cdb89999e0:d0;
+	Node0x62cdb8999f20 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1}|add|t21|{<d0>i32}}"];
+	Node0x62cdb8999f20:s0 -> Node0x62cdb8999ba0:d0;
+	Node0x62cdb8999f20:s1 -> Node0x62cdb8999ac0:d0;
+	Node0x62cdb8999c80 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1}|add|t22|{<d0>i32}}"];
+	Node0x62cdb8999c80:s0 -> Node0x62cdb8999f20:d0;
+	Node0x62cdb8999c80:s1 -> Node0x62cdb8999b30:d0;
+	Node0x62cdb8999dd0 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1|<s2>2}|CopyToReg|t15|{<d0>ch|<d1>glue}}"];
+	Node0x62cdb8999dd0:s0 -> Node0x62cdb897b070:d0[color=blue,style=dashed];
+	Node0x62cdb8999dd0:s1 -> Node0x62cdb8999d60:d0;
+	Node0x62cdb8999dd0:s2 -> Node0x62cdb8999c80:d0;
+	Node0x62cdb8999e40 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1|<s2>2}|TinyGPUISD::Ret|t16|{<d0>ch}}"];
+	Node0x62cdb8999e40:s0 -> Node0x62cdb8999dd0:d0[color=blue,style=dashed];
+	Node0x62cdb8999e40:s1 -> Node0x62cdb8999d60:d0;
+	Node0x62cdb8999e40:s2 -> Node0x62cdb8999dd0:d1[color=red,style=bold];
+	Node0x0[ plaintext=circle, label ="GraphRoot"];
+	Node0x0 -> Node0x62cdb8999e40:d0[color=blue,style=dashed];
+}

@@ -2,48 +2,52 @@ add_llvm_component_group(TinyGPU)
 
 set(LLVM_TARGET_DEFINITIONS TinyGPU.td)
 
-tablegen(LLVM TinyGPUGenRegisterInfo.inc -gen-register-info)
-tablegen(LLVM TinyGPUGenInstrInfo.inc -gen-instr-info)
-tablegen(LLVM TinyGPUGenCodeEmitter.inc -gen-emitter)
-tablegen(LLVM TinyGPUGenMCCodeEmitter.inc -gen-emitter)
+tablegen(LLVM TinyGPUGenAsmMatcher.inc -gen-asm-matcher)
 tablegen(LLVM TinyGPUGenAsmWriter.inc -gen-asm-writer)
-tablegen(LLVM TinyGPUGenDAGISel.inc -gen-dag-isel)
 tablegen(LLVM TinyGPUGenCallingConv.inc -gen-callingconv)
+tablegen(LLVM TinyGPUGenDAGISel.inc -gen-dag-isel)
+tablegen(LLVM TinyGPUGenDisassemblerTables.inc -gen-disassembler)
+tablegen(LLVM TinyGPUGenInstrInfo.inc -gen-instr-info)
+tablegen(LLVM TinyGPUGenMCCodeEmitter.inc -gen-emitter)
+tablegen(LLVM TinyGPUGenRegisterInfo.inc -gen-register-info)
+tablegen(LLVM TinyGPUGenSearchableTables.inc -gen-searchable-tables)
 tablegen(LLVM TinyGPUGenSubtargetInfo.inc -gen-subtarget)
-tablegen(LLVM TinyGPUGenMCPseudoLowering.inc -gen-pseudo-lowering)
 
-# TinyGPUCommonTableGen must be defined
 add_public_tablegen_target(TinyGPUCommonTableGen)
 
-# TinyGPUCodeGen should match with LLVMBuild.txt TinyGPUCodeGen
 add_llvm_target(TinyGPUCodeGen
+  DelaySlotFiller.cpp
+  LeonPasses.cpp
   TinyGPUAsmPrinter.cpp
-  TinyGPUFrameLowering.cpp
   TinyGPUInstrInfo.cpp
+  TinyGPUISelDAGToDAG.cpp
   TinyGPUISelLowering.cpp
+  TinyGPUFrameLowering.cpp
+  TinyGPUMachineFunctionInfo.cpp
   TinyGPURegisterInfo.cpp
   TinyGPUSubtarget.cpp
-  TinyGPUTargetObjectFile.cpp
-  TinyGPUISelDAGToDAG.cpp
   TinyGPUTargetMachine.cpp
-  
+  TinyGPUMCInstLower.cpp
+  TinyGPUTargetObjectFile.cpp
+
   LINK_COMPONENTS
   AsmPrinter
   CodeGen
   CodeGenTypes
   Core
   MC
+  SelectionDAG
   TinyGPUDesc
   TinyGPUInfo
-  SelectionDAG
   Support
   Target
   TargetParser
 
   ADD_TO_COMPONENT
   TinyGPU
-)
+  )
 
-# Should match with "subdirectories =  MCTargetDesc TargetInfo" in LLVMBuild.txt
-add_subdirectory(TargetInfo)
+add_subdirectory(AsmParser)
+add_subdirectory(Disassembler)
 add_subdirectory(MCTargetDesc)
+add_subdirectory(TargetInfo)

@@ -1,9 +1,8 @@
-//===-- TinyGPURegisterInfo.h - TinyGPU Register Information Impl -----*- C++ -*-===//
+//===-- TinyGPURegisterInfo.h - TinyGPU Register Information Impl ---*- C++ -*-===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 //
@@ -20,38 +19,29 @@
 #include "TinyGPUGenRegisterInfo.inc"
 
 namespace llvm {
-class TinyGPUSubtarget;
+struct TinyGPURegisterInfo : public TinyGPUGenRegisterInfo {
+  TinyGPURegisterInfo();
 
-class TinyGPURegisterInfo : public TinyGPUGenRegisterInfo {
-protected:
-  const TinyGPUSubtarget &Subtarget;
-
-public:
-  TinyGPURegisterInfo(const TinyGPUSubtarget &Subtarget);
-
+  /// Code Generation virtual methods...
   const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
-
   const uint32_t *getCallPreservedMask(const MachineFunction &MF,
-                                       CallingConv::ID) const override;
+                                       CallingConv::ID CC) const override;
+
+  const uint32_t* getRTCallPreservedMask(CallingConv::ID CC) const;
 
   BitVector getReservedRegs(const MachineFunction &MF) const override;
+  bool isReservedReg(const MachineFunction &MF, MCRegister Reg) const;
 
-  bool requiresRegisterScavenging(const MachineFunction &MF) const override;
-  bool requiresFrameIndexScavenging(const MachineFunction &MF) const override;
-  bool requiresFrameIndexReplacementScavenging(
-                                    const MachineFunction &MF) const override;
+  const TargetRegisterClass *getPointerRegClass(const MachineFunction &MF,
+                                                unsigned Kind) const override;
 
-  bool trackLivenessAfterRegAlloc(const MachineFunction &MF) const override;
-
-  bool eliminateFrameIndex(MachineBasicBlock::iterator MI,
-                                int SPAdj, unsigned FIOperandNum,
-                                RegScavenger *RS = nullptr) const override;
+  bool eliminateFrameIndex(MachineBasicBlock::iterator II,
+                           int SPAdj, unsigned FIOperandNum,
+                           RegScavenger *RS = nullptr) const override;
 
   Register getFrameRegister(const MachineFunction &MF) const override;
-
-  const TargetRegisterClass *intRegClass(unsigned Size) const;
 };
 
 } // end namespace llvm
 
-#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUREGISTERINFO_H
+#endif

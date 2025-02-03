@@ -1,9 +1,8 @@
-//===-- TinyGPUSubtarget.cpp - TinyGPU Subtarget Information --------------------===//
+//===-- TinyGPUSubtarget.cpp - TinyGPU Subtarget Information ------------------===//
 //
-//                     The LLVM Compiler Infrastructure
-//
-// This file is distributed under the University of Illinois Open Source
-// License. See LICENSE.TXT for details.
+// Part of the LLVM Project, under the Apache License v2.0 with LLVM Exceptions.
+// See https://llvm.org/LICENSE.txt for license information.
+// SPDX-License-Identifier: Apache-2.0 WITH LLVM-exception
 //
 //===----------------------------------------------------------------------===//
 //
@@ -11,16 +10,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#include "TinyGPU.h"
 #include "TinyGPUSubtarget.h"
-#include "TinyGPUMachineFunction.h"
-#include "TinyGPURegisterInfo.h"
-#include "TinyGPUTargetMachine.h"
-#include "llvm/IR/Attributes.h"
-#include "llvm/IR/Function.h"
-#include "llvm/Support/CommandLine.h"
-#include "llvm/Support/ErrorHandling.h"
+#include "llvm/ADT/StringRef.h"
 #include "llvm/MC/TargetRegistry.h"
+#include "llvm/Support/MathExtras.h"
 
 using namespace llvm;
 
@@ -30,26 +23,63 @@ using namespace llvm;
 #define GET_SUBTARGETINFO_CTOR
 #include "TinyGPUGenSubtargetInfo.inc"
 
-TinyGPUSubtarget::TinyGPUSubtarget(const Triple &TT, StringRef CPU, StringRef FS,
-                               const TargetMachine &TM)
-    : TinyGPUGenSubtargetInfo(TT, CPU, /*TuneCPU*/ CPU, FS),
-      TSInfo(),
-      InstrInfo(initializeSubtargetDependencies(TT, CPU, FS, TM)),
-      FrameLowering(*this),
-      TLInfo(TM, *this),
-      RegInfo(*this) { }
+void TinyGPUSubtarget::anchor() { }
 
-
-TinyGPUSubtarget &
-TinyGPUSubtarget::initializeSubtargetDependencies(const Triple &TT, StringRef CPU,
-                                                StringRef FS,
-                                                const TargetMachine &TM) {
-  std::string CPUName(CPU);
+TinyGPUSubtarget &TinyGPUSubtarget::initializeSubtargetDependencies(
+    StringRef CPU, StringRef TuneCPU, StringRef FS) {
+  // Determine default and user specified characteristics
+  std::string CPUName = std::string(CPU);
   if (CPUName.empty())
-    CPUName = "generic";
+    CPUName = (Is64Bit) ? "v9" : "v8";
+
+  if (TuneCPU.empty())
+    TuneCPU = CPUName;
 
   // Parse features string.
-  ParseSubtargetFeatures(CPUName, /*TuneCPU*/ CPUName, FS);
+  ParseSubtargetFeatures(CPUName, TuneCPU, FS);
+
+  // Popc is a v9-only instruction.
+  if (!IsV9)
+    UsePopc = false;
 
   return *this;
+}
+
+TinyGPUSubtarget::TinyGPUSubtarget(const StringRef &CPU, const StringRef &TuneCPU,
+                               const StringRef &FS, const TargetMachine &TM,
+                               bool is64Bit)
+    : TinyGPUGenSubtargetInfo(TM.getTargetTriple(), CPU, TuneCPU, FS),
+      ReserveRegister(TM.getMCRegisterInfo()->getNumRegs()),
+      TargetTriple(TM.getTargetTriple()), Is64Bit(is64Bit),
+      InstrInfo(initializeSubtargetDependencies(CPU, TuneCPU, FS)),
+      TLInfo(TM, *this), FrameLowering(*this) {}
+
+int TinyGPUSubtarget::getAdjustedFrameSize(int frameSize) const {
+
+  if (is64Bit()) {
+    // All 64-bit stack frames must be 16-byte aligned, and must reserve space
+    // for spilling the 16 window registers at %sp+BIAS..%sp+BIAS+128.
+    frameSize += 128;
+    // Frames with calls must also reserve space for 6 outgoing arguments
+    // whether they are used or not. LowerCall_64 takes care of that.
+    frameSize = alignTo(frameSize, 16);
+  } else {
+    // Emit the correct save instruction based on the number of bytes in
+    // the frame. Minimum stack frame size according to V8 ABI is:
+    //   16 words for register window spill
+    //    1 word for address of returned aggregate-value
+    // +  6 words for passing parameters on the stack
+    // ----------
+    //   23 words * 4 bytes per word = 92 bytes
+    frameSize += 92;
+
+    // Round up to next doubleword boundary -- a double-word boundary
+    // is required by the ABI.
+    frameSize = alignTo(frameSize, 8);
+  }
+  return frameSize;
+}
+
+bool TinyGPUSubtarget::enableMachineScheduler() const {
+  return true;
 }
