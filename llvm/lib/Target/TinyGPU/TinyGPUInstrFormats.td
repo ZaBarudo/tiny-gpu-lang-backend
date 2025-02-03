@@ -148,6 +148,20 @@ class RWInstR<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
   let Opcode = opcode.Value;
 }
 
+class RWInstRI<bits<3> funct3, TinyGPUOpcode opcode, dag outs, dag ins,
+              string opcodestr, string argstr>
+    : RWInst<outs, ins, opcodestr, argstr, [], InstFormatI> {
+  bits<12> imm12;
+  // bits<4> rs1;
+  bits<4> rd;
+
+  let Inst{31-20} = imm12;
+  // let Inst{19-16} = rs1;
+  let Inst{14-12} = funct3;
+  let Inst{11-8} = rd;
+  let Opcode = opcode.Value;
+}
+
 class RWInstI<bits<3> funct3, TinyGPUOpcode opcode, dag outs, dag ins,
               string opcodestr, string argstr>
     : RWInst<outs, ins, opcodestr, argstr, [], InstFormatI> {

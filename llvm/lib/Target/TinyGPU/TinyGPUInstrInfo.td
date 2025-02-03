@@ -165,6 +165,11 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class STR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWInstRR<funct7, funct3, OPC_OP, (outs), (ins GPR:$rd, GPR:$rs),
               opcodestr, "$rd, $rs">;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
+class CONST_I< bits<3> funct3, string opcodestr>
+    : RWInstRI<funct3, OPC_OP, (outs), (ins simm12:$imm12, GPR:$rd),
+              opcodestr, "$imm12, $rd">;
 //===----------------------------------------------------------------------===//
 // Instructions
 //===----------------------------------------------------------------------===//
@@ -181,7 +186,7 @@ def AUIPC : RWInstU<OPC_AUIPC, (outs GPR:$rd), (ins uimm20_auipc:$imm20),
 // ADDI isn't always rematerializable, but isReMaterializable will be used as
 // a hint which is verified in isReallyTriviallyReMaterializable.
 let isReMaterializable = 1, isAsCheapAsAMove = 1 in
-// def ADDI  : ALU_ri<0b000, "addi">;
+def ADDI  : ALU_ri<0b000, "addi">;
 
 // def SLTI  : ALU_ri<0b010, "slti">;
 // def SLTIU : ALU_ri<0b011, "sltiu">;
@@ -226,6 +231,9 @@ def LDR : LDR_rr<0b0000010, 0b000, "LDR">,
 def STR : STR_rr<0b0000010, 0b001, "STR">,
               Sched<[ReadLoad, WriteLoad]>;
 
+def CONST : CONST_I<0b011, "CONST">;
+
+
 /* Procedure calling instructions */
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 let isCall = 1 in
@@ -243,7 +251,7 @@ let isReturn = 1, isBarrier = 1, isTerminator = 1 in
 def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>,
                 PseudoInstExpansion<(JALR R0, R1, 0)>;
 
-// def : InstAlias<"mv $rd, $rs",   (ADDI GPR:$rd, GPR:$rs,       0)>;
+def : InstAlias<"mv $rd, $rs",   (ADDI GPR:$rd, GPR:$rs,       0)>;
 // def : InstAlias<"not $rd, $rs",  (XORI GPR:$rd, GPR:$rs,      -1)>;
 // def : InstAlias<"neg $rd, $rs",  (SUB  GPR:$rd,      R0, GPR:$rs)>;
 
@@ -291,18 +299,19 @@ class PatGpr<SDPatternOperator OpNode, RWInstRR Inst>
 
 /// Immediates
 
-// def : Pat<(simm12:$imm), (ADDI R0, simm12:$imm)>;
+def : Pat<(simm12:$imm), (ADDI R0, simm12:$imm)>;
 def : Pat<(simm32hi20:$imm), (LUI (HI20 imm:$imm))>;
-// def : Pat<(simm32:$imm), (ADDI (LUI (HI20 imm:$imm)), (LO12Sext imm:$imm))>;
+def : Pat<(simm32:$imm), (ADDI (LUI (HI20 imm:$imm)), (LO12Sext imm:$imm))>;
 
 def : PatGpr<load, LDR>;
 
 def : Pat<(store GPR:$rd, GPR:$rs), (STR $rd, $rs)>;
+def : Pat<(store simm12:$imm12,GPR:$rd), (CONST $imm12,$rd)>;
 
 /// Simple arithmetic operations
 
 def : PatGprGpr<add, ADD>;
-// def : PatGprSimm12<add, ADDI>;
+def : PatGprSimm12<add, ADDI>;
 def : PatGprGpr<sub, SUB>;
 // def : PatGprGpr<or, OR>;
 // def : PatGprSimm12<or, ORI>;
