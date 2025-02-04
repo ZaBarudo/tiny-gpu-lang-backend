@@ -165,6 +165,11 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class STR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWInstRR<funct7, funct3, OPC_OP, (outs), (ins GPR:$rd, GPR:$rs),
               opcodestr, "$rd, $rs">;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
+class STR_ir<bits<3> funct3, string opcodestr>
+    : RWInstRI<funct3, OPC_OP_IMM, (outs), (ins simm12:$imm12, GPR:$rs),
+              opcodestr, "$rs, #$imm12">,Sched<[WriteIALU]>;
 //===----------------------------------------------------------------------===//
 // Instructions
 //===----------------------------------------------------------------------===//
@@ -180,8 +185,9 @@ def AUIPC : RWInstU<OPC_AUIPC, (outs GPR:$rd), (ins uimm20_auipc:$imm20),
 
 // ADDI isn't always rematerializable, but isReMaterializable will be used as
 // a hint which is verified in isReallyTriviallyReMaterializable.
-let isReMaterializable = 1, isAsCheapAsAMove = 1 in
-// def ADDI  : ALU_ri<0b000, "addi">;
+let isReMaterializable = 1, isAsCheapAsAMove = 1 in{
+  def ADDI  : ALU_ri<0b000, "addi">;
+}
 
 // def SLTI  : ALU_ri<0b010, "slti">;
 // def SLTIU : ALU_ri<0b011, "sltiu">;
@@ -225,7 +231,7 @@ def LDR : LDR_rr<0b0000010, 0b000, "LDR">,
               Sched<[WriteLoad, ReadLoad]>;
 def STR : STR_rr<0b0000010, 0b001, "STR">,
               Sched<[ReadLoad, WriteLoad]>;
-
+def CONST : STR_ir<0b001,"CONST">;
 /* Procedure calling instructions */
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 let isCall = 1 in
@@ -296,13 +302,14 @@ def : Pat<(simm32hi20:$imm), (LUI (HI20 imm:$imm))>;
 // def : Pat<(simm32:$imm), (ADDI (LUI (HI20 imm:$imm)), (LO12Sext imm:$imm))>;
 
 def : PatGpr<load, LDR>;
-
 def : Pat<(store GPR:$rd, GPR:$rs), (STR $rd, $rs)>;
+def : Pat<(store simm12:$imm12, GPR:$rs), (CONST simm12:$imm12, GPR:$rs)>;
+
 
 /// Simple arithmetic operations
 
 def : PatGprGpr<add, ADD>;
-// def : PatGprSimm12<add, ADDI>;
+def : PatGprSimm12<add, ADDI>;
 def : PatGprGpr<sub, SUB>;
 // def : PatGprGpr<or, OR>;
 // def : PatGprSimm12<or, ORI>;
