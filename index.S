@@ -5,7 +5,8 @@
 _Z3addii:                               ; @_Z3addii
 ; %bb.0:                                ; %entry
 	ADD	r0, r0, r1
-	addi	r0, r0, 1
+	CONST	r1 , #1
+	ADD	r0, r0, r1
 	RET
 .Lfunc_end0:
 	.size	_Z3addii, .Lfunc_end0-_Z3addii

@@ -170,6 +170,16 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class STR_ir<bits<3> funct3, string opcodestr>
     : RWInstRI<funct3, OPC_OP_IMM, (outs), (ins simm12:$imm12, GPR:$rs),
               opcodestr, "$rs, #$imm12">,Sched<[WriteIALU]>;
+
+// let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
+// class ALLOCA_ir<bits<3> funct3, string opcodestr>
+//     : RWInstRI<funct3, OPC_OP_IMM, (outs GPR:$rs), (ins ),
+//               opcodestr, "$rs , #0">,Sched<[WriteIALU]>;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
+class ALLOCA_i<bits<3> funct3, string opcodestr>
+    : RWInstRI<funct3, OPC_OP_IMM, (outs GPR:$rs), (ins simm12:$imm12),
+              opcodestr, "$rs , #$imm12">,Sched<[WriteIALU]>;
 //===----------------------------------------------------------------------===//
 // Instructions
 //===----------------------------------------------------------------------===//
@@ -232,6 +242,10 @@ def LDR : LDR_rr<0b0000010, 0b000, "LDR">,
 def STR : STR_rr<0b0000010, 0b001, "STR">,
               Sched<[ReadLoad, WriteLoad]>;
 def CONST : STR_ir<0b001,"CONST">;
+
+// def CONST_ALLOCA : ALLOCA_ir<0b001,"CONST">;
+def I_ALLOCA : ALLOCA_i<0b011,"CONST">;
+
 /* Procedure calling instructions */
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 let isCall = 1 in
@@ -257,6 +271,8 @@ def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>,
 // def : InstAlias<"snez $rd, $rs", (SLTU  GPR:$rd,      R0, GPR:$rs)>;
 // def : InstAlias<"sltz $rd, $rs", (SLT   GPR:$rd, GPR:$rs,      R0)>;
 // def : InstAlias<"sgtz $rd, $rs", (SLT   GPR:$rd,      R0, GPR:$rs)>;
+
+// def : InstAlias<"alloca $rd, $rs", (SLT   GPR:$rd,      R0, GPR:$rs)>;
 
 // sgt/sgtu are recognised by the GNU assembler but the canonical slt/sltu
 // form will always be printed. Therefore, set a zero weight.
@@ -304,12 +320,14 @@ def : Pat<(simm32hi20:$imm), (LUI (HI20 imm:$imm))>;
 def : PatGpr<load, LDR>;
 def : Pat<(store GPR:$rd, GPR:$rs), (STR $rd, $rs)>;
 def : Pat<(store simm12:$imm12, GPR:$rs), (CONST simm12:$imm12, GPR:$rs)>;
+// def : Pat<(alloca), (CONST_ALLOCA)>;
 
 
 /// Simple arithmetic operations
 
 def : PatGprGpr<add, ADD>;
-def : PatGprSimm12<add, ADDI>;
+// def : PatGprSimm12<add, ADDI>;
+def : Pat<(add GPR:$rs1, simm12:$imm12), (ADD GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
 def : PatGprGpr<sub, SUB>;
 // def : PatGprGpr<or, OR>;
 // def : PatGprSimm12<or, ORI>;
