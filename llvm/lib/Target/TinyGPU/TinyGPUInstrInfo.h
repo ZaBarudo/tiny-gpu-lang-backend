@@ -27,6 +27,11 @@ namespace llvm {
 class TinyGPUInstrInfo : public TinyGPUGenInstrInfo {
 public:
   explicit TinyGPUInstrInfo(const TinyGPUSubtarget &STI);
+  void copyPhysReg(MachineBasicBlock &MBB,
+                           MachineBasicBlock::iterator MI, const DebugLoc &DL,
+                           MCRegister DestReg, MCRegister SrcReg, bool KillSrc,
+                           bool RenamableDest = false,
+                           bool RenamableSrc = false) const; 
 
 protected:
   const TinyGPUSubtarget &Subtarget;

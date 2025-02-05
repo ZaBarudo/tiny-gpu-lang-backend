@@ -33,16 +33,16 @@ def R11 : TinyGPUReg<11,"R11", ["a1"]>, DwarfRegNum<[11]>;
 def R12 : TinyGPUReg<12,"R12", ["a2"]>, DwarfRegNum<[12]>;
 def R13 : TinyGPUReg<13,"R13", ["a3"]>, DwarfRegNum<[13]>;
 def R14 : TinyGPUReg<14,"R14", ["a4"]>, DwarfRegNum<[14]>;
-def R15 : TinyGPUReg<15,"R15", ["a5"]>, DwarfRegNum<[15]>;
+def SP : TinyGPUReg<15,"SP", ["a4"]>, DwarfRegNum<[15]>;
+// def SP : RegisterClass<"TinyGPU", [i32], 32, (add R12)>;
+// def R15 : TinyGPUReg<15,"R15", ["a5"]>, DwarfRegNum<[15]>;
 
 // The order of registers represents the preferred allocation sequence.
 // Registers are listed in the order caller-save, callee-save, specials.
 def GPR : RegisterClass<"TinyGPU", [i32], 32, (add
-    (sequence "R%u", 0, 11)
+    (sequence "R%u", 0, 14)
   )>;
 
-def SPR : RegisterClass<"TinyGPU", [i32], 32, (add 
-    (sequence "R%u", 13, 15)
- )>;
-
-def SP : RegisterClass<"TinyGPU", [i32], 32, (add R12)>;
+// def SP : RegisterClass<"TinyGPU", [i32], 32, (add 
+//     (sequence "R%u", 13, 14)
+//  )>;

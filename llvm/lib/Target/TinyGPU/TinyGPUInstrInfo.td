@@ -197,6 +197,8 @@ def AUIPC : RWInstU<OPC_AUIPC, (outs GPR:$rd), (ins uimm20_auipc:$imm20),
 // a hint which is verified in isReallyTriviallyReMaterializable.
 let isReMaterializable = 1, isAsCheapAsAMove = 1 in{
   def ADDI  : ALU_ri<0b000, "addi">;
+  def ADDri  : ALU_ri<0b000, "addi">;
+  def SUBri  : ALU_ri<0b000, "subi">;
 }
 
 // def SLTI  : ALU_ri<0b010, "slti">;
@@ -214,7 +216,9 @@ let isReMaterializable = 1, isAsCheapAsAMove = 1 in{
 // def SRAI : Shift_ri<1, 0b101, "srai">;
 
 def ADD  : ALU_rr<0b0000000, 0b000, "ADD">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+def ADDrr  : ALU_rr<0b0000000, 0b000, "ADD">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 def SUB  : ALU_rr<0b0100000, 0b000, "SUB">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+def SUBrr  : ALU_rr<0b0100000, 0b000, "SUB">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 // def SLL  : ALU_rr<0b0000000, 0b001, "sll">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 // def SLT  : ALU_rr<0b0000000, 0b010, "slt">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 // def SLTU : ALU_rr<0b0000000, 0b011, "sltu">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
@@ -322,6 +326,14 @@ def : Pat<(store GPR:$rd, GPR:$rs), (STR $rd, $rs)>;
 def : Pat<(store simm12:$imm12, GPR:$rs), (CONST simm12:$imm12, GPR:$rs)>;
 // def : Pat<(alloca), (CONST_ALLOCA)>;
 
+// // Match load from FrameIndex
+// def : Pat<(i32 (load (frameindex FI))),
+//           (LW (add SP, (i32 (simm32 FI))), 0)>;
+
+// // Match store to FrameIndex
+// def : Pat<(store i32:$src, (frameindex FI)),
+//           (SW i32:$src, (add SP, (i32 (simm32 FI))), 0)>;
+
 
 /// Simple arithmetic operations
 
@@ -329,6 +341,20 @@ def : PatGprGpr<add, ADD>;
 // def : PatGprSimm12<add, ADDI>;
 def : Pat<(add GPR:$rs1, simm12:$imm12), (ADD GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
 def : PatGprGpr<sub, SUB>;
+
+def to_tframeindex : SDNodeXForm<frameindex, [{
+  return CurDAG->getTargetFrameIndex(N->getIndex(), N->getValueType(0));
+}]>;
+
+//THIS WORKS
+def : Pat<(frameindex:$fi), (ADDI (to_tframeindex $fi), 0)>;
+
+// def : Pat<(frameindex:$fi), (ADD (to_tframeindex $fi), (I_ALLOCA 0))>;
+// def : Pat<(frameindex:$fi), ( (to_tframeindex $fi), (I_ALLOCA 0))>
+
+
+
+
 // def : PatGprGpr<or, OR>;
 // def : PatGprSimm12<or, ORI>;
 // def : PatGprGpr<and, AND>;

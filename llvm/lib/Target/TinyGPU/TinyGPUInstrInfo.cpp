@@ -33,3 +33,14 @@ TinyGPUInstrInfo::TinyGPUInstrInfo(const TinyGPUSubtarget &STI)
       Subtarget(STI)
 {
 }
+
+void TinyGPUInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
+                           MachineBasicBlock::iterator MI, const DebugLoc &DL,
+                           MCRegister DestReg, MCRegister SrcReg, bool KillSrc,
+                           bool RenamableDest,
+                           bool RenamableSrc)  const {
+  // Use a move instruction to copy SrcReg to DestReg
+  // Replace `TinyGPU::MOV` with the actual move instruction for your target
+  BuildMI(MBB, MI, DL, get(TinyGPU::STR), DestReg)
+      .addReg(SrcReg, getKillRegState(KillSrc));
+}

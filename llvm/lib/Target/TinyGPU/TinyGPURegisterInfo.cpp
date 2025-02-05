@@ -14,6 +14,7 @@
 #include "TinyGPURegisterInfo.h"
 #include "TinyGPUSubtarget.h"
 #include "llvm/Support/Debug.h"
+#include "llvm/CodeGen/MachineFrameInfo.h"
 
 #define GET_REGINFO_TARGET_DESC
 #include "TinyGPUGenRegisterInfo.inc"
@@ -47,16 +48,30 @@ BitVector TinyGPURegisterInfo::getReservedRegs(const MachineFunction &MF) const 
   markSuperRegs(Reserved, TinyGPU::R12); // zero
   markSuperRegs(Reserved, TinyGPU::R13); // zero
   markSuperRegs(Reserved, TinyGPU::R14); // zero
-  markSuperRegs(Reserved, TinyGPU::R15); // zero
+  // markSuperRegs(Reserved, TinyGPU::R15); // zero
 
 
   return Reserved;
 }
 
-bool TinyGPURegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator MI,
+bool TinyGPURegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
                                             int SPAdj, unsigned FIOperandNum,
                                             RegScavenger *RS) const {
-  llvm_unreachable("Unsupported eliminateFrameIndex");
+  // llvm_unreachable("Unsupported eliminateFrameIndex");
+   MachineInstr &MI = *II;
+  int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
+
+  // Calculate offset from SP
+  MachineFunction &MF = *MI.getParent()->getParent();
+  const TargetFrameLowering *TFI = Subtarget.getFrameLowering();
+  int Offset = MF.getFrameInfo().getObjectOffset(FrameIndex) +
+               MI.getOperand(FIOperandNum + 1).getImm();
+
+  // Replace FrameIndex with SP + offset
+  MI.getOperand(FIOperandNum).ChangeToRegister(TinyGPU::SP, false);
+  MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
+
+  return false;
 }
 
 bool
