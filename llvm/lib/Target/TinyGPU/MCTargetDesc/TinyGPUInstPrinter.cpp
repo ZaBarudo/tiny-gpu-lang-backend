@@ -33,7 +33,7 @@ TinyGPUInstPrinter::TinyGPUInstPrinter(const MCAsmInfo &MAI, const MCInstrInfo &
     : MCInstPrinter(MAI, MII, MRI) {}
 
 void TinyGPUInstPrinter::printRegName(raw_ostream &OS, MCRegister RegNo) {
-  OS << StringRef(getRegisterName(RegNo)).lower();
+  OS << StringRef(getRegisterName(RegNo)).upper();
 }
 
 void TinyGPUInstPrinter::printInst(const MCInst *MI, uint64_t Address,

@@ -158,12 +158,12 @@ class ALU_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
 
 let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in
 class LDR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
-    : RWInstRR<funct7, funct3, OPC_OP, (outs GPR:$rd), (ins GPR:$rs),
+    : RWInstRR<funct7, funct3, OPC_LOAD, (outs GPR:$rd), (ins GPR:$rs),
               opcodestr, "$rd, $rs">;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class STR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
-    : RWInstRR<funct7, funct3, OPC_OP, (outs), (ins GPR:$rd, GPR:$rs),
+    : RWInstRR<funct7, funct3, OPC_STORE, (outs), (ins GPR:$rd, GPR:$rs),
               opcodestr, "$rd, $rs">;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in

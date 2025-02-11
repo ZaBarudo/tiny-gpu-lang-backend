@@ -1,21 +1,14 @@
-	.file	"index4.cpp"
+	.file	"index2.ll"
 	.text
-	.globl	_Z3addii                        ; -- Begin function _Z3addii
-	.type	_Z3addii,@function
-_Z3addii:                               ; @_Z3addii
-; %bb.0:                                ; %entry
-	addi	sp, sp, -8
-	addi	r2, sp, -4
-	STR	r0, r2
-	addi	r0, sp, -8
-	STR	r1, r0
-	LDR	r1, r2
-	LDR	r0, r0
-	ADD	r0, r1, r0
-	addi	sp, sp, 8
+	.globl	example                         ; -- Begin function example
+	.type	example,@function
+example:                                ; @example
+	.cfi_startproc
+; %bb.0:
+	STR	R1, R0
 	RET
 .Lfunc_end0:
-	.size	_Z3addii, .Lfunc_end0-_Z3addii
+	.size	example, .Lfunc_end0-example
+	.cfi_endproc
                                         ; -- End function
-	.ident	"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git 801c626889eab5afdc627ac2aa03bfc429f41f75)"
 	.section	".note.GNU-stack","",@progbits

@@ -1,4 +1,5 @@
-//===-- TinyGPURegisterInfo.h - TinyGPU Register Information Impl -----*- C++ -*-===//
+//===-- TinyGPURegisterInfo.h - TinyGPU Register Information Impl -----*- C++
+//-*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,7 +8,8 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This file contains the TinyGPU implementation of the TargetRegisterInfo class.
+// This file contains the TinyGPU implementation of the TargetRegisterInfo
+// class.
 //
 //===----------------------------------------------------------------------===//
 
@@ -29,6 +31,7 @@ protected:
 public:
   TinyGPURegisterInfo(const TinyGPUSubtarget &Subtarget);
 
+  /// Code Generation virtual methods...
   const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
 
   const uint32_t *getCallPreservedMask(const MachineFunction &MF,
@@ -39,13 +42,13 @@ public:
   bool requiresRegisterScavenging(const MachineFunction &MF) const override;
   bool requiresFrameIndexScavenging(const MachineFunction &MF) const override;
   bool requiresFrameIndexReplacementScavenging(
-                                    const MachineFunction &MF) const override;
+      const MachineFunction &MF) const override;
 
   bool trackLivenessAfterRegAlloc(const MachineFunction &MF) const override;
 
-  bool eliminateFrameIndex(MachineBasicBlock::iterator MI,
-                                int SPAdj, unsigned FIOperandNum,
-                                RegScavenger *RS = nullptr) const override;
+  bool eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
+                           unsigned FIOperandNum,
+                           RegScavenger *RS = nullptr) const override;
 
   Register getFrameRegister(const MachineFunction &MF) const override;
 

@@ -87,7 +87,6 @@ def WriteFST64        : SchedWrite;    // Floating point dp store
 
 /// Define scheduler resources associated with use operands.
 def ReadLoad       : SchedRead;
-
 def ReadJmp         : SchedRead;
 def ReadJalr        : SchedRead;
 def ReadCSR         : SchedRead;
