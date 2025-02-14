@@ -38,6 +38,9 @@ public:
   void printCustomAliasOperand(const MCInst *MI, uint64_t Address,
                                unsigned OpIdx, unsigned PrintMethodIdx,
                                raw_ostream &O);
+
+  void printBrTarget(const MCInst *MI, unsigned OpNo,
+                                      raw_ostream &O);
   
 private:
   void printOperand(const MCInst *MI, unsigned OpNo, raw_ostream &O);

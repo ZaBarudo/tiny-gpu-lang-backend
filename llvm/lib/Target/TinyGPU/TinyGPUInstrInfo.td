@@ -113,6 +113,21 @@ def immbottomwsizeset : ImmLeaf<i32, [{
   return countr_one<uint64_t>(Imm) >= 5;
 }]>;
 
+def simm13_lsb0 : Operand<OtherVT> {
+  let ParserMatchClass = SImmAsmOperand<13>;
+  // let EncoderMethod = "getImmOpValue";
+  // let DecoderMethod = "decodeSImmOperand<13>";
+  // let MCOperandPredicate = [{
+  //   int64_t Imm;
+  //   if (MCOp.evaluateAsConstantImm(Imm))
+  //     return isShiftedInt<12, 1>(Imm);
+  //   return MCOp.isBareSymbolRef();
+  // }];
+  let OperandType = "OPERAND_SIMM12";
+  let OperandNamespace = "TinyGPUOp";
+  let PrintMethod = "printBrTarget";
+}
+
 // Extract least significant 12 bits from an immediate value and sign extend
 // them.
 def LO12Sext : SDNodeXForm<imm, [{
@@ -160,6 +175,15 @@ let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in
 class LDR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWInstRR<funct7, funct3, OPC_LOAD, (outs GPR:$rd), (ins GPR:$rs),
               opcodestr, "$rd, $rs">;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+class BRANCH_r<bits<7> funct7, bits<3> funct3, string opcodestr>
+    : RWJInstR<funct7, funct3, OPC_OP, (outs), (ins simm13_lsb0:$rs),
+              opcodestr, "$rs">;
+
+class BRANCH_r2<bits<7> funct7, bits<3> funct3, string opcodestr>
+    : RWJInstR2<funct7, funct3, OPC_OP, (outs), (ins GPR:$rs2, simm13_lsb0:$rs),
+              opcodestr, "$rs">;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class STR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
@@ -246,6 +270,11 @@ def LDR : LDR_rr<0b0000010, 0b000, "LDR">,
 def STR : STR_rr<0b0000010, 0b001, "STR">,
               Sched<[ReadLoad, WriteLoad]>;
 def CONST : STR_ir<0b001,"CONST">;
+def BRNCH : BRANCH_r<0b0000011, 0b000, "BR">,
+              Sched<[ReadLoad]>;
+
+def BRNCH_2 : BRANCH_r2<0b0000011, 0b000, "BR">,
+              Sched<[ReadLoad]>;
 
 // def CONST_ALLOCA : ALLOCA_ir<0b001,"CONST">;
 def I_ALLOCA : ALLOCA_i<0b011,"CONST">;
@@ -340,6 +369,66 @@ def : Pat<(store simm12:$imm12, GPR:$rs), (CONST simm12:$imm12, GPR:$rs)>;
 def : PatGprGpr<add, ADD>;
 // def : PatGprSimm12<add, ADDI>;
 def : Pat<(add GPR:$rs1, simm12:$imm12), (ADD GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
+def : Pat<(sub GPR:$rs1, simm12:$imm12), (SUB GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
+def : Pat<(mul GPR:$rs1, simm12:$imm12), (MUL GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
+def : Pat<(sdiv GPR:$rs1, simm12:$imm12), (DIV GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
+
+def : Pat<(setlt GPR:$lhs, GPR:$rhs), (ADD GPR:$lhs, GPR:$rhs)>;
+def : Pat<(setgt GPR:$lhs, GPR:$rhs), (SUB GPR:$lhs, GPR:$rhs)>;
+def : Pat<(br bb:$dst), (BRNCH bb:$dst)>;
+
+
+
+// def : Pat<(brcond GPR:$rs, bb:$dst),  (BRNCH bb:$dst)>;
+// def : Pat<(brcond (i32 (setlt GPR:$lhs, GPR:$rhs)), bb:$dst), ([(ADD GPR:$lhs, GPR:$rhs), (BRNCH bb:$dst)])>;
+// def : Pat<(brcond (i1(setlt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i32(setgt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i32(setge GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i32(setlt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i32(setle GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i32(setne GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i32(seteq GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i32(setule GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+
+// def : Pat<(brcond (setgt GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (setge GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (setlt GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (setle GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (setne GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (seteq GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (setule GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+
+// // def GT : CondCode<CC_GT>;  // For "setgt"
+
+// def BPF_CC_EQ  : PatLeaf<(i64 imm),
+//                          [{return (N->getZExtValue() == ISD::SETEQ);}]>;
+// def BPF_CC_NE  : PatLeaf<(i64 imm),
+//                          [{return (N->getZExtValue() == ISD::SETNE);}]>;
+
+// def : Pat<(brcc BPF_CC_EQ, GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcc BPF_CC_NE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+
+
+
+// def : Pat<(brcond (i1(setgt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i1(setge GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i1(setlt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i1(setle GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i1(setne GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i1(seteq GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i1(setule GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+
+
+
+// def : Pat<(brcond (i1(setgt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// def : Pat<(brcond (i1(setge GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+
+
+// def : Pat<(brcond (i1 (setgt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (SUB GPR:$lhs, GPR:$rhs), bb:$dst)>;
+
+// def : Pat<(brcond GPR:$cond, bb:$dst), (MUL GPR:$cond, GPR:$cond)>;
+
+// def : Pat<(setcc GPR:$lhs, GPR:$rhs, setgt), (ADD GPR:$lhs, GPR:$rhs)>;
 def : PatGprGpr<sub, SUB>;
 
 def to_tframeindex : SDNodeXForm<frameindex, [{

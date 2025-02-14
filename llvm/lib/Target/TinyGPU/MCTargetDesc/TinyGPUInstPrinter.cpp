@@ -62,3 +62,13 @@ void TinyGPUInstPrinter::printOperand(const MCInst *MI, unsigned OpNo,
   assert(Op.isExpr() && "unknown operand kind in printOperand");
   Op.getExpr()->print(O, &MAI, true);
 }
+
+void TinyGPUInstPrinter::printBrTarget(const MCInst *MI, unsigned OpNo,
+                                      raw_ostream &O) {
+  const MCOperand &MO = MI->getOperand(OpNo);
+  if (MO.isExpr()) {
+    const MCExpr *Expr = MO.getExpr();
+    const MCSymbolRefExpr *SRE = cast<MCSymbolRefExpr>(Expr);
+    O << SRE->getSymbol();
+  }
+}

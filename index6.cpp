@@ -1,6 +1,7 @@
-void add(int a, int b){
-    if(a<b){
-        a = 1;
+int branch(int a, int b){
+    if(a != b){
+        return a;
+    }else{
+        return b;
     }
-    return;
 }

@@ -31,6 +31,9 @@ using namespace llvm;
 namespace llvm {
 class TinyGPUAsmPrinter : public AsmPrinter {
 public:
+  bool shouldEmitLabelForBasicBlock(const MachineBasicBlock &MBB) const {
+    return true; // Emit labels even if unreferenced
+  }
   explicit TinyGPUAsmPrinter(TargetMachine &TM,
                            std::unique_ptr<MCStreamer> Streamer)
     : AsmPrinter(TM, std::move(Streamer)) {}
@@ -40,7 +43,8 @@ public:
   }
 
   void emitInstruction(const MachineInstr *MI) override;
-
+  void emitBasicBlockStart(const MachineBasicBlock &MBB) const; 
+  void emitFunctionBodyEnd();
   // This function must be present as it is internally used by the
   // auto-generated function emitPseudoExpansionLowering to expand pseudo
   // instruction
@@ -72,6 +76,21 @@ void TinyGPUAsmPrinter::emitInstruction(const MachineInstr *MI) {
   MCInst TmpInst;
   LowerInstruction(MI, TmpInst);
   EmitToStreamer(*OutStreamer, TmpInst);
+}
+
+
+void TinyGPUAsmPrinter::emitBasicBlockStart(const MachineBasicBlock &MBB) const {
+  const MCSubtargetInfo &STI = getSubtargetInfo();
+  auto MF = MBB.getParent();
+  // const MCSymbol *Symbol = STI.getInstrInfo()->getExprForFDESymbol(
+  //     MF->getContext(), MBB.getSymbol(), *MF);
+  OutStreamer->emitLabel(createTempSymbol(
+        Twine("LBB") + Twine(MF->getFunctionNumber()) + "_" + 
+        Twine(MBB.getNumber())));
+}
+
+void TinyGPUAsmPrinter::emitFunctionBodyEnd() {
+  // Disable LLVM's default comment emission
 }
 
 void TinyGPUAsmPrinter::LowerInstruction(const MachineInstr *MI,

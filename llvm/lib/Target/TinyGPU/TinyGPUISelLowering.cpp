@@ -473,6 +473,35 @@ TinyGPUTargetLowering::LowerShrParts(SDValue Op, SelectionDAG &DAG,
   return DAG.getMergeValues(Ops, DL);
 }
 
+
+
+SDValue TinyGPUTargetLowering::LowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
+  SDLoc dl(Op);
+  return DAG.getNode(ISD::BR_CC, dl, MVT::Other, 
+                     Op.getOperand(1), Op.getOperand(0));
+}
+
+SDValue TinyGPUTargetLowering::LowerBRCOND(SDValue Op, SelectionDAG &DAG) const {
+  // SDLoc dl(Op);
+  // SDValue Chain = Op.getOperand(0);
+  // SDValue Cond = Op.getOperand(1);
+  // SDValue Dest = Op.getOperand(2);
+
+  // if (Cond.getOpcode() == ISD::SETCC) {
+  //   SDValue LHS = Cond.getOperand(0);
+  //   SDValue RHS = Cond.getOperand(1);
+  //   ISD::CondCode CC = cast<CondCodeSDNode>(Cond.getOperand(2))->get();
+
+  //   // Emit CMPOp with glue output
+  //   if (CC == ISD::SETLE) {
+  //     SDValue Cmp = DAG.getNode(TinyGPUISD::CMP, dl, MVT::Glue, LHS, RHS);
+  //     return DAG.getNode(TinyGPUISD::BR, dl, MVT::Other, Chain, Dest, Cmp);
+  //   }
+  // }
+
+  return SDValue();
+}
+
 SDValue
 TinyGPUTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
@@ -484,5 +513,7 @@ TinyGPUTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   case ISD::SHL_PARTS:            return LowerShlParts(Op, DAG);
   case ISD::SRL_PARTS:            return LowerShrParts(Op, DAG, false);
   case ISD::SRA_PARTS:            return LowerShrParts(Op, DAG, true);
+  // case ISD::BRCOND:               return LowerBRCOND(Op, DAG);
+  case ISD::BR_CC:                return LowerBR_CC(Op, DAG);
   }
 }
