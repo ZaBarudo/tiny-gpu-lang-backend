@@ -514,6 +514,6 @@ TinyGPUTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   case ISD::SRL_PARTS:            return LowerShrParts(Op, DAG, false);
   case ISD::SRA_PARTS:            return LowerShrParts(Op, DAG, true);
   // case ISD::BRCOND:               return LowerBRCOND(Op, DAG);
-  case ISD::BR_CC:                return LowerBR_CC(Op, DAG);
+  // case ISD::BR_CC:                return LowerBR_CC(Op, DAG);
   }
 }

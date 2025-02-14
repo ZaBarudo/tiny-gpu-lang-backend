@@ -171,6 +171,11 @@ class ALU_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWInstR<funct7, funct3, OPC_OP, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
               opcodestr, "$rd, $rs1, $rs2">;
 
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+class CMP_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
+    : RWInstR<funct7, funct3, OPC_OP, (outs GPR:$rd), (ins GPR:$rs1, GPR:$rs2),
+              opcodestr, "$rs1, $rs2">;
+
 let hasSideEffects = 0, mayLoad = 1, mayStore = 0 in
 class LDR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWInstRR<funct7, funct3, OPC_LOAD, (outs GPR:$rd), (ins GPR:$rs),
@@ -243,6 +248,10 @@ def ADD  : ALU_rr<0b0000000, 0b000, "ADD">, Sched<[WriteIALU, ReadIALU, ReadIALU
 def ADDrr  : ALU_rr<0b0000000, 0b000, "ADD">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 def SUB  : ALU_rr<0b0100000, 0b000, "SUB">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 def SUBrr  : ALU_rr<0b0100000, 0b000, "SUB">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+
+def CMP  : CMP_rr<0b0000000, 0b000, "CMP">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
+
+
 // def SLL  : ALU_rr<0b0000000, 0b001, "sll">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 // def SLT  : ALU_rr<0b0000000, 0b010, "slt">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 // def SLTU : ALU_rr<0b0000000, 0b011, "sltu">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
@@ -275,6 +284,21 @@ def BRNCH : BRANCH_r<0b0000011, 0b000, "BR">,
 
 def BRNCH_2 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
+def BRNCHN : BRANCH_r2<0b0000011, 0b000, "BRn">,
+              Sched<[ReadLoad]>;
+def BRNCHP : BRANCH_r2<0b0000011, 0b000, "BRp">,
+              Sched<[ReadLoad]>;
+def BRNCHZ : BRANCH_r2<0b0000011, 0b000, "BRz">,
+              Sched<[ReadLoad]>;
+def BRNCHNP : BRANCH_r2<0b0000011, 0b000, "BRnp">,
+              Sched<[ReadLoad]>;
+def BRNCHNZ : BRANCH_r2<0b0000011, 0b000, "BRnz">,
+              Sched<[ReadLoad]>;
+def BRNCHPZ : BRANCH_r2<0b0000011, 0b000, "BRpz">,
+              Sched<[ReadLoad]>;
+def BRNCHNZP : BRANCH_r2<0b0000011, 0b000, "BRnzp">,
+              Sched<[ReadLoad]>;
+
 
 // def CONST_ALLOCA : ALLOCA_ir<0b001,"CONST">;
 def I_ALLOCA : ALLOCA_i<0b011,"CONST">;
@@ -375,58 +399,22 @@ def : Pat<(sdiv GPR:$rs1, simm12:$imm12), (DIV GPR:$rs1, (I_ALLOCA simm12:$imm12
 
 def : Pat<(setlt GPR:$lhs, GPR:$rhs), (ADD GPR:$lhs, GPR:$rhs)>;
 def : Pat<(setgt GPR:$lhs, GPR:$rhs), (SUB GPR:$lhs, GPR:$rhs)>;
+def : Pat<(seteq GPR:$lhs, GPR:$rhs), (MUL GPR:$lhs, GPR:$rhs)>;
+def : Pat<(setne GPR:$lhs, GPR:$rhs), (MUL GPR:$lhs, GPR:$rhs)>;
 def : Pat<(br bb:$dst), (BRNCH bb:$dst)>;
 
 
 
-// def : Pat<(brcond GPR:$rs, bb:$dst),  (BRNCH bb:$dst)>;
-// def : Pat<(brcond (i32 (setlt GPR:$lhs, GPR:$rhs)), bb:$dst), ([(ADD GPR:$lhs, GPR:$rhs), (BRNCH bb:$dst)])>;
-// def : Pat<(brcond (i1(setlt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i32(setgt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i32(setge GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i32(setlt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i32(setle GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i32(setne GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i32(seteq GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i32(setule GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-
-// def : Pat<(brcond (setgt GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (setge GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (setlt GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (setle GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (setne GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (seteq GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (setule GPR:$lhs, GPR:$rhs), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-
-// // def GT : CondCode<CC_GT>;  // For "setgt"
-
-// def BPF_CC_EQ  : PatLeaf<(i64 imm),
-//                          [{return (N->getZExtValue() == ISD::SETEQ);}]>;
-// def BPF_CC_NE  : PatLeaf<(i64 imm),
-//                          [{return (N->getZExtValue() == ISD::SETNE);}]>;
-
 // def : Pat<(brcc BPF_CC_EQ, GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcc BPF_CC_NE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETLE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHNZ (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETLT,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHN (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETGT,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHP (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETGE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHPZ (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETNE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHNP (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETEQ,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHZ (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
 
 
 
-// def : Pat<(brcond (i1(setgt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i1(setge GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i1(setlt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i1(setle GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i1(setne GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i1(seteq GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i1(setule GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-
-
-
-// def : Pat<(brcond (i1(setgt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-// def : Pat<(brcond (i1(setge GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
-
-
-// def : Pat<(brcond (i1 (setgt GPR:$lhs, GPR:$rhs)), bb:$dst), (BRNCH_2 (SUB GPR:$lhs, GPR:$rhs), bb:$dst)>;
-
-// def : Pat<(brcond GPR:$cond, bb:$dst), (MUL GPR:$cond, GPR:$cond)>;
 
 // def : Pat<(setcc GPR:$lhs, GPR:$rhs, setgt), (ADD GPR:$lhs, GPR:$rhs)>;
 def : PatGprGpr<sub, SUB>;
