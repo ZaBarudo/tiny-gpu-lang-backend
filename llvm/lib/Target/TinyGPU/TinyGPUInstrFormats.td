@@ -28,8 +28,8 @@
 // Format specifies the encoding used by the instruction. This is used by
 // TinyGPUMCCodeEmitter to determine which form of fixup to use. These
 // definitions must be kept in-sync with TinyGPUBaseInfo.h.
-class InstFormat<bits<4> val> {
-  bits<4> Value = val;
+class InstFormat<bits<5> val> {
+  bits<5> Value = val;
 }
 def InstFormatPseudo : InstFormat<0>;
 def InstFormatR      : InstFormat<1>;
@@ -52,24 +52,57 @@ def InstFormatOther  : InstFormat<17>;
 
 // The following opcode names match those given in Table 19.1 in the
 // RISC-V User-level ISA specification ("RISC-V base opcode map").
-class TinyGPUOpcode<bits<4> val> {
-  bits<4> Value = val;
+class TinyGPUOpcode<bits<7> val> {
+  bits<7> Value = val;
 }
-def OPC_LOAD      : TinyGPUOpcode<0b0111>;
-def OPC_OP_IMM    : TinyGPUOpcode<0b1001>;
+def OPC_LOAD      : TinyGPUOpcode<0b0000011>;
+def OPC_LOAD_FP   : TinyGPUOpcode<0b0000111>;
+def OPC_MISC_MEM  : TinyGPUOpcode<0b0001111>;
+def OPC_OP_IMM    : TinyGPUOpcode<0b0010011>;
 def OPC_AUIPC     : TinyGPUOpcode<0b0010111>;
-def OPC_STORE     : TinyGPUOpcode<0b1000>;
+def OPC_OP_IMM_32 : TinyGPUOpcode<0b0011011>;
+def OPC_STORE     : TinyGPUOpcode<0b0100011>;
+def OPC_STORE_FP  : TinyGPUOpcode<0b0100111>;
 def OPC_AMO       : TinyGPUOpcode<0b0101111>;
 def OPC_OP        : TinyGPUOpcode<0b0110011>;
 def OPC_LUI       : TinyGPUOpcode<0b0110111>;
-def OPC_MADD      : TinyGPUOpcode<0b0011>;
+def OPC_OP_32     : TinyGPUOpcode<0b0111011>;
+def OPC_MADD      : TinyGPUOpcode<0b1000011>;
 def OPC_MSUB      : TinyGPUOpcode<0b1000111>;
 def OPC_NMSUB     : TinyGPUOpcode<0b1001011>;
 def OPC_NMADD     : TinyGPUOpcode<0b1001111>;
+def OPC_OP_FP     : TinyGPUOpcode<0b1010011>;
 def OPC_BRANCH    : TinyGPUOpcode<0b1100011>;
 def OPC_JALR      : TinyGPUOpcode<0b1100111>;
 def OPC_JAL       : TinyGPUOpcode<0b1101111>;
 def OPC_SYSTEM    : TinyGPUOpcode<0b1110011>;
+
+class JumpInst<dag outs, dag ins, string opcodestr1,string opcodestr2, string argstr1,string argstr2,
+             list<dag> pattern, InstFormat format>
+    : Instruction {
+  field bits<32> Inst;
+  // SoftFail is a field the disassembler can use to provide a way for
+  // instructions to not match without killing the whole decode process. It is
+  // mainly used for ARM, but Tablegen expects this field to exist or it fails
+  // to build the decode table.
+  field bits<32> SoftFail = 0;
+  let Size = 4;
+
+  bits<7> Opcode = 0;
+
+  let Inst{6-0} = Opcode;
+
+  let Namespace = "TinyGPU";
+
+  dag OutOperandList = outs;
+  dag InOperandList = ins;
+  let AsmString = opcodestr1 # "\t" # argstr1 # "\n" # opcodestr2 # "\t" # argstr2;
+  let Pattern = pattern;
+
+  let TSFlags{4-0} = format.Value;
+}
+
+
 
 class RWInst<dag outs, dag ins, string opcodestr, string argstr,
              list<dag> pattern, InstFormat format>
@@ -109,31 +142,144 @@ class Pseudo<dag outs, dag ins, list<dag> pattern, string opcodestr = "",
 // instruction set manual (R, I, S, B, U, J) with sub-formats (e.g. RWInstR4,
 // RWInstRAtomic) sorted alphabetically.
 
+class RWInstRR<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
+              dag ins, string opcodestr, string argstr>
+    : RWInst<outs, ins, opcodestr, argstr, [], InstFormatR> {
+  // bits<4> rs2;
+  // bits<4> rs1;
+  // bits<4> rd;
+  bits<4> rs;
+  bits<4> rd;
+
+  let Inst{31-25} = funct7;
+  // let Inst{24-21} = rs2;
+  // let Inst{19-16} = rs1;
+  let Inst{19-16} = rs;
+  let Inst{14-12} = funct3;
+  let Inst{11-8} = rd;
+  let Opcode = opcode.Value;
+}
+
 class RWInstR<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
               dag ins, string opcodestr, string argstr>
     : RWInst<outs, ins, opcodestr, argstr, [], InstFormatR> {
-  bits<5> rs2;
-  bits<5> rs1;
-  bits<5> rd;
+  bits<4> rs2;
+  bits<4> rs1;
+  bits<4> rd;
 
   let Inst{31-25} = funct7;
-  let Inst{24-20} = rs2;
-  let Inst{19-15} = rs1;
+  let Inst{24-21} = rs2;
+  let Inst{19-16} = rs1;
   let Inst{14-12} = funct3;
-  let Inst{11-7} = rd;
+  let Inst{11-8} = rd;
   let Opcode = opcode.Value;
 }
+
+class RWJInstR2<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
+              dag ins, string opcodestr, string argstr>
+    : RWInst<outs, ins, opcodestr, argstr, [], InstFormatR> {
+  bits<4> rs;
+  bits<4> rs2;
+
+  let isBranch = 1;
+  let isTerminator = 1;
+  let hasDelaySlot = 0;
+
+  let Inst{31-25} = funct7;
+  let Inst{19-16} = rs;
+  let Inst{14-12} = funct3;
+  let Inst{10-7} = rs2;
+
+  let Opcode = opcode.Value;
+}
+
+class RWJInstR<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
+              dag ins, string opcodestr, string argstr>
+    : RWInst<outs, ins, opcodestr, argstr, [], InstFormatR> {
+  bits<4> rs;
+
+  let isBranch = 1;
+  let isTerminator = 1;
+  let hasDelaySlot = 0;
+
+  let Inst{31-25} = funct7;
+  let Inst{19-16} = rs;
+  let Inst{14-12} = funct3;
+  let Opcode = opcode.Value;
+}
+
 
 class RWInstI<bits<3> funct3, TinyGPUOpcode opcode, dag outs, dag ins,
               string opcodestr, string argstr>
     : RWInst<outs, ins, opcodestr, argstr, [], InstFormatI> {
   bits<12> imm12;
-  bits<5> rs1;
-  bits<5> rd;
+  bits<4> rs1;
+  bits<4> rd;
 
   let Inst{31-20} = imm12;
-  let Inst{19-15} = rs1;
+  let Inst{19-16} = rs1;
   let Inst{14-12} = funct3;
-  let Inst{11-7} = rd;
+  let Inst{11-8} = rd;
   let Opcode = opcode.Value;
 }
+
+class RWInstRI<bits<3> funct3, TinyGPUOpcode opcode, dag outs, dag ins,
+              string opcodestr, string argstr>
+    : RWInst<outs, ins, opcodestr, argstr, [], InstFormatI> {
+  bits<12> imm12;
+  bits<4> rs;
+
+  let Inst{31-20} = imm12;
+  let Inst{14-12} = funct3;
+  let Inst{11-8} = rs;
+  let Opcode = opcode.Value;
+}
+
+
+
+class RWInstIShift<bit arithshift, bits<3> funct3, TinyGPUOpcode opcode,
+                   dag outs, dag ins, string opcodestr, string argstr>
+    : RWInst<outs, ins, opcodestr, argstr, [], InstFormatI> {
+  bits<6> shamt;
+  bits<4> rs1;
+  bits<4> rd;
+
+  let Inst{31} = 0;
+  let Inst{30} = arithshift;
+  let Inst{29-26} = 0;
+  let Inst{25-20} = shamt;
+  let Inst{19-16} = rs1;
+  let Inst{14-12} = funct3;
+  let Inst{11-8} = rd;
+  let Opcode = opcode.Value;
+}
+
+class RWInstU<TinyGPUOpcode opcode, dag outs, dag ins, string opcodestr,
+              string argstr>
+    : RWInst<outs, ins, opcodestr, argstr, [], InstFormatU> {
+  bits<20> imm20;
+  bits<4> rd;
+
+  let Inst{31-12} = imm20;
+  let Inst{11-8} = rd;
+  let Opcode = opcode.Value;
+}
+
+// class BranchInst<bits<3> funct3, TinyGPUOpcode opcode, dag outs, dag ins,
+//                  string opcodestr1, string opcodestr2, string argstr1,
+//                  string argstr2>
+//     : JumpInst<outs, ins, opcodestr1, opcodestr2, argstr1, argstr2, [],
+//                InstFormatB> {
+//   // bits<12> imm12;
+//   bits<4> rs2;
+//   bits<4> rs1;
+
+//   // let Inst{31} = imm12{11};
+//   // let Inst{30-25} = imm12{10-5};
+//   let Inst{24-21} = rs2;
+//   let Inst{20-16} = rs1;
+//   let Inst{14-12} = funct3;
+//   let Inst{11-8} = imm12{4-1};
+//   let Inst{7} = imm12{12};
+//   let Opcode = opcode.Value;
+// }

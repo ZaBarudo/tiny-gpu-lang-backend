@@ -7,8 +7,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_TINYGPUTARGETOBJECTFILE_H
-#define LLVM_LIB_TARGET_TINYGPU_TINYGPUTARGETOBJECTFILE_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPUTARGETOBJECTFILE_H
+#define LLVM_LIB_TARGET_TinyGPU_TinyGPUTARGETOBJECTFILE_H
 
 #include "llvm/CodeGen/TargetLoweringObjectFileImpl.h"
 
@@ -19,4 +19,4 @@ public:
 };
 } // end namespace llvm
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_TINYGPUTARGETOBJECTFILE_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUTARGETOBJECTFILE_H
