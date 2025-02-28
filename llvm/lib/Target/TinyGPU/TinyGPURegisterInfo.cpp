@@ -65,17 +65,22 @@ bool TinyGPURegisterInfo::eliminateFrameIndex(MachineBasicBlock::iterator II,
                                               RegScavenger *RS) const {
   // llvm_unreachable("Unsupported eliminateFrameIndex");
   MachineInstr &MI = *II;
+  MachineInstr &prevMI = *std::prev(II);
+  // MachineInstr &MIPrev = *(II - 1);
   int FrameIndex = MI.getOperand(FIOperandNum).getIndex();
 
   // Calculate offset from SP
   MachineFunction &MF = *MI.getParent()->getParent();
   const TargetFrameLowering *TFI = Subtarget.getFrameLowering();
-  int Offset = MF.getFrameInfo().getObjectOffset(FrameIndex) +
-               MI.getOperand(FIOperandNum + 1).getImm();
+  // int Offset = MF.getFrameInfo().getObjectOffset(FrameIndex) +
+  //              MI.getOperand(FIOperandNum + 1).getImm();
+  int Offset = MF.getFrameInfo().getObjectOffset(FrameIndex);
+
 
   // Replace FrameIndex with SP + offset
   MI.getOperand(FIOperandNum).ChangeToRegister(TinyGPU::SP, false);
-  MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
+  prevMI.getOperand(1).ChangeToImmediate(Offset);
+  // MI.getOperand(FIOperandNum + 1).ChangeToImmediate(Offset);
 
   return false;
 }

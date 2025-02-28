@@ -74,37 +74,19 @@ MachineBasicBlock::iterator TinyGPUFrameLowering::eliminateCallFramePseudoInstr(
 void TinyGPUFrameLowering::emitPrologue(MachineFunction &MF,
                                      MachineBasicBlock &MBB) const {
   const TargetInstrInfo &TII = * (MF.getSubtarget().getInstrInfo());
-  // MachineBasicBlock &MBB = MF.front();
-  // MachineBasicBlock::iterator MBBI = MBB.begin();
-  // DebugLoc dl = MBBI != MBB.end() ? MBBI->getDebugLoc() : DebugLoc();
-  // uint64_t StackSize = computeStackSize(MF);
-  // if (!StackSize) {
-  //   return;
-  // }
-  // unsigned StackReg = TinyGPU::SP;
-  // unsigned OffsetReg = materializeOffset(MF, MBB, MBBI, (unsigned)StackSize);
-  // if (OffsetReg) {
-  //   BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::SUBrr), StackReg)
-  //       .addReg(StackReg)
-  //       .addReg(OffsetReg)
-  //       .setMIFlag(MachineInstr::FrameSetup);
-  // } else {
-  //   BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::SUBri), StackReg)
-  //       .addReg(StackReg)
-  //       .addImm(StackSize)
-  //       .setMIFlag(MachineInstr::FrameSetup);                          
-  // }
   MachineBasicBlock::iterator MBBI = MBB.begin();
-  // const MyTargetInstrInfo &TII = *Subtarget.getInstrInfo();
   DebugLoc dl;
-
   // Adjust SP by stack size
   int StackSize = (int)MF.getFrameInfo().getStackSize();
   if (StackSize != 0) {
-    BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::ADDI))
-        .addReg(TinyGPU::SP)
-        .addReg(TinyGPU::SP)
-        .addImm(-StackSize);
+    auto ConstInst = BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::CONST))
+        .addImm(StackSize)
+        .addReg(TinyGPU::R0);
+    auto resultRegister = ConstInst->getOperand(1).getReg();
+    unsigned StackReg = TinyGPU::SP;
+    BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::ADDrr), StackReg)
+        .addReg(StackReg)
+        .addReg(resultRegister);
   }
 }
 
@@ -125,10 +107,14 @@ MachineBasicBlock::iterator MBBI = MBB.getLastNonDebugInstr();
         .addReg(OffsetReg)
         .setMIFlag(MachineInstr::FrameSetup);
   } else {
-    BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::ADDri), StackReg)
-        .addReg(StackReg)
+    auto ConstInst = BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::CONST))
         .addImm(StackSize)
-        .setMIFlag(MachineInstr::FrameSetup);
+        .addReg(TinyGPU::R0);
+    auto resultRegister = ConstInst->getOperand(1).getReg();
+    unsigned StackReg = TinyGPU::SP;
+    BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::ADDrr), StackReg)
+        .addReg(StackReg)
+        .addReg(resultRegister);
   }
 }
 

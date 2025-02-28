@@ -4,12 +4,14 @@
 	.type	_Z6branchii,@function
 _Z6branchii:                            ; @_Z6branchii
 ; %bb.0:                                ; %entry
-	addi	R0, R0, -12
+	CONST	R0, #12
+	ADD	SP, SP, R0
 	STR	R2, R1
-	STR	R1, R0
-	addi	R0, R0, -8
-	STR	R1, R0
-	addi	R1, R0, -12
+	STR	R3, R0
+	CONST	R1 , #-8
+	ADD	R0, SP, R1
+	STR	R3, -12
+	ADD	R1, SP, R1
 	STR	R2, R1
 	LDR	R0, R0
 	LDR	R1, R1
@@ -17,21 +19,25 @@ _Z6branchii:                            ; @_Z6branchii
 	BRz	.LBB0_2
 	BR	.LBB0_1
 .LBB0_1:                                ; %if.then
-	addi	R0, R0, -8
-	LDR	R0, R0
-	addi	R1, R0, -4
+	CONST	R1 , #-8
+	ADD	R0, SP, R1
+	LDR	R0, -4
+	ADD	R1, SP, R1
 	STR	R0, R1
 	BR	.LBB0_3
 .LBB0_2:                                ; %if.else
-	addi	R0, R0, -12
-	LDR	R0, R0
-	addi	R1, R0, -4
+	CONST	R1 , #-12
+	ADD	R0, SP, R1
+	LDR	R0, -4
+	ADD	R1, SP, R1
 	STR	R0, R1
 	BR	.LBB0_3
 .LBB0_3:                                ; %return
-	addi	R0, R0, -4
+	CONST	R0 , #-4
+	ADD	R0, SP, R0
 	LDR	R0, R0
-	addi	R0, R0, 12
+	CONST	R0, #12
+	ADD	SP, SP, R0
 	RET
 .Lfunc_end0:
 	.size	_Z6branchii, .Lfunc_end0-_Z6branchii

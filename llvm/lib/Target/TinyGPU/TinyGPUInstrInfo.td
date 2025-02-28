@@ -225,7 +225,7 @@ def AUIPC : RWInstU<OPC_AUIPC, (outs GPR:$rd), (ins uimm20_auipc:$imm20),
 // ADDI isn't always rematerializable, but isReMaterializable will be used as
 // a hint which is verified in isReallyTriviallyReMaterializable.
 let isReMaterializable = 1, isAsCheapAsAMove = 1 in{
-  def ADDI  : ALU_ri<0b000, "addi">;
+  def ADDI  : ALU_ri<0b000, "ADDI">;
   def ADDri  : ALU_ri<0b000, "addi">;
   def SUBri  : ALU_ri<0b000, "subi">;
 }
@@ -424,7 +424,8 @@ def to_tframeindex : SDNodeXForm<frameindex, [{
 }]>;
 
 //THIS WORKS
-def : Pat<(frameindex:$fi), (ADDI (to_tframeindex $fi), 0)>;
+// def : Pat<(frameindex:$fi), (ADDI (to_tframeindex $fi), 0)>;
+def : Pat<(frameindex:$fi), (ADD (to_tframeindex $fi), (I_ALLOCA 0))>;
 
 // def : Pat<(frameindex:$fi), (ADD (to_tframeindex $fi), (I_ALLOCA 0))>;
 // def : Pat<(frameindex:$fi), ( (to_tframeindex $fi), (I_ALLOCA 0))>

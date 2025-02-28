@@ -318,7 +318,18 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
 
 SDValue
 TinyGPUTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const {
-  llvm_unreachable("Unsupported global address");
+   const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
+  EVT PtrVT = Op.getValueType();
+
+  // Create a TargetGlobalAddress node.
+  SDValue Result = DAG.getTargetGlobalAddress(GV, SDLoc(Op), PtrVT);
+
+  // If the target requires a specific sequence of instructions to load a global
+  // address (e.g., using a base register and an offset), emit those instructions here.
+  // For example, TinyGPU might use a LOAD instruction to load the address into a register.
+
+  // Example: Emit a LOAD instruction to load the global address into a register.
+  return DAG.getNode(ISD::LOAD, SDLoc(Op), PtrVT, Result);
 }
 
 SDValue
