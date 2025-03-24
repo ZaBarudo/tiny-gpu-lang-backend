@@ -127,6 +127,14 @@ def simm13_lsb0 : Operand<OtherVT> {
   let OperandNamespace = "TinyGPUOp";
   let PrintMethod = "printBrTarget";
 }
+def CallTargetAsmOperand : AsmOperandClass {
+  let Name = "CallTarget";
+}
+def CallTarget : Operand<i32> {
+  let ParserMatchClass = CallTargetAsmOperand;
+  let EncoderMethod = "getBranchTargetOpValue";
+  let DecoderMethod = "decodeBranch";
+}
 
 // Extract least significant 12 bits from an immediate value and sign extend
 // them.
@@ -311,6 +319,16 @@ def JALR : RWInstI<0b000, OPC_JALR, (outs GPR:$rd),
                    "jalr", "$rd, ${imm12}(${rs1})">,
            Sched<[WriteJalr, ReadJalr]>;
 }
+
+
+// Calls
+let isCall = 1, hasDelaySlot = 1, isCodeGenOnly = 1, Uses = [SP],
+    Defs = [RCA] in {
+  def CALL : Pseudo<(outs), (ins CallTarget:$addr), "", []>;
+  def CALLR : Pseudo<(outs), (ins GPR:$Rs1), "", [(Call GPR:$Rs1)]>;
+}
+
+def : Pat<(Call tglobaladdr:$dst), (CALL tglobaladdr:$dst)>;
 
 //===----------------------------------------------------------------------===//
 // Assembler Pseudo Instructions (User-Level ISA, Version 2.2, Chapter 20)

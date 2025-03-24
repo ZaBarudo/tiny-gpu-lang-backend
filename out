@@ -1,0 +1,286 @@
+Args: build/bin/llc -march=tinygpu -debug -o output.s temp.ll 
+
+Features:
+CPU:generic
+TuneCPU:generic
+
+MergeICmpsLegacyPass: vector_add
+		Looking for trivial roots
+Found a new trivial root: %entry
+Last visited node: %entry
+		Looking for non-trivial roots
+Total: 1, Num: 2
+Discovered CFG nodes:
+0: nullptr
+1: nullptr
+2: %entry
+Found roots: %entry 
+---- Branch Probability Info : vector_add ----
+
+Computing probabilities for entry
+
+block-frequency: vector_add
+===========================
+reverse-post-order-traversal
+ - 0: entry
+loop-detection
+compute-mass-in-function
+ - node: entry
+  => mass:  ffffffffffffffff
+float-to-int: min = 1.0, max = 1.0, factor = 18014398509481984.0
+ - entry: float = 1.0, scaled = 18014398509481984.0, int = 18014398509481984
+block-frequency-info: vector_add
+ - entry: float = 1.0, int = 18014398509481984
+
+********** Begin Constant Hoisting **********
+********** Function: vector_add
+********** End Constant Hoisting **********
+---- Branch Probability Info : vector_add ----
+
+		Looking for trivial roots
+Found a new trivial root: %entry
+Last visited node: %entry
+		Looking for non-trivial roots
+Total: 1, Num: 2
+Discovered CFG nodes:
+0: nullptr
+1: nullptr
+2: %entry
+Found roots: %entry 
+Computing probabilities for entry
+
+block-frequency: vector_add
+===========================
+reverse-post-order-traversal
+ - 0: entry
+loop-detection
+compute-mass-in-function
+ - node: entry
+  => mass:  ffffffffffffffff
+float-to-int: min = 1.0, max = 1.0, factor = 18014398509481984.0
+ - entry: float = 1.0, scaled = 18014398509481984.0, int = 18014398509481984
+block-frequency-info: vector_add
+ - entry: float = 1.0, int = 18014398509481984
+
+[SafeStack] Function: vector_add
+[SafeStack]     safestack is not requested for this function
+		Looking for trivial roots
+Found a new trivial root: %entry
+Last visited node: %entry
+		Looking for non-trivial roots
+Total: 1, Num: 2
+Discovered CFG nodes:
+0: nullptr
+1: nullptr
+2: %entry
+Found roots: %entry 
+---- Branch Probability Info : vector_add ----
+
+Computing probabilities for entry
+	FastISel is disabled
+
+
+
+=== vector_add
+Creating new node: t2: i32,ch = CopyFromReg t0, Register:i32 %0
+Creating new node: t4: i32,ch = CopyFromReg t0, Register:i32 %1
+Creating new node: t6: i32,ch = CopyFromReg t0, Register:i32 %2
+Creating new node: t8: i32,ch = CopyFromReg t0, Register:i32 %3
+Creating constant: t10: i32 = Constant<0>
+Creating new node: t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+Creating new node: t14: i32,ch = CopyFromReg t12, Register:i32 $r0
+Creating new node: t15: ch = TinyGPUISD::Ret t12
+
+Initial selection DAG: %bb.0 'vector_add:entry'
+SelectionDAG has 16 nodes:
+  t0: ch,glue = EntryToken
+  t2: i32,ch = CopyFromReg t0, Register:i32 %0
+  t4: i32,ch = CopyFromReg t0, Register:i32 %1
+  t6: i32,ch = CopyFromReg t0, Register:i32 %2
+  t8: i32,ch = CopyFromReg t0, Register:i32 %3
+  t9: i32 = GlobalAddress<ptr @_Z13get_global_idj> 0
+  t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+  t14: i32,ch = CopyFromReg t12, Register:i32 $r0
+  t15: ch = TinyGPUISD::Ret t12
+
+
+
+Combining: t15: ch = TinyGPUISD::Ret t12
+
+Combining: t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+
+Combining: t11: i32 = TargetGlobalAddress<ptr @_Z13get_global_idj> 0
+
+Combining: t10: i32 = Constant<0>
+
+Combining: t0: ch,glue = EntryToken
+
+Optimized lowered selection DAG: %bb.0 'vector_add:entry'
+SelectionDAG has 5 nodes:
+      t0: ch,glue = EntryToken
+    t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+  t15: ch = TinyGPUISD::Ret t12
+
+
+
+Legalizing node: t11: i32 = TargetGlobalAddress<ptr @_Z13get_global_idj> 0
+Analyzing result type: i32
+Legal result type
+Legally typed node: t11: i32 = TargetGlobalAddress<ptr @_Z13get_global_idj> 0
+
+Legalizing node: t10: i32 = Constant<0>
+Analyzing result type: i32
+Legal result type
+Legally typed node: t10: i32 = Constant<0>
+
+Legalizing node: t0: ch,glue = EntryToken
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Legally typed node: t0: ch,glue = EntryToken
+
+Legalizing node: t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Analyzing operand: t0: ch,glue = EntryToken
+Legal operand
+Analyzing operand: t11: i32 = TargetGlobalAddress<ptr @_Z13get_global_idj> 0
+Legal operand
+Analyzing operand: t10: i32 = Constant<0>
+Legal operand
+Legally typed node: t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+
+Legalizing node: t15: ch = TinyGPUISD::Ret t12
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+Legal operand
+Legally typed node: t15: ch = TinyGPUISD::Ret t12
+
+Legalizing node: t65535: ch = handlenode t15
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t15: ch = TinyGPUISD::Ret t12
+Legal operand
+Legally typed node: t65535: ch = handlenode t15
+
+Type-legalized selection DAG: %bb.0 'vector_add:entry'
+SelectionDAG has 5 nodes:
+      t0: ch,glue = EntryToken
+    t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+  t15: ch = TinyGPUISD::Ret t12
+
+
+
+Legalizing: t15: ch = TinyGPUISD::Ret t12
+Legal node: nothing to do
+
+Legalizing: t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+Legal node: nothing to do
+
+Legalizing: t11: i32 = TargetGlobalAddress<ptr @_Z13get_global_idj> 0
+Legal node: nothing to do
+
+Legalizing: t10: i32 = Constant<0>
+Legal node: nothing to do
+
+Legalizing: t0: ch,glue = EntryToken
+Legal node: nothing to do
+
+Legalized selection DAG: %bb.0 'vector_add:entry'
+SelectionDAG has 5 nodes:
+      t0: ch,glue = EntryToken
+    t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+  t15: ch = TinyGPUISD::Ret t12
+
+
+
+Legalizing: t15: ch = TinyGPUISD::Ret t12
+Legal node: nothing to do
+
+Combining: t15: ch = TinyGPUISD::Ret t12
+
+Legalizing: t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+Legal node: nothing to do
+
+Combining: t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+
+Legalizing: t11: i32 = TargetGlobalAddress<ptr @_Z13get_global_idj> 0
+Legal node: nothing to do
+
+Combining: t11: i32 = TargetGlobalAddress<ptr @_Z13get_global_idj> 0
+
+Legalizing: t10: i32 = Constant<0>
+Legal node: nothing to do
+
+Combining: t10: i32 = Constant<0>
+
+Legalizing: t0: ch,glue = EntryToken
+Legal node: nothing to do
+
+Combining: t0: ch,glue = EntryToken
+
+Optimized legalized selection DAG: %bb.0 'vector_add:entry'
+SelectionDAG has 5 nodes:
+      t0: ch,glue = EntryToken
+    t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+  t15: ch = TinyGPUISD::Ret t12
+
+
+===== Instruction selection begins: %bb.0 'entry'
+
+ISEL: Starting selection on root node: t15: ch = TinyGPUISD::Ret t12
+ISEL: Starting pattern match
+  Morphed node: t15: ch = PseudoRET t12
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+ISEL: Starting pattern match
+  Initial Opcode index to 0
+  Match failed at index 0
+LLVM ERROR: Cannot select: t12: ch,glue = <<Unknown Target Node #497>> t0, TargetGlobalAddress:i32<ptr @_Z13get_global_idj> 0, Constant:i32<0>
+  t11: i32 = TargetGlobalAddress<ptr @_Z13get_global_idj> 0
+  t10: i32 = Constant<0>
+In function: vector_add
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace.
+Stack dump:
+0.	Program arguments: build/bin/llc -march=tinygpu -debug -o output.s temp.ll
+1.	Running pass 'Function Pass Manager' on module 'temp.ll'.
+2.	Running pass 'CPU0 DAG->DAG Pattern Instruction Selection' on function '@vector_add'
+ #0 0x00007da2d0208501 llvm::sys::PrintStackTrace(llvm::raw_ostream&, int) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/Support/Unix/Signals.inc:798:11
+ #1 0x00007da2d02089fb PrintStackTraceSignalHandler(void*) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/Support/Unix/Signals.inc:874:1
+ #2 0x00007da2d02069f6 llvm::sys::RunSignalHandlers() /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/Support/Signals.cpp:105:5
+ #3 0x00007da2d02091b5 SignalHandler(int) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/Support/Unix/Signals.inc:415:1
+ #4 0x00007da2cf645330 (/lib/x86_64-linux-gnu/libc.so.6+0x45330)
+ #5 0x00007da2cf69eb2c __pthread_kill_implementation ./nptl/pthread_kill.c:44:76
+ #6 0x00007da2cf69eb2c __pthread_kill_internal ./nptl/pthread_kill.c:78:10
+ #7 0x00007da2cf69eb2c pthread_kill ./nptl/pthread_kill.c:89:10
+ #8 0x00007da2cf64527e raise ./signal/../sysdeps/posix/raise.c:27:6
+ #9 0x00007da2cf6288ff abort ./stdlib/abort.c:81:7
+#10 0x00007da2d00cc134 llvm::report_fatal_error(llvm::Twine const&, bool) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/Support/ErrorHandling.cpp:126:5
+#11 0x00007da2d58dc9a0 llvm::SmallVectorTemplateCommon<(anonymous namespace)::MatchScope, void>::back() /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/include/llvm/ADT/SmallVector.h:308:0
+#12 0x00007da2d58d9974 llvm::SelectionDAGISel::SelectCodeCommon(llvm::SDNode*, unsigned char const*, unsigned int) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:4334:9
+#13 0x00007da2d8b900f9 llvm::TinyGPUDAGToDAGISel::SelectCode(llvm::SDNode*) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/build/lib/Target/TinyGPU/TinyGPUGenDAGISel.inc:437:1
+#14 0x00007da2d8b8fccd llvm::TinyGPUDAGToDAGISel::Select(llvm::SDNode*) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/Target/TinyGPU/TinyGPUISelDAGToDAG.cpp:58:1
+#15 0x00007da2d58cb97f llvm::SelectionDAGISel::DoInstructionSelection() /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1354:5
+#16 0x00007da2d58caa5f llvm::SelectionDAGISel::CodeGenAndEmitDAG() /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1123:3
+#17 0x00007da2d58c92c3 llvm::SelectionDAGISel::SelectBasicBlock(llvm::ilist_iterator_w_bits<llvm::ilist_detail::node_options<llvm::Instruction, true, false, void, true, llvm::BasicBlock>, false, true>, llvm::ilist_iterator_w_bits<llvm::ilist_detail::node_options<llvm::Instruction, true, false, void, true, llvm::BasicBlock>, false, true>, bool&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:878:1
+#18 0x00007da2d58c8e9e llvm::SelectionDAGISel::SelectAllBasicBlocks(llvm::Function const&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1905:11
+#19 0x00007da2d58c5ee9 llvm::SelectionDAGISel::runOnMachineFunction(llvm::MachineFunction&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:615:3
+#20 0x00007da2d8b8fae5 llvm::TinyGPUDAGToDAGISel::runOnMachineFunction(llvm::MachineFunction&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/Target/TinyGPU/TinyGPUISelDAGToDAG.cpp:26:3
+#21 0x00007da2d58c4d4b llvm::SelectionDAGISelLegacy::runOnMachineFunction(llvm::MachineFunction&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:375:3
+#22 0x00007da2d4bae5d3 llvm::MachineFunctionPass::runOnFunction(llvm::Function&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/CodeGen/MachineFunctionPass.cpp:94:8
+#23 0x00007da2d0c8749a llvm::FPPassManager::runOnFunction(llvm::Function&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/IR/LegacyPassManager.cpp:1406:23
+#24 0x00007da2d0c8bf32 llvm::FPPassManager::runOnModule(llvm::Module&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/IR/LegacyPassManager.cpp:1452:16
+#25 0x00007da2d0c87d8b (anonymous namespace)::MPPassManager::runOnModule(llvm::Module&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/IR/LegacyPassManager.cpp:1521:23
+#26 0x00007da2d0c87901 llvm::legacy::PassManagerImpl::run(llvm::Module&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/IR/LegacyPassManager.cpp:539:16
+#27 0x00007da2d0c8c211 llvm::legacy::PassManager::run(llvm::Module&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/lib/IR/LegacyPassManager.cpp:1648:3
+#28 0x000061d8d2b830ee compileModule(char**, llvm::LLVMContext&) /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/tools/llc/llc.cpp:753:9
+#29 0x000061d8d2b811eb main /home/zabarudo/Desktop/GIT_REPOS/llvm-project/llvm/tools/llc/llc.cpp:411:13
+#30 0x00007da2cf62a1ca __libc_start_call_main ./csu/../sysdeps/nptl/libc_start_call_main.h:74:3
+#31 0x00007da2cf62a28b call_init ./csu/../csu/libc-start.c:128:20
+#32 0x00007da2cf62a28b __libc_start_main ./csu/../csu/libc-start.c:347:5
+#33 0x000061d8d2b80965 _start (build/bin/llc+0x47965)

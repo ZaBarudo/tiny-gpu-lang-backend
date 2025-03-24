@@ -1,4 +1,5 @@
-//===-- TinyGPUISelLowering.cpp - TinyGPU DAG Lowering Implementation -----------===//
+//===-- TinyGPUISelLowering.cpp - TinyGPU DAG Lowering Implementation
+//-----------===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -34,9 +35,8 @@ using namespace llvm;
 #include "TinyGPUGenCallingConv.inc"
 
 TinyGPUTargetLowering::TinyGPUTargetLowering(const TargetMachine &TM,
-                                         const TinyGPUSubtarget &STI)
-    : TargetLowering(TM), Subtarget(STI)
-{
+                                             const TinyGPUSubtarget &STI)
+    : TargetLowering(TM), Subtarget(STI) {
   // Set up the register classes
   addRegisterClass(MVT::i32, &TinyGPU::GPRRegClass);
 
@@ -53,8 +53,8 @@ TinyGPUTargetLowering::TinyGPUTargetLowering(const TargetMachine &TM,
   setBooleanContents(ZeroOrOneBooleanContent);
 
   // Arithmetic operations
-  setOperationAction(ISD::SDIVREM,   MVT::i32, Expand);
-  setOperationAction(ISD::UDIVREM,   MVT::i32, Expand);
+  setOperationAction(ISD::SDIVREM, MVT::i32, Expand);
+  setOperationAction(ISD::UDIVREM, MVT::i32, Expand);
   setOperationAction(ISD::SMUL_LOHI, MVT::i32, Expand);
   setOperationAction(ISD::UMUL_LOHI, MVT::i32, Expand);
 
@@ -62,17 +62,17 @@ TinyGPUTargetLowering::TinyGPUTargetLowering(const TargetMachine &TM,
   setOperationAction(ISD::SRL_PARTS, MVT::i32, Custom);
   setOperationAction(ISD::SRA_PARTS, MVT::i32, Custom);
 
-  setOperationAction(ISD::ROTL,  MVT::i32, Expand);
-  setOperationAction(ISD::ROTR,  MVT::i32, Expand);
+  setOperationAction(ISD::ROTL, MVT::i32, Expand);
+  setOperationAction(ISD::ROTR, MVT::i32, Expand);
   setOperationAction(ISD::BSWAP, MVT::i32, Expand);
-  setOperationAction(ISD::CTTZ,  MVT::i32, Expand);
-  setOperationAction(ISD::CTLZ,  MVT::i32, Expand);
+  setOperationAction(ISD::CTTZ, MVT::i32, Expand);
+  setOperationAction(ISD::CTLZ, MVT::i32, Expand);
   setOperationAction(ISD::CTPOP, MVT::i32, Expand);
 
   // Address resolution and constant pool
   setOperationAction(ISD::GlobalAddress, MVT::i32, Custom);
-  setOperationAction(ISD::BlockAddress,  MVT::i32, Custom);
-  setOperationAction(ISD::ConstantPool,  MVT::i32, Custom);
+  setOperationAction(ISD::BlockAddress, MVT::i32, Custom);
+  setOperationAction(ISD::ConstantPool, MVT::i32, Custom);
 
   // Set minimum and preferred function alignment (log2)
   setMinFunctionAlignment(Align(1));
@@ -84,14 +84,15 @@ TinyGPUTargetLowering::TinyGPUTargetLowering(const TargetMachine &TM,
 
 const char *TinyGPUTargetLowering::getTargetNodeName(unsigned Opcode) const {
   switch (Opcode) {
-  case TinyGPUISD::Ret: return "TinyGPUISD::Ret";
-  default:            return NULL;
+  case TinyGPUISD::Ret:
+    return "TinyGPUISD::Ret";
+  default:
+    return NULL;
   }
 }
 
-void TinyGPUTargetLowering::ReplaceNodeResults(SDNode *N,
-                                             SmallVectorImpl<SDValue> &Results,
-                                             SelectionDAG &DAG) const {
+void TinyGPUTargetLowering::ReplaceNodeResults(
+    SDNode *N, SmallVectorImpl<SDValue> &Results, SelectionDAG &DAG) const {
   switch (N->getOpcode()) {
   default:
     llvm_unreachable("Don't know how to custom expand this!");
@@ -103,21 +104,18 @@ void TinyGPUTargetLowering::ReplaceNodeResults(SDNode *N,
 //===----------------------------------------------------------------------===//
 
 // The BeyondRISC calling convention parameter registers.
-static const MCPhysReg GPRArgRegs[] = {
-  TinyGPU::R0, TinyGPU::R1, TinyGPU::R2, TinyGPU::R3
-};
+static const MCPhysReg GPRArgRegs[] = {TinyGPU::R0, TinyGPU::R1, TinyGPU::R2,
+                                       TinyGPU::R3};
 
 /// LowerFormalArguments - transform physical registers into virtual registers
 /// and generate load operations for arguments places on the stack.
 SDValue TinyGPUTargetLowering::LowerFormalArguments(
-                                    SDValue Chain,
-                                    CallingConv::ID CallConv,
-                                    bool isVarArg,
-                                    const SmallVectorImpl<ISD::InputArg> &Ins,
-                                    const SDLoc &dl, SelectionDAG &DAG,
-                                    SmallVectorImpl<SDValue> &InVals) const {
-  assert((CallingConv::C == CallConv || CallingConv::Fast == CallConv || CallConv == CallingConv::SPIR_KERNEL) &&
-		 "Unsupported CallingConv to FORMAL_ARGS");
+    SDValue Chain, CallingConv::ID CallConv, bool isVarArg,
+    const SmallVectorImpl<ISD::InputArg> &Ins, const SDLoc &dl,
+    SelectionDAG &DAG, SmallVectorImpl<SDValue> &InVals) const {
+  assert((CallingConv::C == CallConv || CallingConv::Fast == CallConv ||
+          CallConv == CallingConv::SPIR_KERNEL) &&
+         "Unsupported CallingConv to FORMAL_ARGS");
 
   MachineFunction &MF = DAG.getMachineFunction();
   MachineFrameInfo &MFI = MF.getFrameInfo();
@@ -196,8 +194,10 @@ SDValue TinyGPUTargetLowering::LowerFormalArguments(
       // to 32 bits.  Insert an assert[sz]ext to capture this, then
       // truncate to the right size.
       switch (VA.getLocInfo()) {
-      default: llvm_unreachable("Unknown loc info!");
-      case CCValAssign::Full: break;
+      default:
+        llvm_unreachable("Unknown loc info!");
+      case CCValAssign::Full:
+        break;
       case CCValAssign::BCvt:
         ArgValue = DAG.getNode(ISD::BITCAST, dl, VA.getValVT(), ArgValue);
         break;
@@ -223,8 +223,7 @@ SDValue TinyGPUTargetLowering::LowerFormalArguments(
 
       // Some Ins[] entries become multiple ArgLoc[] entries.
       // Process them only once.
-      if (index != lastInsIndex)
-      {
+      if (index != lastInsIndex) {
         llvm_unreachable("Cannot retrieve arguments from the stack");
       }
     }
@@ -237,26 +236,111 @@ SDValue TinyGPUTargetLowering::LowerFormalArguments(
 //@              Return Value Calling Convention Implementation
 //===----------------------------------------------------------------------===//
 
-bool TinyGPUTargetLowering::CanLowerReturn(CallingConv::ID CallConv,
-                                MachineFunction &MF, bool isVarArg,
-                                const SmallVectorImpl<ISD::OutputArg> &Outs,
-                                LLVMContext &Context) const {
+/// Helper function: Given an argument index, return the assigned physical register
+/// according to your calling convention defined in callingconv.td.
+/// In a real implementation, this mapping would be derived from your TableGen records.
+unsigned getArgRegister(unsigned ArgIdx) {
+  // For example, assume the first four arguments go in registers R0 - R3.
+  static const unsigned ArgRegs[4] = { TinyGPU::R0, TinyGPU::R1, TinyGPU::R2, TinyGPU::R3 };
+  if (ArgIdx < 4)
+    return ArgRegs[ArgIdx];
+  // Otherwise, the argument must be passed on the stack.
+  llvm_unreachable("Stack arguments not implemented yet for TinyGPU!");
+}
+
+/// Helper function for return value register assignment.
+/// For simplicity, assume return value goes in register R0.
+unsigned getRetRegister() { return TinyGPU::R0; }
+
+bool TinyGPUTargetLowering::CanLowerReturn(
+    CallingConv::ID CallConv, MachineFunction &MF, bool isVarArg,
+    const SmallVectorImpl<ISD::OutputArg> &Outs, LLVMContext &Context) const {
   SmallVector<CCValAssign, 16> RVLocs;
   CCState CCInfo(CallConv, isVarArg, MF, RVLocs, Context);
   return CCInfo.CheckReturn(Outs, TinyGPU_CRetConv);
 }
 
-SDValue TinyGPUTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
-                                       SmallVectorImpl<SDValue> &InVals) const {
-  llvm_unreachable("Cannot lower call");
+SDValue TinyGPUTargetLowering::LowerCall(CallLoweringInfo &CLI,
+                                         SmallVectorImpl<SDValue> &InVals) const {
+  SelectionDAG &DAG = CLI.DAG;
+  SDLoc DL = CLI.DL;
+  SDValue Chain = CLI.Chain;
+  SDValue Callee = CLI.Callee;
+
+  const SmallVectorImpl<ISD::OutputArg> &Outs = CLI.Outs;
+  const SmallVectorImpl<SDValue> &OutVals = CLI.OutVals;
+  const SmallVectorImpl<ISD::InputArg> &Ins = CLI.Ins;
+
+  SmallVector<CCValAssign, 16> ArgLocs;
+  CCState CCInfo(CLI.CallConv, CLI.IsVarArg,
+                 DAG.getMachineFunction(), ArgLocs, *DAG.getContext());
+
+  // Use TableGen-generated CC_TinyGPU
+  CCInfo.AnalyzeCallOperands(Outs, CC_TinyGPU);
+
+  SmallVector<SDValue, 8> Ops;
+  SmallVector<std::pair<unsigned, SDValue>, 8> RegsToPass;
+
+  for (unsigned i = 0; i < ArgLocs.size(); ++i) {
+    CCValAssign &VA = ArgLocs[i];
+    SDValue Arg = OutVals[i];
+
+    // If promoted, insert the conversion
+    if (VA.getLocInfo() == CCValAssign::SExt)
+      Arg = DAG.getNode(ISD::SIGN_EXTEND, DL, VA.getLocVT(), Arg);
+    else if (VA.getLocInfo() == CCValAssign::ZExt)
+      Arg = DAG.getNode(ISD::ZERO_EXTEND, DL, VA.getLocVT(), Arg);
+    else if (VA.getLocInfo() == CCValAssign::AExt)
+      Arg = DAG.getNode(ISD::ANY_EXTEND, DL, VA.getLocVT(), Arg);
+    else if (VA.getLocInfo() == CCValAssign::BCvt)
+      Arg = DAG.getBitcast(VA.getLocVT(), Arg);
+
+    if (VA.isRegLoc()) {
+      RegsToPass.push_back(std::make_pair(VA.getLocReg(), Arg));
+    } else {
+      // Handle stack-based arguments
+      int FI = MF.getFrameInfo().CreateStackObject(4, 4, false);
+      SDValue Ptr = DAG.getFrameIndex(FI, MVT::i32);
+      Chain = DAG.getStore(Chain, DL, Arg, Ptr, MachinePointerInfo());
+    }
+  }
+
+  // Emit register copies
+  for (auto &RegArg : RegsToPass) {
+    Chain = DAG.getCopyToReg(Chain, DL, RegArg.first, RegArg.second);
+    Ops.push_back(DAG.getRegister(RegArg.first, RegArg.second.getValueType()));
+  }
+
+  // Add the callee (function address) as the final operand
+  Ops.push_back(Callee);
+  Ops.insert(Ops.begin(), Chain); // Insert Chain at beginning
+
+  SDVTList NodeTys = DAG.getVTList(MVT::Other, MVT::Glue);
+  Chain = DAG.getNode(TinyGPUISD::CALL, DL, NodeTys, Ops);
+
+  // Handle return values
+  SmallVector<CCValAssign, 16> RetLocs;
+  CCState RetCCInfo(CLI.CallConv, CLI.IsVarArg,
+                    DAG.getMachineFunction(), RetLocs, *DAG.getContext());
+
+  RetCCInfo.AnalyzeCallResult(Ins, RetCC_TinyGPU);
+
+  for (auto &VA : RetLocs) {
+    assert(VA.isRegLoc() && "Only reg returns supported in TinyGPU");
+
+    SDValue Val = DAG.getCopyFromReg(Chain, DL, VA.getLocReg(), VA.getValVT());
+    InVals.push_back(Val);
+  }
+
+  return Chain;
 }
 
 SDValue
-TinyGPUTargetLowering::LowerReturn(SDValue Chain,
-                                 CallingConv::ID CallConv, bool isVarArg,
-                                 const SmallVectorImpl<ISD::OutputArg> &Outs,
-                                 const SmallVectorImpl<SDValue> &OutVals,
-                                 const SDLoc &dl, SelectionDAG &DAG) const {
+TinyGPUTargetLowering::LowerReturn(SDValue Chain, CallingConv::ID CallConv,
+                                   bool isVarArg,
+                                   const SmallVectorImpl<ISD::OutputArg> &Outs,
+                                   const SmallVectorImpl<SDValue> &OutVals,
+                                   const SDLoc &dl, SelectionDAG &DAG) const {
   // CCValAssign - represent the assignment of the return value to a location.
   SmallVector<CCValAssign, 16> RVLocs;
 
@@ -272,8 +356,7 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
   RetOps.push_back(Chain); // Operand #0 = Chain (updated below)
 
   // Copy the result values into the output registers.
-  for (unsigned i = 0, realRVLocIdx = 0;
-       i != RVLocs.size();
+  for (unsigned i = 0, realRVLocIdx = 0; i != RVLocs.size();
        ++i, ++realRVLocIdx) {
     CCValAssign &VA = RVLocs[i];
     assert(VA.isRegLoc() && "Can only return in registers!");
@@ -282,8 +365,10 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
     bool ReturnF16 = false;
 
     switch (VA.getLocInfo()) {
-    default: llvm_unreachable("Unknown loc info!");
-    case CCValAssign::Full: break;
+    default:
+      llvm_unreachable("Unknown loc info!");
+    case CCValAssign::Full:
+      break;
     case CCValAssign::BCvt:
       if (!ReturnF16)
         Arg = DAG.getNode(ISD::BITCAST, dl, VA.getLocVT(), Arg);
@@ -300,8 +385,8 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
     // Guarantee that all emitted copies are stuck together, avoiding something
     // bad.
     Flag = Chain.getValue(1);
-    RetOps.push_back(DAG.getRegister(VA.getLocReg(),
-                                     ReturnF16 ? MVT::f16 : VA.getLocVT()));
+    RetOps.push_back(
+        DAG.getRegister(VA.getLocReg(), ReturnF16 ? MVT::f16 : VA.getLocVT()));
   }
 
   // Update chain and glue.
@@ -316,39 +401,41 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
 //  Misc Lower Operation implementation
 //===----------------------------------------------------------------------===//
 
-SDValue
-TinyGPUTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const {
-   const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
+SDValue TinyGPUTargetLowering::LowerGlobalAddress(SDValue Op,
+                                                  SelectionDAG &DAG) const {
+  const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
   EVT PtrVT = Op.getValueType();
 
   // Create a TargetGlobalAddress node.
   SDValue Result = DAG.getTargetGlobalAddress(GV, SDLoc(Op), PtrVT);
 
   // If the target requires a specific sequence of instructions to load a global
-  // address (e.g., using a base register and an offset), emit those instructions here.
-  // For example, TinyGPU might use a LOAD instruction to load the address into a register.
+  // address (e.g., using a base register and an offset), emit those
+  // instructions here. For example, TinyGPU might use a LOAD instruction to
+  // load the address into a register.
 
-  // Example: Emit a LOAD instruction to load the global address into a register.
+  // Example: Emit a LOAD instruction to load the global address into a
+  // register.
   return DAG.getNode(ISD::LOAD, SDLoc(Op), PtrVT, Result);
 }
 
-SDValue
-TinyGPUTargetLowering::LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const {
+SDValue TinyGPUTargetLowering::LowerBlockAddress(SDValue Op,
+                                                 SelectionDAG &DAG) const {
   llvm_unreachable("Unsupported block address");
 }
 
-SDValue
-TinyGPUTargetLowering::LowerConstantPool(SDValue Op, SelectionDAG &DAG) const {
+SDValue TinyGPUTargetLowering::LowerConstantPool(SDValue Op,
+                                                 SelectionDAG &DAG) const {
   llvm_unreachable("Unsupported constant pool");
 }
 
-SDValue
-TinyGPUTargetLowering::LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const {
+SDValue TinyGPUTargetLowering::LowerRETURNADDR(SDValue Op,
+                                               SelectionDAG &DAG) const {
   return SDValue();
 }
 
-SDValue
-TinyGPUTargetLowering::LowerShlParts(SDValue Op, SelectionDAG &DAG) const {
+SDValue TinyGPUTargetLowering::LowerShlParts(SDValue Op,
+                                             SelectionDAG &DAG) const {
   assert(Op.getNumOperands() == 3 && "Not a long shift");
 
   EVT VT = Op.getValueType();
@@ -408,9 +495,8 @@ TinyGPUTargetLowering::LowerShlParts(SDValue Op, SelectionDAG &DAG) const {
   return DAG.getMergeValues(Ops, DL);
 }
 
-SDValue
-TinyGPUTargetLowering::LowerShrParts(SDValue Op, SelectionDAG &DAG,
-                                   bool arith) const {
+SDValue TinyGPUTargetLowering::LowerShrParts(SDValue Op, SelectionDAG &DAG,
+                                             bool arith) const {
   assert(Op.getNumOperands() == 3 && "Not a long shift");
 
   EVT VT = Op.getValueType();
@@ -484,15 +570,14 @@ TinyGPUTargetLowering::LowerShrParts(SDValue Op, SelectionDAG &DAG,
   return DAG.getMergeValues(Ops, DL);
 }
 
-
-
 SDValue TinyGPUTargetLowering::LowerBR_CC(SDValue Op, SelectionDAG &DAG) const {
   SDLoc dl(Op);
-  return DAG.getNode(ISD::BR_CC, dl, MVT::Other, 
-                     Op.getOperand(1), Op.getOperand(0));
+  return DAG.getNode(ISD::BR_CC, dl, MVT::Other, Op.getOperand(1),
+                     Op.getOperand(0));
 }
 
-SDValue TinyGPUTargetLowering::LowerBRCOND(SDValue Op, SelectionDAG &DAG) const {
+SDValue TinyGPUTargetLowering::LowerBRCOND(SDValue Op,
+                                           SelectionDAG &DAG) const {
   // SDLoc dl(Op);
   // SDValue Chain = Op.getOperand(0);
   // SDValue Cond = Op.getOperand(1);
@@ -513,18 +598,26 @@ SDValue TinyGPUTargetLowering::LowerBRCOND(SDValue Op, SelectionDAG &DAG) const 
   return SDValue();
 }
 
-SDValue
-TinyGPUTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
+SDValue TinyGPUTargetLowering::LowerOperation(SDValue Op,
+                                              SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
-  default:                        llvm_unreachable("unimplemented operand");
-  case ISD::GlobalAddress:        return LowerGlobalAddress(Op, DAG);
-  case ISD::BlockAddress:         return LowerBlockAddress(Op, DAG);
-  case ISD::ConstantPool:         return LowerConstantPool(Op, DAG);
-  case ISD::RETURNADDR:           return LowerRETURNADDR(Op, DAG);
-  case ISD::SHL_PARTS:            return LowerShlParts(Op, DAG);
-  case ISD::SRL_PARTS:            return LowerShrParts(Op, DAG, false);
-  case ISD::SRA_PARTS:            return LowerShrParts(Op, DAG, true);
-  // case ISD::BRCOND:               return LowerBRCOND(Op, DAG);
-  // case ISD::BR_CC:                return LowerBR_CC(Op, DAG);
+  default:
+    llvm_unreachable("unimplemented operand");
+  case ISD::GlobalAddress:
+    return LowerGlobalAddress(Op, DAG);
+  case ISD::BlockAddress:
+    return LowerBlockAddress(Op, DAG);
+  case ISD::ConstantPool:
+    return LowerConstantPool(Op, DAG);
+  case ISD::RETURNADDR:
+    return LowerRETURNADDR(Op, DAG);
+  case ISD::SHL_PARTS:
+    return LowerShlParts(Op, DAG);
+  case ISD::SRL_PARTS:
+    return LowerShrParts(Op, DAG, false);
+  case ISD::SRA_PARTS:
+    return LowerShrParts(Op, DAG, true);
+    // case ISD::BRCOND:               return LowerBRCOND(Op, DAG);
+    // case ISD::BR_CC:                return LowerBR_CC(Op, DAG);
   }
 }

@@ -27,7 +27,8 @@ enum NodeType {
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
   // BR,
   // CMP,
-  // Return
+  // Return,
+  CALL,
   Ret,
 };
 }

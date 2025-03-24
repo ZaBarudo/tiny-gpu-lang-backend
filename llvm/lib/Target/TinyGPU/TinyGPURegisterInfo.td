@@ -33,7 +33,7 @@ def R10 : TinyGPUReg<10, "R10", ["a0"]>, DwarfRegNum<[10]>;
 def R11 : TinyGPUReg<11, "R11", ["a1"]>, DwarfRegNum<[11]>;
 def R13 : TinyGPUReg<13, "R13", ["bi"]>, DwarfRegNum<[13]>;
 def R14 : TinyGPUReg<14, "R14", ["bd"]>, DwarfRegNum<[14]>;
-def R15 : TinyGPUReg<15, "R15", ["ti"]>, DwarfRegNum<[15]>;
+// def R15 : TinyGPUReg<15, "R15", ["ti"]>, DwarfRegNum<[15]>;
 // def SP : RegisterClass<"TinyGPU", [i32], 32, (add R12)>;
 // def R15 : TinyGPUReg<15,"R15", ["a5"]>, DwarfRegNum<[15]>;
 
@@ -42,6 +42,8 @@ def R15 : TinyGPUReg<15, "R15", ["ti"]>, DwarfRegNum<[15]>;
 def GPR : RegisterClass<"TinyGPU", [i32], 32, (sequence "R%u", 0, 10)>;
 def NZP : RegisterClass<"TinyGPU", [i32], 32, (add R2)>;
 def SP : TinyGPUReg<12, "SP", ["sp"]>, DwarfRegNum<[12]>;
+def RCA : TinyGPUReg<15, "RCA", ["rca"]>, DwarfRegNum<[15]>;
+
 
 // def SP : RegisterClass<"TinyGPU", [i32], 32, (add R12)>;
 
