@@ -1,0 +1,1261 @@
+Args: llc -march=tinygpu -O0 index8.ll -debug -view-isel-dags -o index.S 
+
+Features:
+CPU:generic
+TuneCPU:generic
+
+[SafeStack] Function: _Z9getNumberii
+[SafeStack]     safestack is not requested for this function
+Skipping pass 'CPU0 DAG->DAG Pattern Instruction Selection' on function _Z9getNumberii
+	FastISel is enabled
+
+
+
+=== _Z9getNumberii
+Enabling fast-isel
+Found argument copy elision candidate:   %x.addr = alloca i32, align 4
+Found argument copy elision candidate:   %y.addr = alloca i32, align 4
+Creating new node: t2: i32,ch = CopyFromReg t0, Register:i32 %0
+Creating new node: t4: i32,ch = CopyFromReg t0, Register:i32 %1
+Creating constant: t6: i32 = Constant<0>
+Creating new node: t7: i32 = undef
+Creating new node: t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+Creating new node: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+Creating new node: t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+Creating new node: t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+Creating new node: t13: i32 = add nsw t11, t12
+Creating new node: t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+Creating new node: t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+
+Initial selection DAG: %bb.0 '_Z9getNumberii:entry'
+SelectionDAG has 17 nodes:
+  t0: ch,glue = EntryToken
+  t6: i32 = Constant<0>
+      t2: i32,ch = CopyFromReg t0, Register:i32 %0
+    t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+    t4: i32,ch = CopyFromReg t0, Register:i32 %1
+  t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+      t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+      t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+    t13: i32 = add nsw t11, t12
+  t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+  t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+
+
+
+Combining: t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+
+Combining: t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+
+Combining: t14: i32 = Register $r0
+
+Combining: t13: i32 = add nsw t11, t12
+
+Combining: t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+
+Combining: t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+
+Combining: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+
+Combining: t9: i32 = FrameIndex<1>
+
+Combining: t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+
+Combining: t7: i32 = undef
+
+Combining: t5: i32 = FrameIndex<0>
+
+Combining: t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+Combining: t3: i32 = Register %1
+
+Combining: t2: i32,ch = CopyFromReg t0, Register:i32 %0
+
+Combining: t1: i32 = Register %0
+
+Combining: t0: ch,glue = EntryToken
+
+Optimized lowered selection DAG: %bb.0 '_Z9getNumberii:entry'
+SelectionDAG has 16 nodes:
+  t0: ch,glue = EntryToken
+      t2: i32,ch = CopyFromReg t0, Register:i32 %0
+    t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+    t4: i32,ch = CopyFromReg t0, Register:i32 %1
+  t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+      t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+      t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+    t13: i32 = add nsw t11, t12
+  t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+  t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+
+
+
+Legalizing node: t14: i32 = Register $r0
+Ignoring node results
+Legally typed node: t14: i32 = Register $r0
+
+Legalizing node: t9: i32 = FrameIndex<1>
+Analyzing result type: i32
+Legal result type
+Legally typed node: t9: i32 = FrameIndex<1>
+
+Legalizing node: t7: i32 = undef
+Analyzing result type: i32
+Legal result type
+Legally typed node: t7: i32 = undef
+
+Legalizing node: t5: i32 = FrameIndex<0>
+Analyzing result type: i32
+Legal result type
+Legally typed node: t5: i32 = FrameIndex<0>
+
+Legalizing node: t3: i32 = Register %1
+Ignoring node results
+Legally typed node: t3: i32 = Register %1
+
+Legalizing node: t1: i32 = Register %0
+Ignoring node results
+Legally typed node: t1: i32 = Register %0
+
+Legalizing node: t0: ch,glue = EntryToken
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Legally typed node: t0: ch,glue = EntryToken
+
+Legalizing node: t2: i32,ch = CopyFromReg t0, Register:i32 %0
+Analyzing result type: i32
+Legal result type
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t0: ch,glue = EntryToken
+Legal operand
+Legally typed node: t2: i32,ch = CopyFromReg t0, Register:i32 %0
+
+Legalizing node: t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t0: ch,glue = EntryToken
+Legal operand
+Analyzing operand: t2: i32,ch = CopyFromReg t0, Register:i32 %0
+Legal operand
+Analyzing operand: t5: i32 = FrameIndex<0>
+Legal operand
+Analyzing operand: t7: i32 = undef
+Legal operand
+Legally typed node: t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+
+Legalizing node: t4: i32,ch = CopyFromReg t0, Register:i32 %1
+Analyzing result type: i32
+Legal result type
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t0: ch,glue = EntryToken
+Legal operand
+Legally typed node: t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+Legalizing node: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+Legal operand
+Analyzing operand: t4: i32,ch = CopyFromReg t0, Register:i32 %1
+Legal operand
+Analyzing operand: t9: i32 = FrameIndex<1>
+Legal operand
+Analyzing operand: t7: i32 = undef
+Legal operand
+Legally typed node: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+
+Legalizing node: t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+Analyzing result type: i32
+Legal result type
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+Legal operand
+Analyzing operand: t5: i32 = FrameIndex<0>
+Legal operand
+Analyzing operand: t7: i32 = undef
+Legal operand
+Legally typed node: t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+
+Legalizing node: t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+Analyzing result type: i32
+Legal result type
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+Legal operand
+Analyzing operand: t9: i32 = FrameIndex<1>
+Legal operand
+Analyzing operand: t7: i32 = undef
+Legal operand
+Legally typed node: t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+
+Legalizing node: t13: i32 = add nsw t11, t12
+Analyzing result type: i32
+Legal result type
+Analyzing operand: t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+Legal operand
+Analyzing operand: t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+Legal operand
+Legally typed node: t13: i32 = add nsw t11, t12
+
+Legalizing node: t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Analyzing operand: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+Legal operand
+Analyzing operand: t13: i32 = add nsw t11, t12
+Legal operand
+Legally typed node: t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+
+Legalizing node: t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+Legal operand
+Analyzing operand: t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+Legal operand
+Legally typed node: t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+
+Legalizing node: t65535: ch = handlenode t16
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+Legal operand
+Legally typed node: t65535: ch = handlenode t16
+
+Type-legalized selection DAG: %bb.0 '_Z9getNumberii:entry'
+SelectionDAG has 16 nodes:
+  t0: ch,glue = EntryToken
+      t2: i32,ch = CopyFromReg t0, Register:i32 %0
+    t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+    t4: i32,ch = CopyFromReg t0, Register:i32 %1
+  t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+      t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+      t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+    t13: i32 = add nsw t11, t12
+  t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+  t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+
+
+
+Legalizing: t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+Legal node: nothing to do
+
+Legalizing: t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+Legal node: nothing to do
+
+Legalizing: t13: i32 = add nsw t11, t12
+Legal node: nothing to do
+
+Legalizing: t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+Legalizing non-extending load operation
+
+Legalizing: t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+Legalizing non-extending load operation
+
+Legalizing: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+Legalizing store operation
+Optimizing float store operations
+Legal store
+
+Legalizing: t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+Legalizing store operation
+Optimizing float store operations
+Legal store
+
+Legalizing: t4: i32,ch = CopyFromReg t0, Register:i32 %1
+Legal node: nothing to do
+
+Legalizing: t2: i32,ch = CopyFromReg t0, Register:i32 %0
+Legal node: nothing to do
+
+Legalizing: t14: i32 = Register $r0
+
+Legalizing: t9: i32 = FrameIndex<1>
+Legal node: nothing to do
+
+Legalizing: t7: i32 = undef
+Legal node: nothing to do
+
+Legalizing: t5: i32 = FrameIndex<0>
+Legal node: nothing to do
+
+Legalizing: t3: i32 = Register %1
+
+Legalizing: t1: i32 = Register %0
+
+Legalizing: t0: ch,glue = EntryToken
+Legal node: nothing to do
+
+Legalized selection DAG: %bb.0 '_Z9getNumberii:entry'
+SelectionDAG has 16 nodes:
+  t0: ch,glue = EntryToken
+      t2: i32,ch = CopyFromReg t0, Register:i32 %0
+    t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+    t4: i32,ch = CopyFromReg t0, Register:i32 %1
+  t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+      t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+      t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+    t13: i32 = add nsw t11, t12
+  t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+  t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+
+
+
+Legalizing: t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+Legal node: nothing to do
+
+Combining: t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+
+Legalizing: t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+Legal node: nothing to do
+
+Combining: t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+
+Legalizing: t13: i32 = add nsw t11, t12
+Legal node: nothing to do
+
+Combining: t13: i32 = add nsw t11, t12
+
+Legalizing: t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+Legalizing non-extending load operation
+
+Combining: t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+
+Legalizing: t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+Legalizing non-extending load operation
+
+Combining: t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+
+Legalizing: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+Legalizing store operation
+Optimizing float store operations
+Legal store
+
+Combining: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+
+Legalizing: t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+Legalizing store operation
+Optimizing float store operations
+Legal store
+
+Combining: t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+
+Legalizing: t4: i32,ch = CopyFromReg t0, Register:i32 %1
+Legal node: nothing to do
+
+Combining: t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+Legalizing: t2: i32,ch = CopyFromReg t0, Register:i32 %0
+Legal node: nothing to do
+
+Combining: t2: i32,ch = CopyFromReg t0, Register:i32 %0
+
+Legalizing: t14: i32 = Register $r0
+
+Combining: t14: i32 = Register $r0
+
+Legalizing: t9: i32 = FrameIndex<1>
+Legal node: nothing to do
+
+Combining: t9: i32 = FrameIndex<1>
+
+Legalizing: t7: i32 = undef
+Legal node: nothing to do
+
+Combining: t7: i32 = undef
+
+Legalizing: t5: i32 = FrameIndex<0>
+Legal node: nothing to do
+
+Combining: t5: i32 = FrameIndex<0>
+
+Legalizing: t3: i32 = Register %1
+
+Combining: t3: i32 = Register %1
+
+Legalizing: t1: i32 = Register %0
+
+Combining: t1: i32 = Register %0
+
+Legalizing: t0: ch,glue = EntryToken
+Legal node: nothing to do
+
+Combining: t0: ch,glue = EntryToken
+
+Optimized legalized selection DAG: %bb.0 '_Z9getNumberii:entry'
+SelectionDAG has 16 nodes:
+  t0: ch,glue = EntryToken
+      t2: i32,ch = CopyFromReg t0, Register:i32 %0
+    t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+    t4: i32,ch = CopyFromReg t0, Register:i32 %1
+  t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+      t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+      t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+    t13: i32 = add nsw t11, t12
+  t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+  t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+
+
+Writing '/tmp/dag._Z9getNumberii-f5247f.dot'...  done. 
+Trying 'xdg-open' program... Remember to erase graph file: /tmp/dag._Z9getNumberii-f5247f.dot
+===== Instruction selection begins: %bb.0 'entry'
+
+ISEL: Starting selection on root node: t16: ch = TinyGPUISD::Ret t15, Register:i32 $r0, t15:1
+ISEL: Starting pattern match
+  Morphed node: t16: ch = PseudoRET Register:i32 $r0, t15, t15:1
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+
+ISEL: Starting selection on root node: t13: i32 = add nsw t11, t12
+ISEL: Starting pattern match
+  Initial Opcode index to 95
+  Match failed at index 100
+  Continuing at 119
+  Morphed node: t13: i32 = ADD nsw t11, t12
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t11: i32,ch = load<(dereferenceable load (s32) from %ir.x.addr)> t10, FrameIndex:i32<0>, undef:i32
+ISEL: Starting pattern match
+  Initial Opcode index to 254
+  Morphed node: t11: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.x.addr)> FrameIndex:i32<0>, t10
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t12: i32,ch = load<(dereferenceable load (s32) from %ir.y.addr)> t10, FrameIndex:i32<1>, undef:i32
+ISEL: Starting pattern match
+  Initial Opcode index to 254
+  Morphed node: t12: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.y.addr)> FrameIndex:i32<1>, t10
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t10: ch = store<(store (s32) into %ir.y.addr)> t8, t4, FrameIndex:i32<1>, undef:i32
+ISEL: Starting pattern match
+  Initial Opcode index to 53
+  Match failed at index 59
+  Continuing at 77
+  Morphed node: t10: ch = STR<Mem:(store (s32) into %ir.y.addr)> t4, FrameIndex:i32<1>, t8
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t8: ch = store<(store (s32) into %ir.x.addr)> t0, t2, FrameIndex:i32<0>, undef:i32
+ISEL: Starting pattern match
+  Initial Opcode index to 53
+  Match failed at index 59
+  Continuing at 77
+  Morphed node: t8: ch = STR<Mem:(store (s32) into %ir.x.addr)> t2, FrameIndex:i32<0>, t0
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+ISEL: Starting selection on root node: t2: i32,ch = CopyFromReg t0, Register:i32 %0
+
+ISEL: Starting selection on root node: t14: i32 = Register $r0
+
+ISEL: Starting selection on root node: t9: i32 = FrameIndex<1>
+ISEL: Starting pattern match
+  Initial Opcode index to 517
+Creating constant: t18: i32 = TargetConstant<0>
+Creating new machine node: t19: i32 = I_ALLOCA TargetConstant:i32<0>
+  Created node: t19: i32 = I_ALLOCA TargetConstant:i32<0>
+  Morphed node: t9: i32 = ADD TargetFrameIndex:i32<1>, t19
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t5: i32 = FrameIndex<0>
+ISEL: Starting pattern match
+  Initial Opcode index to 517
+  Created node: t19: i32 = I_ALLOCA TargetConstant:i32<0>
+  Morphed node: t5: i32 = ADD TargetFrameIndex:i32<0>, t19
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t3: i32 = Register %1
+
+ISEL: Starting selection on root node: t1: i32 = Register %0
+
+ISEL: Starting selection on root node: t0: ch,glue = EntryToken
+
+===== Instruction selection ends:
+
+Selected selection DAG: %bb.0 '_Z9getNumberii:entry'
+SelectionDAG has 19 nodes:
+  t0: ch,glue = EntryToken
+  t5: i32 = ADD TargetFrameIndex:i32<0>, t19
+  t9: i32 = ADD TargetFrameIndex:i32<1>, t19
+    t4: i32,ch = CopyFromReg t0, Register:i32 %1
+      t2: i32,ch = CopyFromReg t0, Register:i32 %0
+    t8: ch = STR<Mem:(store (s32) into %ir.x.addr)> t2, t5, t0
+  t10: ch = STR<Mem:(store (s32) into %ir.y.addr)> t4, t9, t8
+      t11: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.x.addr)> t5, t10
+      t12: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.y.addr)> t9, t10
+    t13: i32 = ADD nsw t11, t12
+  t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+  t19: i32 = I_ALLOCA TargetConstant:i32<0>
+  t16: ch = PseudoRET Register:i32 $r0, t15, t15:1
+
+
+********** List Scheduling %bb.0 'entry' **********
+SU(0): t16: ch = PseudoRET Register:i32 $r0, t15, t15:1
+
+    t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+
+  # preds left       : 2
+  # succs left       : 0
+  # rdefs left       : 0
+  Latency            : 1
+  Depth              : 6
+  Height             : 0
+  Predecessors:
+    SU(7): Ord  Latency=1 Barrier
+    SU(1): Data Latency=1
+SU(1): t13: i32 = ADD nsw t11, t12
+
+  # preds left       : 2
+  # succs left       : 1
+  # rdefs left       : 1
+  Latency            : 1
+  Depth              : 5
+  Height             : 1
+  Predecessors:
+    SU(5): Data Latency=1
+    SU(2): Data Latency=1
+  Successors:
+    SU(0): Data Latency=1
+SU(2): t12: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.y.addr)> t9, t10
+
+  # preds left       : 2
+  # succs left       : 1
+  # rdefs left       : 1
+  Latency            : 1
+  Depth              : 4
+  Height             : 2
+  Predecessors:
+    SU(3): Data Latency=1
+    SU(7): Ord  Latency=1 Barrier
+  Successors:
+    SU(1): Data Latency=1
+SU(3): t9: i32 = ADD TargetFrameIndex:i32<1>, t19
+
+  # preds left       : 1
+  # succs left       : 2
+  # rdefs left       : 1
+  Latency            : 1
+  Depth              : 1
+  Height             : 4
+  Predecessors:
+    SU(4): Data Latency=1
+  Successors:
+    SU(2): Data Latency=1
+    SU(7): Data Latency=1
+SU(4): t19: i32 = I_ALLOCA TargetConstant:i32<0>
+
+  # preds left       : 0
+  # succs left       : 2
+  # rdefs left       : 1
+  Latency            : 1
+  Depth              : 0
+  Height             : 6
+  Successors:
+    SU(3): Data Latency=1
+    SU(6): Data Latency=1
+SU(5): t11: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.x.addr)> t5, t10
+
+  # preds left       : 2
+  # succs left       : 1
+  # rdefs left       : 1
+  Latency            : 1
+  Depth              : 4
+  Height             : 2
+  Predecessors:
+    SU(6): Data Latency=1
+    SU(7): Ord  Latency=1 Barrier
+  Successors:
+    SU(1): Data Latency=1
+SU(6): t5: i32 = ADD TargetFrameIndex:i32<0>, t19
+
+  # preds left       : 1
+  # succs left       : 2
+  # rdefs left       : 1
+  Latency            : 1
+  Depth              : 1
+  Height             : 5
+  Predecessors:
+    SU(4): Data Latency=1
+  Successors:
+    SU(5): Data Latency=1
+    SU(8): Data Latency=1
+SU(7): t10: ch = STR<Mem:(store (s32) into %ir.y.addr)> t4, t9, t8
+
+  # preds left       : 3
+  # succs left       : 3
+  # rdefs left       : 0
+  Latency            : 1
+  Depth              : 3
+  Height             : 3
+  Predecessors:
+    SU(10): Data Latency=1
+    SU(3): Data Latency=1
+    SU(8): Ord  Latency=1 Barrier
+  Successors:
+    SU(0): Ord  Latency=1 Barrier
+    SU(2): Ord  Latency=1 Barrier
+    SU(5): Ord  Latency=1 Barrier
+SU(8): t8: ch = STR<Mem:(store (s32) into %ir.x.addr)> t2, t5, t0
+
+  # preds left       : 2
+  # succs left       : 1
+  # rdefs left       : 0
+  Latency            : 1
+  Depth              : 2
+  Height             : 4
+  Predecessors:
+    SU(9): Data Latency=1
+    SU(6): Data Latency=1
+  Successors:
+    SU(7): Ord  Latency=1 Barrier
+SU(9): t2: i32,ch = CopyFromReg t0, Register:i32 %0
+
+  # preds left       : 0
+  # succs left       : 1
+  # rdefs left       : 1
+  Latency            : 1
+  Depth              : 0
+  Height             : 5
+  Successors:
+    SU(8): Data Latency=1
+SU(10): t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+  # preds left       : 0
+  # succs left       : 1
+  # rdefs left       : 1
+  Latency            : 1
+  Depth              : 0
+  Height             : 4
+  Successors:
+    SU(7): Data Latency=1
+
+Examining Available:
+Height 0: SU(0): t16: ch = PseudoRET Register:i32 $r0, t15, t15:1
+
+    t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+
+
+*** Scheduling [0]: SU(0): t16: ch = PseudoRET Register:i32 $r0, t15, t15:1
+
+    t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+
+
+Examining Available:
+Height 1: SU(1): t13: i32 = ADD nsw t11, t12
+
+
+*** Scheduling [1]: SU(1): t13: i32 = ADD nsw t11, t12
+
+
+Examining Available:
+Height 2: SU(2): t12: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.y.addr)> t9, t10
+
+Height 2: SU(5): t11: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.x.addr)> t5, t10
+
+
+*** Scheduling [2]: SU(2): t12: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.y.addr)> t9, t10
+
+
+Examining Available:
+Height 2: SU(5): t11: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.x.addr)> t5, t10
+
+
+*** Scheduling [3]: SU(5): t11: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.x.addr)> t5, t10
+
+
+Examining Available:
+Height 4: SU(7): t10: ch = STR<Mem:(store (s32) into %ir.y.addr)> t4, t9, t8
+
+
+*** Scheduling [4]: SU(7): t10: ch = STR<Mem:(store (s32) into %ir.y.addr)> t4, t9, t8
+
+
+Examining Available:
+Height 5: SU(3): t9: i32 = ADD TargetFrameIndex:i32<1>, t19
+
+Height 5: SU(8): t8: ch = STR<Mem:(store (s32) into %ir.x.addr)> t2, t5, t0
+
+Height 5: SU(10): t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+
+*** Scheduling [5]: SU(3): t9: i32 = ADD TargetFrameIndex:i32<1>, t19
+
+
+Examining Available:
+Height 5: SU(8): t8: ch = STR<Mem:(store (s32) into %ir.x.addr)> t2, t5, t0
+
+Height 5: SU(10): t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+
+*** Scheduling [6]: SU(8): t8: ch = STR<Mem:(store (s32) into %ir.x.addr)> t2, t5, t0
+
+
+Examining Available:
+Height 7: SU(6): t5: i32 = ADD TargetFrameIndex:i32<0>, t19
+
+Height 7: SU(9): t2: i32,ch = CopyFromReg t0, Register:i32 %0
+
+Height 5: SU(10): t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+
+*** Scheduling [7]: SU(6): t5: i32 = ADD TargetFrameIndex:i32<0>, t19
+
+
+Examining Available:
+Height 8: SU(4): t19: i32 = I_ALLOCA TargetConstant:i32<0>
+
+Height 7: SU(9): t2: i32,ch = CopyFromReg t0, Register:i32 %0
+
+Height 5: SU(10): t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+
+*** Scheduling [8]: SU(4): t19: i32 = I_ALLOCA TargetConstant:i32<0>
+
+
+Examining Available:
+Height 7: SU(9): t2: i32,ch = CopyFromReg t0, Register:i32 %0
+
+Height 5: SU(10): t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+
+*** Scheduling [9]: SU(9): t2: i32,ch = CopyFromReg t0, Register:i32 %0
+
+
+Examining Available:
+Height 5: SU(10): t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+
+*** Scheduling [10]: SU(10): t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+*** Final schedule ***
+SU(10): t4: i32,ch = CopyFromReg t0, Register:i32 %1
+
+SU(9): t2: i32,ch = CopyFromReg t0, Register:i32 %0
+
+SU(4): t19: i32 = I_ALLOCA TargetConstant:i32<0>
+
+SU(6): t5: i32 = ADD TargetFrameIndex:i32<0>, t19
+
+SU(8): t8: ch = STR<Mem:(store (s32) into %ir.x.addr)> t2, t5, t0
+
+SU(3): t9: i32 = ADD TargetFrameIndex:i32<1>, t19
+
+SU(7): t10: ch = STR<Mem:(store (s32) into %ir.y.addr)> t4, t9, t8
+
+SU(5): t11: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.x.addr)> t5, t10
+
+SU(2): t12: i32,ch = LDR<Mem:(dereferenceable load (s32) from %ir.y.addr)> t9, t10
+
+SU(1): t13: i32 = ADD nsw t11, t12
+
+SU(0): t16: ch = PseudoRET Register:i32 $r0, t15, t15:1
+
+    t15: ch,glue = CopyToReg t10, Register:i32 $r0, t13
+
+
+Total amount of phi nodes to update: 0
+*** MachineFunction at end of ISel ***
+# Machine code for function _Z9getNumberii: IsSSA, TracksLiveness
+Frame Objects:
+  fi#0: size=4, align=4, at location [SP]
+  fi#1: size=4, align=4, at location [SP]
+Function Live Ins: $r0 in %0, $r1 in %1
+
+bb.0.entry:
+  liveins: $r0, $r1
+  %1:gpr = COPY $r1
+  %0:gpr = COPY $r0
+  %2:gpr = I_ALLOCA 0
+  %3:gpr = ADD %stack.0.x.addr, %2:gpr
+  STR %0:gpr, %3:gpr :: (store (s32) into %ir.x.addr)
+  %4:gpr = ADD %stack.1.y.addr, %2:gpr
+  STR %1:gpr, %4:gpr :: (store (s32) into %ir.y.addr)
+  %5:gpr = LDR %3:gpr :: (dereferenceable load (s32) from %ir.x.addr)
+  %6:gpr = LDR %4:gpr :: (dereferenceable load (s32) from %ir.y.addr)
+  %7:gpr = nsw ADD killed %5:gpr, killed %6:gpr
+  $r0 = COPY %7:gpr
+  PseudoRET implicit $r0
+
+# End machine code for function _Z9getNumberii.
+
+Skipping pass 'Two-Address instruction pass' on function _Z9getNumberii
+********** REWRITING TWO-ADDR INSTRS **********
+********** Function: _Z9getNumberii
+********** FAST REGISTER ALLOCATION **********
+********** Function: _Z9getNumberii
+
+Allocating bb.0.entry:
+  liveins: $r0, $r1
+  %1:gpr = COPY $r1
+  %0:gpr = COPY $r0
+  %2:gpr = I_ALLOCA 0
+  %3:gpr = ADD %stack.0.x.addr, %2:gpr
+  STR %0:gpr, %3:gpr :: (store (s32) into %ir.x.addr)
+  %4:gpr = ADD %stack.1.y.addr, %2:gpr
+  STR %1:gpr, %4:gpr :: (store (s32) into %ir.y.addr)
+  %5:gpr = LDR %3:gpr :: (dereferenceable load (s32) from %ir.x.addr)
+  %6:gpr = LDR %4:gpr :: (dereferenceable load (s32) from %ir.y.addr)
+  %7:gpr = nsw ADD killed %5:gpr, killed %6:gpr
+  $r0 = COPY %7:gpr
+  PseudoRET implicit $r0
+
+>> PseudoRET implicit $r0
+Regs:
+<< PseudoRET implicit killed $r0
+
+>> $r0 = COPY %7:gpr
+Regs: R0[P]
+Freeing $r0:
+Search register for %7 in class GPR with hint $r0
+	Preferred Register 1: $r0
+Assigning %7 to $r0
+<< $r0 = COPY killed $r0
+Mark identity copy for removal
+
+>> %7:gpr = nsw ADD killed %5:gpr, killed %6:gpr
+Regs: R0=%7
+In def of %7 use existing assignment to $r0
+Freeing $r0: %7
+Search register for %5 in class GPR with hint $noreg
+AllocationOrder(GPR) = [ $r0 $r1 $r2 $r3 $r4 $r5 $r6 $r7 $r10 $r8 $r9 ]
+	Register: $r0 Cost: 0 BestCost: 4294967295
+Assigning %5 to $r0
+Search register for %6 in class GPR with hint $noreg
+	Register: $r0 already used in instr.
+	Register: $r1 Cost: 0 BestCost: 4294967295
+Assigning %6 to $r1
+<< $r0 = nsw ADD killed $r0, killed $r1
+
+>> %6:gpr = LDR %4:gpr :: (dereferenceable load (s32) from %ir.y.addr)
+Regs: R0=%5 R1=%6
+In def of %6 use existing assignment to $r1
+Freeing $r1: %6
+Search register for %4 in class GPR with hint $noreg
+	Register: $r0 Cost: 100 BestCost: 4294967295
+	Register: $r1 Cost: 0 BestCost: 100
+Assigning %4 to $r1
+<< $r1 = LDR killed $r1 :: (dereferenceable load (s32) from %ir.y.addr)
+
+>> %5:gpr = LDR %3:gpr :: (dereferenceable load (s32) from %ir.x.addr)
+Regs: R0=%5 R1=%4
+In def of %5 use existing assignment to $r0
+Freeing $r0: %5
+Search register for %3 in class GPR with hint $noreg
+	Register: $r0 Cost: 0 BestCost: 4294967295
+Assigning %3 to $r0
+<< $r0 = LDR killed $r0 :: (dereferenceable load (s32) from %ir.x.addr)
+
+>> STR %1:gpr, %4:gpr :: (store (s32) into %ir.y.addr)
+Regs: R0=%3 R1=%4
+Search register for %1 in class GPR with hint $noreg
+	Preferred Register 1: $r1 occupied
+	Register: $r0 Cost: 100 BestCost: 4294967295
+	Register: $r1 Cost: 100 BestCost: 100
+	Register: $r2 Cost: 0 BestCost: 80
+Assigning %1 to $r2
+<< STR killed $r2, $r1 :: (store (s32) into %ir.y.addr)
+
+>> %4:gpr = ADD %stack.1.y.addr, %2:gpr
+Regs: R0=%3 R1=%4 R2=%1
+In def of %4 use existing assignment to $r1
+Freeing $r1: %4
+Search register for %2 in class GPR with hint $noreg
+	Register: $r0 Cost: 100 BestCost: 4294967295
+	Register: $r1 Cost: 0 BestCost: 100
+Assigning %2 to $r1
+<< $r1 = ADD %stack.1.y.addr, killed $r1
+
+>> STR %0:gpr, %3:gpr :: (store (s32) into %ir.x.addr)
+Regs: R0=%3 R1=%2 R2=%1
+Search register for %0 in class GPR with hint $noreg
+	Preferred Register 1: $r0 occupied
+	Register: $r0 Cost: 100 BestCost: 4294967295
+	Register: $r1 Cost: 100 BestCost: 80
+	Register: $r2 Cost: 100 BestCost: 80
+	Register: $r3 Cost: 0 BestCost: 80
+Assigning %0 to $r3
+<< STR killed $r3, $r0 :: (store (s32) into %ir.x.addr)
+
+>> %3:gpr = ADD %stack.0.x.addr, %2:gpr
+Regs: R0=%3 R1=%2 R2=%1 R3=%0
+In def of %3 use existing assignment to $r0
+Freeing $r0: %3
+<< $r0 = ADD %stack.0.x.addr, $r1
+
+>> %2:gpr = I_ALLOCA 0
+Regs: R1=%2 R2=%1 R3=%0
+In def of %2 use existing assignment to $r1
+Freeing $r1: %2
+<< $r1 = I_ALLOCA 0
+
+>> %0:gpr = COPY $r0
+Regs: R2=%1 R3=%0
+In def of %0 use existing assignment to $r3
+Freeing $r3: %0
+<< $r3 = COPY killed $r0
+
+>> %1:gpr = COPY $r1
+Regs: R0[P] R2=%1
+In def of %1 use existing assignment to $r2
+Freeing $r2: %1
+<< $r2 = COPY killed $r1
+Begin Regs: R0[P] R1[P]
+Loading live registers at begin of block.
+bb.0.entry:
+  liveins: $r0, $r1
+  $r2 = COPY killed $r1
+  $r3 = COPY killed $r0
+  $r1 = I_ALLOCA 0
+  $r0 = ADD %stack.0.x.addr, $r1
+  STR killed $r3, $r0 :: (store (s32) into %ir.x.addr)
+  $r1 = ADD %stack.1.y.addr, killed $r1
+  STR killed $r2, $r1 :: (store (s32) into %ir.y.addr)
+  $r0 = LDR killed $r0 :: (dereferenceable load (s32) from %ir.x.addr)
+  $r1 = LDR killed $r1 :: (dereferenceable load (s32) from %ir.y.addr)
+  $r0 = nsw ADD killed $r0, killed $r1
+  PseudoRET implicit killed $r0
+Skipping pass 'Fixup Statepoint Caller Saved' on function _Z9getNumberii
+alloc FI(0) at SP[-4]
+alloc FI(1) at SP[-8]
+Machine Function
+********** EXPANDING POST-RA PSEUDO INSTRS **********
+********** Function: _Z9getNumberii
+
+Debug Range Extension: _Z9getNumberii
+[SafeStack] Function: _Z13callGetNumberv
+[SafeStack]     safestack is not requested for this function
+Skipping pass 'CPU0 DAG->DAG Pattern Instruction Selection' on function _Z13callGetNumberv
+	FastISel is enabled
+
+
+
+=== _Z13callGetNumberv
+Enabling fast-isel
+Creating constant: t2: i32 = Constant<32>
+Creating constant: t3: i32 = Constant<42>
+Creating new node: t7: ch,glue = <<Unknown Target Node #497>> t0, GlobalAddress:i32<ptr @_Z9getNumberii> 0, Register:i32 $r0, Register:i32 $r1, RegisterMask:Untyped
+Creating new node: t8: i32,ch,glue = CopyFromReg t7, Register:i32 $r0, t7:1
+Creating constant: t10: i32 = Constant<0>
+Creating new node: t11: i32 = undef
+Creating new node: t12: ch = store<(store (s32) into %ir.x)> t8:1, t8, FrameIndex:i32<0>, undef:i32
+Creating new node: t13: i32,ch = load<(dereferenceable load (s32) from %ir.x)> t12, FrameIndex:i32<0>, undef:i32
+Creating constant: t14: i32 = Constant<2>
+Creating new node: t15: i32 = mul nsw t13, Constant:i32<2>
+Creating new node: t17: ch = store<(store (s32) into %ir.c)> t13:1, t15, FrameIndex:i32<1>, undef:i32
+Creating new node: t18: ch = trap t17
+
+Initial selection DAG: %bb.0 '_Z13callGetNumberv:entry'
+SelectionDAG has 19 nodes:
+  t2: i32 = Constant<32>
+  t3: i32 = Constant<42>
+    t0: ch,glue = EntryToken
+  t7: ch,glue = <<Unknown Target Node #497>> t0, GlobalAddress:i32<ptr @_Z9getNumberii> 0, Register:i32 $r0, Register:i32 $r1, RegisterMask:Untyped
+  t8: i32,ch,glue = CopyFromReg t7, Register:i32 $r0, t7:1
+  t10: i32 = Constant<0>
+    t12: ch = store<(store (s32) into %ir.x)> t8:1, t8, FrameIndex:i32<0>, undef:i32
+  t13: i32,ch = load<(dereferenceable load (s32) from %ir.x)> t12, FrameIndex:i32<0>, undef:i32
+      t15: i32 = mul nsw t13, Constant:i32<2>
+    t17: ch = store<(store (s32) into %ir.c)> t13:1, t15, FrameIndex:i32<1>, undef:i32
+  t18: ch = trap t17
+
+
+
+Combining: t18: ch = trap t17
+
+Combining: t17: ch = store<(store (s32) into %ir.c)> t13:1, t15, FrameIndex:i32<1>, undef:i32
+
+Combining: t16: i32 = FrameIndex<1>
+
+Combining: t15: i32 = mul nsw t13, Constant:i32<2>
+Creating constant: t19: i32 = Constant<1>
+Creating new node: t20: i32 = shl t13, Constant:i32<1>
+ ... into: t20: i32 = shl t13, Constant:i32<1>
+
+Combining: t20: i32 = shl t13, Constant:i32<1>
+
+Combining: t19: i32 = Constant<1>
+
+Combining: t17: ch = store<(store (s32) into %ir.c)> t13:1, t20, FrameIndex:i32<1>, undef:i32
+
+Combining: t13: i32,ch = load<(dereferenceable load (s32) from %ir.x)> t12, FrameIndex:i32<0>, undef:i32
+
+Combining: t12: ch = store<(store (s32) into %ir.x)> t8:1, t8, FrameIndex:i32<0>, undef:i32
+
+Combining: t11: i32 = undef
+
+Combining: t9: i32 = FrameIndex<0>
+
+Combining: t8: i32,ch,glue = CopyFromReg t7, Register:i32 $r0, t7:1
+
+Combining: t7: ch,glue = <<Unknown Target Node #497>> t0, GlobalAddress:i32<ptr @_Z9getNumberii> 0, Register:i32 $r0, Register:i32 $r1, RegisterMask:Untyped
+
+Combining: t6: Untyped = RegisterMask
+
+Combining: t5: i32 = Register $r1
+
+Combining: t4: i32 = Register $r0
+
+Combining: t1: i32 = GlobalAddress<ptr @_Z9getNumberii> 0
+
+Combining: t0: ch,glue = EntryToken
+
+Optimized lowered selection DAG: %bb.0 '_Z13callGetNumberv:entry'
+SelectionDAG has 16 nodes:
+    t0: ch,glue = EntryToken
+  t7: ch,glue = <<Unknown Target Node #497>> t0, GlobalAddress:i32<ptr @_Z9getNumberii> 0, Register:i32 $r0, Register:i32 $r1, RegisterMask:Untyped
+  t8: i32,ch,glue = CopyFromReg t7, Register:i32 $r0, t7:1
+    t12: ch = store<(store (s32) into %ir.x)> t8:1, t8, FrameIndex:i32<0>, undef:i32
+  t13: i32,ch = load<(dereferenceable load (s32) from %ir.x)> t12, FrameIndex:i32<0>, undef:i32
+      t20: i32 = shl t13, Constant:i32<1>
+    t17: ch = store<(store (s32) into %ir.c)> t13:1, t20, FrameIndex:i32<1>, undef:i32
+  t18: ch = trap t17
+
+
+
+Legalizing node: t19: i32 = Constant<1>
+Analyzing result type: i32
+Legal result type
+Legally typed node: t19: i32 = Constant<1>
+
+Legalizing node: t16: i32 = FrameIndex<1>
+Analyzing result type: i32
+Legal result type
+Legally typed node: t16: i32 = FrameIndex<1>
+
+Legalizing node: t11: i32 = undef
+Analyzing result type: i32
+Legal result type
+Legally typed node: t11: i32 = undef
+
+Legalizing node: t9: i32 = FrameIndex<0>
+Analyzing result type: i32
+Legal result type
+Legally typed node: t9: i32 = FrameIndex<0>
+
+Legalizing node: t6: Untyped = RegisterMask
+Analyzing result type: Untyped
+Legal result type
+Legally typed node: t6: Untyped = RegisterMask
+
+Legalizing node: t5: i32 = Register $r1
+Ignoring node results
+Legally typed node: t5: i32 = Register $r1
+
+Legalizing node: t4: i32 = Register $r0
+Ignoring node results
+Legally typed node: t4: i32 = Register $r0
+
+Legalizing node: t1: i32 = GlobalAddress<ptr @_Z9getNumberii> 0
+Analyzing result type: i32
+Legal result type
+Legally typed node: t1: i32 = GlobalAddress<ptr @_Z9getNumberii> 0
+
+Legalizing node: t0: ch,glue = EntryToken
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Legally typed node: t0: ch,glue = EntryToken
+
+Legalizing node: t7: ch,glue = <<Unknown Target Node #497>> t0, GlobalAddress:i32<ptr @_Z9getNumberii> 0, Register:i32 $r0, Register:i32 $r1, RegisterMask:Untyped
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Analyzing operand: t0: ch,glue = EntryToken
+Legal operand
+Analyzing operand: t1: i32 = GlobalAddress<ptr @_Z9getNumberii> 0
+Legal operand
+Analyzing operand: t6: Untyped = RegisterMask
+Legal operand
+Legally typed node: t7: ch,glue = <<Unknown Target Node #497>> t0, GlobalAddress:i32<ptr @_Z9getNumberii> 0, Register:i32 $r0, Register:i32 $r1, RegisterMask:Untyped
+
+Legalizing node: t8: i32,ch,glue = CopyFromReg t7, Register:i32 $r0, t7:1
+Analyzing result type: i32
+Legal result type
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Analyzing operand: t7: ch,glue = <<Unknown Target Node #497>> t0, GlobalAddress:i32<ptr @_Z9getNumberii> 0, Register:i32 $r0, Register:i32 $r1, RegisterMask:Untyped
+Legal operand
+Analyzing operand: t7: ch,glue = <<Unknown Target Node #497>> t0, GlobalAddress:i32<ptr @_Z9getNumberii> 0, Register:i32 $r0, Register:i32 $r1, RegisterMask:Untyped
+Legal operand
+Legally typed node: t8: i32,ch,glue = CopyFromReg t7, Register:i32 $r0, t7:1
+
+Legalizing node: t12: ch = store<(store (s32) into %ir.x)> t8:1, t8, FrameIndex:i32<0>, undef:i32
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t8: i32,ch,glue = CopyFromReg t7, Register:i32 $r0, t7:1
+Legal operand
+Analyzing operand: t8: i32,ch,glue = CopyFromReg t7, Register:i32 $r0, t7:1
+Legal operand
+Analyzing operand: t9: i32 = FrameIndex<0>
+Legal operand
+Analyzing operand: t11: i32 = undef
+Legal operand
+Legally typed node: t12: ch = store<(store (s32) into %ir.x)> t8:1, t8, FrameIndex:i32<0>, undef:i32
+
+Legalizing node: t13: i32,ch = load<(dereferenceable load (s32) from %ir.x)> t12, FrameIndex:i32<0>, undef:i32
+Analyzing result type: i32
+Legal result type
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t12: ch = store<(store (s32) into %ir.x)> t8:1, t8, FrameIndex:i32<0>, undef:i32
+Legal operand
+Analyzing operand: t9: i32 = FrameIndex<0>
+Legal operand
+Analyzing operand: t11: i32 = undef
+Legal operand
+Legally typed node: t13: i32,ch = load<(dereferenceable load (s32) from %ir.x)> t12, FrameIndex:i32<0>, undef:i32
+
+Legalizing node: t20: i32 = shl t13, Constant:i32<1>
+Analyzing result type: i32
+Legal result type
+Analyzing operand: t13: i32,ch = load<(dereferenceable load (s32) from %ir.x)> t12, FrameIndex:i32<0>, undef:i32
+Legal operand
+Analyzing operand: t19: i32 = Constant<1>
+Legal operand
+Legally typed node: t20: i32 = shl t13, Constant:i32<1>
+
+Legalizing node: t17: ch = store<(store (s32) into %ir.c)> t13:1, t20, FrameIndex:i32<1>, undef:i32
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t13: i32,ch = load<(dereferenceable load (s32) from %ir.x)> t12, FrameIndex:i32<0>, undef:i32
+Legal operand
+Analyzing operand: t20: i32 = shl t13, Constant:i32<1>
+Legal operand
+Analyzing operand: t16: i32 = FrameIndex<1>
+Legal operand
+Analyzing operand: t11: i32 = undef
+Legal operand
+Legally typed node: t17: ch = store<(store (s32) into %ir.c)> t13:1, t20, FrameIndex:i32<1>, undef:i32
+
+Legalizing node: t18: ch = trap t17
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t17: ch = store<(store (s32) into %ir.c)> t13:1, t20, FrameIndex:i32<1>, undef:i32
+Legal operand
+Legally typed node: t18: ch = trap t17
+
+Legalizing node: t65535: ch = handlenode t18
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t18: ch = trap t17
+Legal operand
+Legally typed node: t65535: ch = handlenode t18
+
+Type-legalized selection DAG: %bb.0 '_Z13callGetNumberv:entry'
+SelectionDAG has 16 nodes:
+    t0: ch,glue = EntryToken
+  t7: ch,glue = <<Unknown Target Node #497>> t0, GlobalAddress:i32<ptr @_Z9getNumberii> 0, Register:i32 $r0, Register:i32 $r1, RegisterMask:Untyped
+  t8: i32,ch,glue = CopyFromReg t7, Register:i32 $r0, t7:1
+    t12: ch = store<(store (s32) into %ir.x)> t8:1, t8, FrameIndex:i32<0>, undef:i32
+  t13: i32,ch = load<(dereferenceable load (s32) from %ir.x)> t12, FrameIndex:i32<0>, undef:i32
+      t20: i32 = shl t13, Constant:i32<1>
+    t17: ch = store<(store (s32) into %ir.c)> t13:1, t20, FrameIndex:i32<1>, undef:i32
+  t18: ch = trap t17
+
+
+
+Legalizing: t18: ch = trap t17
+Trying to expand node
+Cannot expand node
+Trying to convert node to libcall
+Creating new node: t22: ch,glue = <<Unknown Target Node #497>> t17, ExternalSymbol:i32'abort', RegisterMask:Untyped
+Successfully converted node to libcall
+ ... replacing: t18: ch = trap t17
+     with:      t22: ch,glue = <<Unknown Target Node #497>> t17, ExternalSymbol:i32'abort', RegisterMask:Untyped
+
+Legalizing: t17: ch = store<(store (s32) into %ir.c)> t13:1, t20, FrameIndex:i32<1>, undef:i32
+Legalizing store operation
+Optimizing float store operations
+Legal store
+
+Legalizing: t20: i32 = shl t13, Constant:i32<1>
+Legal node: nothing to do
+
+Legalizing: t13: i32,ch = load<(dereferenceable load (s32) from %ir.x)> t12, FrameIndex:i32<0>, undef:i32
+Legalizing non-extending load operation
+
+Legalizing: t12: ch = store<(store (s32) into %ir.x)> t8:1, t8, FrameIndex:i32<0>, undef:i32
+Legalizing store operation
+Optimizing float store operations
+Legal store
+
+Legalizing: t8: i32,ch,glue = CopyFromReg t7, Register:i32 $r0, t7:1
+Legal node: nothing to do
+
+Legalizing: t7: ch,glue = <<Unknown Target Node #497>> t0, GlobalAddress:i32<ptr @_Z9getNumberii> 0, Register:i32 $r0, Register:i32 $r1, RegisterMask:Untyped
+Legal node: nothing to do
+
+Legalizing: t19: i32 = Constant<1>
+Legal node: nothing to do
+
+Legalizing: t16: i32 = FrameIndex<1>
+Legal node: nothing to do
+
+Legalizing: t11: i32 = undef
+Legal node: nothing to do
+
+Legalizing: t9: i32 = FrameIndex<0>
+Legal node: nothing to do
+
+Legalizing: t6: Untyped = RegisterMask
+Legal node: nothing to do
+
+Legalizing: t5: i32 = Register $r1
+
+Legalizing: t4: i32 = Register $r0
+
+Legalizing: t1: i32 = GlobalAddress<ptr @_Z9getNumberii> 0
+Trying custom legalization
+Unsupported global address
+UNREACHABLE executed at /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Target/TinyGPU/TinyGPUISelLowering.cpp:409!
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace.
+Stack dump:
+0.	Program arguments: llc -march=tinygpu -O0 index8.ll -debug -view-isel-dags -o index.S
+1.	Running pass 'Function Pass Manager' on module 'index8.ll'.
+2.	Running pass 'CPU0 DAG->DAG Pattern Instruction Selection' on function '@_Z13callGetNumberv'
+ #0 0x00007bf688e29552 llvm::sys::PrintStackTrace(llvm::raw_ostream&, int) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Unix/Signals.inc:798:22
+ #1 0x00007bf688e29969 PrintStackTraceSignalHandler(void*) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Unix/Signals.inc:874:1
+ #2 0x00007bf688e26dcb llvm::sys::RunSignalHandlers() /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Signals.cpp:105:20
+ #3 0x00007bf688e28df3 SignalHandler(int) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Unix/Signals.inc:415:1
+ #4 0x00007bf688245250 (/lib/x86_64-linux-gnu/libc.so.6+0x45250)
+ #5 0x00007bf6882a3f1c __pthread_kill_implementation ./nptl/pthread_kill.c:44:76
+ #6 0x00007bf6882a3f1c __pthread_kill_internal ./nptl/pthread_kill.c:78:10
+ #7 0x00007bf6882a3f1c pthread_kill ./nptl/pthread_kill.c:89:10
+ #8 0x00007bf68824519e raise ./signal/../sysdeps/posix/raise.c:27:6
+ #9 0x00007bf688228902 abort ./stdlib/abort.c:81:7
+#10 0x00007bf688cdf5ed bindingsErrorHandler(void*, char const*, bool) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/ErrorHandling.cpp:223:55
+#11 0x00007bf692c4484f /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Target/TinyGPU/TinyGPUISelLowering.cpp:409:3
+#12 0x00007bf692c45a81 llvm::TinyGPUTargetLowering::LowerOperation(llvm::SDValue, llvm::SelectionDAG&) const /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Target/TinyGPU/TinyGPUISelLowering.cpp:598:68
+#13 0x00007bf68ec5346b (anonymous namespace)::SelectionDAGLegalize::LegalizeOp(llvm::SDNode*) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/LegalizeDAG.cpp:1316:43
+#14 0x00007bf68ec77579 llvm::SelectionDAG::Legalize() /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/LegalizeDAG.cpp:5842:25
+#15 0x00007bf68eede3b8 llvm::SelectionDAGISel::CodeGenAndEmitDAG() /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1079:3
+#16 0x00007bf68eedcd6f llvm::SelectionDAGISel::SelectBasicBlock(llvm::ilist_iterator_w_bits<llvm::ilist_detail::node_options<llvm::Instruction, true, false, void, true, llvm::BasicBlock>, false, true>, llvm::ilist_iterator_w_bits<llvm::ilist_detail::node_options<llvm::Instruction, true, false, void, true, llvm::BasicBlock>, false, true>, bool&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:878:1
+#17 0x00007bf68eee2efd llvm::SelectionDAGISel::SelectAllBasicBlocks(llvm::Function const&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1905:33
+#18 0x00007bf68eedb419 llvm::SelectionDAGISel::runOnMachineFunction(llvm::MachineFunction&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:616:7
+#19 0x00007bf692c65bd2 llvm::TinyGPUDAGToDAGISel::runOnMachineFunction(llvm::MachineFunction&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Target/TinyGPU/TinyGPUISelDAGToDAG.cpp:27:1
+#20 0x00007bf68eeda170 llvm::SelectionDAGISelLegacy::runOnMachineFunction(llvm::MachineFunction&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:375:40
+#21 0x00007bf68e0719ae llvm::MachineFunctionPass::runOnFunction(llvm::Function&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/MachineFunctionPass.cpp:94:33
+#22 0x00007bf689936acc llvm::FPPassManager::runOnFunction(llvm::Function&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1406:20
+#23 0x00007bf689936da2 llvm::FPPassManager::runOnModule(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1452:13
+#24 0x00007bf6899371fa (anonymous namespace)::MPPassManager::runOnModule(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1521:20
+#25 0x00007bf689932183 llvm::legacy::PassManagerImpl::run(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:539:13
+#26 0x00007bf689937af1 llvm::legacy::PassManager::run(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1649:1
+#27 0x00005dc7e19b7d53 compileModule(char**, llvm::LLVMContext&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/tools/llc/llc.cpp:753:34
+#28 0x00005dc7e19b5454 main /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/tools/llc/llc.cpp:411:35
+#29 0x00007bf68822a3b8 __libc_start_call_main ./csu/../sysdeps/nptl/libc_start_call_main.h:74:3
+#30 0x00007bf68822a47b call_init ./csu/../csu/libc-start.c:128:20
+#31 0x00007bf68822a47b __libc_start_main ./csu/../csu/libc-start.c:347:5
+#32 0x00005dc7e19b3eb5 _start (/usr/local/bin/llc+0x42eb5)

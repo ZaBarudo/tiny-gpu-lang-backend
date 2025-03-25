@@ -1,0 +1,414 @@
+Args: llc -march=tinygpu -O0 index8.ll -debug -view-isel-dags -o index.S 
+
+Features:
+CPU:generic
+TuneCPU:generic
+
+[SafeStack] Function: _Z9getNumberv
+[SafeStack]     safestack is not requested for this function
+Skipping pass 'CPU0 DAG->DAG Pattern Instruction Selection' on function _Z9getNumberv
+	FastISel is enabled
+
+
+
+=== _Z9getNumberv
+Enabling fast-isel
+Creating constant: t1: i32 = Constant<42>
+Creating new node: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Creating new node: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+Initial selection DAG: %bb.0 '_Z9getNumberv:entry'
+SelectionDAG has 5 nodes:
+    t0: ch,glue = EntryToken
+  t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+  t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+
+
+Combining: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+Combining: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+
+Combining: t2: i32 = Register $r0
+
+Combining: t1: i32 = Constant<42>
+
+Combining: t0: ch,glue = EntryToken
+
+Optimized lowered selection DAG: %bb.0 '_Z9getNumberv:entry'
+SelectionDAG has 5 nodes:
+    t0: ch,glue = EntryToken
+  t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+  t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+
+
+Legalizing node: t2: i32 = Register $r0
+Ignoring node results
+Legally typed node: t2: i32 = Register $r0
+
+Legalizing node: t1: i32 = Constant<42>
+Analyzing result type: i32
+Legal result type
+Legally typed node: t1: i32 = Constant<42>
+
+Legalizing node: t0: ch,glue = EntryToken
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Legally typed node: t0: ch,glue = EntryToken
+
+Legalizing node: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Analyzing operand: t0: ch,glue = EntryToken
+Legal operand
+Analyzing operand: t1: i32 = Constant<42>
+Legal operand
+Legally typed node: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+
+Legalizing node: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Legal operand
+Analyzing operand: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Legal operand
+Legally typed node: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+Legalizing node: t65535: ch = handlenode t4
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+Legal operand
+Legally typed node: t65535: ch = handlenode t4
+
+Type-legalized selection DAG: %bb.0 '_Z9getNumberv:entry'
+SelectionDAG has 5 nodes:
+    t0: ch,glue = EntryToken
+  t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+  t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+
+
+Legalizing: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+Legal node: nothing to do
+
+Legalizing: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Legal node: nothing to do
+
+Legalizing: t2: i32 = Register $r0
+
+Legalizing: t1: i32 = Constant<42>
+Legal node: nothing to do
+
+Legalizing: t0: ch,glue = EntryToken
+Legal node: nothing to do
+
+Legalized selection DAG: %bb.0 '_Z9getNumberv:entry'
+SelectionDAG has 5 nodes:
+    t0: ch,glue = EntryToken
+  t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+  t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+
+
+Legalizing: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+Legal node: nothing to do
+
+Combining: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+Legalizing: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Legal node: nothing to do
+
+Combining: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+
+Legalizing: t2: i32 = Register $r0
+
+Combining: t2: i32 = Register $r0
+
+Legalizing: t1: i32 = Constant<42>
+Legal node: nothing to do
+
+Combining: t1: i32 = Constant<42>
+
+Legalizing: t0: ch,glue = EntryToken
+Legal node: nothing to do
+
+Combining: t0: ch,glue = EntryToken
+
+Optimized legalized selection DAG: %bb.0 '_Z9getNumberv:entry'
+SelectionDAG has 5 nodes:
+    t0: ch,glue = EntryToken
+  t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+  t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+
+Writing '/tmp/dag._Z9getNumberv-77f98c.dot'...  done. 
+Trying 'xdg-open' program... Remember to erase graph file: /tmp/dag._Z9getNumberv-77f98c.dot
+===== Instruction selection begins: %bb.0 'entry'
+
+ISEL: Starting selection on root node: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+ISEL: Starting pattern match
+  Morphed node: t4: ch = PseudoRET Register:i32 $r0, t3, t3:1
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+
+ISEL: Starting selection on root node: t2: i32 = Register $r0
+
+ISEL: Starting selection on root node: t1: i32 = Constant<42>
+ISEL: Starting pattern match
+  Initial Opcode index to 239
+  Match failed at index 240
+LLVM ERROR: Cannot select: t1: i32 = Constant<42>
+In function: _Z9getNumberv
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace.
+Stack dump:
+0.	Program arguments: llc -march=tinygpu -O0 index8.ll -debug -view-isel-dags -o index.S
+1.	Running pass 'Function Pass Manager' on module 'index8.ll'.
+2.	Running pass 'CPU0 DAG->DAG Pattern Instruction Selection' on function '@_Z9getNumberv'
+ #0 0x00007df418229552 llvm::sys::PrintStackTrace(llvm::raw_ostream&, int) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Unix/Signals.inc:798:22
+ #1 0x00007df418229969 PrintStackTraceSignalHandler(void*) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Unix/Signals.inc:874:1
+ #2 0x00007df418226dcb llvm::sys::RunSignalHandlers() /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Signals.cpp:105:20
+ #3 0x00007df418228df3 SignalHandler(int) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Unix/Signals.inc:415:1
+ #4 0x00007df417645250 (/lib/x86_64-linux-gnu/libc.so.6+0x45250)
+ #5 0x00007df4176a3f1c __pthread_kill_implementation ./nptl/pthread_kill.c:44:76
+ #6 0x00007df4176a3f1c __pthread_kill_internal ./nptl/pthread_kill.c:78:10
+ #7 0x00007df4176a3f1c pthread_kill ./nptl/pthread_kill.c:89:10
+ #8 0x00007df41764519e raise ./signal/../sysdeps/posix/raise.c:27:6
+ #9 0x00007df417628902 abort ./stdlib/abort.c:81:7
+#10 0x00007df4180df25b llvm::report_fatal_error(llvm::Twine const&, bool) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/ErrorHandling.cpp:126:9
+#11 0x00007df41e2f11da llvm::iterator_range<llvm::filter_iterator_impl<decltype(adl_begin(declval<llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>&>())), llvm::filterDbgVars(llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>)::'lambda'(llvm::DbgRecord&), llvm::detail::fwd_or_bidi_tag<decltype(adl_begin(declval<llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>&>()))>::type>> llvm::make_filter_range<llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>&, llvm::filterDbgVars(llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>)::'lambda'(llvm::DbgRecord&)>(llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>&, llvm::filterDbgVars(llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>)::'lambda'(llvm::DbgRecord&)) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/include/llvm/ADT/STLExtras.h:573:1
+#12 0x00007df41e2f08eb llvm::SelectionDAGISel::SelectCodeCommon(llvm::SDNode*, unsigned char const*, unsigned int) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:4335:9
+#13 0x00007df4213dbcd2 llvm::TinyGPUDAGToDAGISel::SelectCode(llvm::SDNode*) /home/sanjai/fyp/tiny-gpu-lang-backend/build/lib/Target/TinyGPU/TinyGPUGenDAGISel.inc:437:1
+#14 0x00007df4213d7591 llvm::TinyGPUDAGToDAGISel::Select(llvm::SDNode*) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Target/TinyGPU/TinyGPUISelDAGToDAG.cpp:58:1
+#15 0x00007df41e2df6eb llvm::SelectionDAGISel::DoInstructionSelection() /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1354:5
+#16 0x00007df41e2de8a8 llvm::SelectionDAGISel::CodeGenAndEmitDAG() /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1123:3
+#17 0x00007df41e2dcd6f llvm::SelectionDAGISel::SelectBasicBlock(llvm::ilist_iterator_w_bits<llvm::ilist_detail::node_options<llvm::Instruction, true, false, void, true, llvm::BasicBlock>, false, true>, llvm::ilist_iterator_w_bits<llvm::ilist_detail::node_options<llvm::Instruction, true, false, void, true, llvm::BasicBlock>, false, true>, bool&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:878:1
+#18 0x00007df41e2e2efd llvm::SelectionDAGISel::SelectAllBasicBlocks(llvm::Function const&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1905:33
+#19 0x00007df41e2db419 llvm::SelectionDAGISel::runOnMachineFunction(llvm::MachineFunction&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:616:7
+#20 0x00007df4213d73ac llvm::TinyGPUDAGToDAGISel::runOnMachineFunction(llvm::MachineFunction&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Target/TinyGPU/TinyGPUISelDAGToDAG.cpp:27:1
+#21 0x00007df41e2da170 llvm::SelectionDAGISelLegacy::runOnMachineFunction(llvm::MachineFunction&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:375:40
+#22 0x00007df41d4719ae llvm::MachineFunctionPass::runOnFunction(llvm::Function&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/MachineFunctionPass.cpp:94:33
+#23 0x00007df418d36acc llvm::FPPassManager::runOnFunction(llvm::Function&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1406:20
+#24 0x00007df418d36da2 llvm::FPPassManager::runOnModule(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1452:13
+#25 0x00007df418d371fa (anonymous namespace)::MPPassManager::runOnModule(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1521:20
+#26 0x00007df418d32183 llvm::legacy::PassManagerImpl::run(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:539:13
+#27 0x00007df418d37af1 llvm::legacy::PassManager::run(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1649:1
+#28 0x00005f1ced989d53 compileModule(char**, llvm::LLVMContext&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/tools/llc/llc.cpp:753:34
+#29 0x00005f1ced987454 main /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/tools/llc/llc.cpp:411:35
+#30 0x00007df41762a3b8 __libc_start_call_main ./csu/../sysdeps/nptl/libc_start_call_main.h:74:3
+#31 0x00007df41762a47b call_init ./csu/../csu/libc-start.c:128:20
+#32 0x00007df41762a47b __libc_start_main ./csu/../csu/libc-start.c:347:5
+#33 0x00005f1ced985eb5 _start (/usr/local/bin/llc+0x42eb5)
+Args: llc -march=tinygpu -O0 index8.ll -debug -view-isel-dags -o index.S 
+
+Features:
+CPU:generic
+TuneCPU:generic
+
+[SafeStack] Function: _Z9getNumberv
+[SafeStack]     safestack is not requested for this function
+Skipping pass 'CPU0 DAG->DAG Pattern Instruction Selection' on function _Z9getNumberv
+	FastISel is enabled
+
+
+
+=== _Z9getNumberv
+Enabling fast-isel
+Creating constant: t1: i32 = Constant<42>
+Creating new node: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Creating new node: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+Initial selection DAG: %bb.0 '_Z9getNumberv:entry'
+SelectionDAG has 5 nodes:
+    t0: ch,glue = EntryToken
+  t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+  t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+
+
+Combining: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+Combining: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+
+Combining: t2: i32 = Register $r0
+
+Combining: t1: i32 = Constant<42>
+
+Combining: t0: ch,glue = EntryToken
+
+Optimized lowered selection DAG: %bb.0 '_Z9getNumberv:entry'
+SelectionDAG has 5 nodes:
+    t0: ch,glue = EntryToken
+  t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+  t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+
+
+Legalizing node: t2: i32 = Register $r0
+Ignoring node results
+Legally typed node: t2: i32 = Register $r0
+
+Legalizing node: t1: i32 = Constant<42>
+Analyzing result type: i32
+Legal result type
+Legally typed node: t1: i32 = Constant<42>
+
+Legalizing node: t0: ch,glue = EntryToken
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Legally typed node: t0: ch,glue = EntryToken
+
+Legalizing node: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Analyzing result type: ch
+Legal result type
+Analyzing result type: glue
+Legal result type
+Analyzing operand: t0: ch,glue = EntryToken
+Legal operand
+Analyzing operand: t1: i32 = Constant<42>
+Legal operand
+Legally typed node: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+
+Legalizing node: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Legal operand
+Analyzing operand: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Legal operand
+Legally typed node: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+Legalizing node: t65535: ch = handlenode t4
+Analyzing result type: ch
+Legal result type
+Analyzing operand: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+Legal operand
+Legally typed node: t65535: ch = handlenode t4
+
+Type-legalized selection DAG: %bb.0 '_Z9getNumberv:entry'
+SelectionDAG has 5 nodes:
+    t0: ch,glue = EntryToken
+  t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+  t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+
+
+Legalizing: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+Legal node: nothing to do
+
+Legalizing: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Legal node: nothing to do
+
+Legalizing: t2: i32 = Register $r0
+
+Legalizing: t1: i32 = Constant<42>
+Legal node: nothing to do
+
+Legalizing: t0: ch,glue = EntryToken
+Legal node: nothing to do
+
+Legalized selection DAG: %bb.0 '_Z9getNumberv:entry'
+SelectionDAG has 5 nodes:
+    t0: ch,glue = EntryToken
+  t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+  t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+
+
+Legalizing: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+Legal node: nothing to do
+
+Combining: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+Legalizing: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+Legal node: nothing to do
+
+Combining: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+
+Legalizing: t2: i32 = Register $r0
+
+Combining: t2: i32 = Register $r0
+
+Legalizing: t1: i32 = Constant<42>
+Legal node: nothing to do
+
+Combining: t1: i32 = Constant<42>
+
+Legalizing: t0: ch,glue = EntryToken
+Legal node: nothing to do
+
+Combining: t0: ch,glue = EntryToken
+
+Optimized legalized selection DAG: %bb.0 '_Z9getNumberv:entry'
+SelectionDAG has 5 nodes:
+    t0: ch,glue = EntryToken
+  t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+  t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+
+
+Writing '/tmp/dag._Z9getNumberv-f71e71.dot'...  done. 
+Trying 'xdg-open' program... Remember to erase graph file: /tmp/dag._Z9getNumberv-f71e71.dot
+===== Instruction selection begins: %bb.0 'entry'
+
+ISEL: Starting selection on root node: t4: ch = TinyGPUISD::Ret t3, Register:i32 $r0, t3:1
+ISEL: Starting pattern match
+  Morphed node: t4: ch = PseudoRET Register:i32 $r0, t3, t3:1
+ISEL: Match complete!
+
+ISEL: Starting selection on root node: t3: ch,glue = CopyToReg t0, Register:i32 $r0, Constant:i32<42>
+
+ISEL: Starting selection on root node: t2: i32 = Register $r0
+
+ISEL: Starting selection on root node: t1: i32 = Constant<42>
+ISEL: Starting pattern match
+  Initial Opcode index to 239
+  Match failed at index 240
+LLVM ERROR: Cannot select: t1: i32 = Constant<42>
+In function: _Z9getNumberv
+PLEASE submit a bug report to https://github.com/llvm/llvm-project/issues/ and include the crash backtrace.
+Stack dump:
+0.	Program arguments: llc -march=tinygpu -O0 index8.ll -debug -view-isel-dags -o index.S
+1.	Running pass 'Function Pass Manager' on module 'index8.ll'.
+2.	Running pass 'CPU0 DAG->DAG Pattern Instruction Selection' on function '@_Z9getNumberv'
+ #0 0x000070bbede29552 llvm::sys::PrintStackTrace(llvm::raw_ostream&, int) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Unix/Signals.inc:798:22
+ #1 0x000070bbede29969 PrintStackTraceSignalHandler(void*) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Unix/Signals.inc:874:1
+ #2 0x000070bbede26dcb llvm::sys::RunSignalHandlers() /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Signals.cpp:105:20
+ #3 0x000070bbede28df3 SignalHandler(int) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/Unix/Signals.inc:415:1
+ #4 0x000070bbed245250 (/lib/x86_64-linux-gnu/libc.so.6+0x45250)
+ #5 0x000070bbed2a3f1c __pthread_kill_implementation ./nptl/pthread_kill.c:44:76
+ #6 0x000070bbed2a3f1c __pthread_kill_internal ./nptl/pthread_kill.c:78:10
+ #7 0x000070bbed2a3f1c pthread_kill ./nptl/pthread_kill.c:89:10
+ #8 0x000070bbed24519e raise ./signal/../sysdeps/posix/raise.c:27:6
+ #9 0x000070bbed228902 abort ./stdlib/abort.c:81:7
+#10 0x000070bbedcdf25b llvm::report_fatal_error(llvm::Twine const&, bool) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Support/ErrorHandling.cpp:126:9
+#11 0x000070bbf3ef11da llvm::iterator_range<llvm::filter_iterator_impl<decltype(adl_begin(declval<llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>&>())), llvm::filterDbgVars(llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>)::'lambda'(llvm::DbgRecord&), llvm::detail::fwd_or_bidi_tag<decltype(adl_begin(declval<llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>&>()))>::type>> llvm::make_filter_range<llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>&, llvm::filterDbgVars(llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>)::'lambda'(llvm::DbgRecord&)>(llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>&, llvm::filterDbgVars(llvm::iterator_range<llvm::ilist_iterator<llvm::ilist_detail::node_options<llvm::DbgRecord, true, false, void, false, void>, false, false>>)::'lambda'(llvm::DbgRecord&)) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/include/llvm/ADT/STLExtras.h:573:1
+#12 0x000070bbf3ef08eb llvm::SelectionDAGISel::SelectCodeCommon(llvm::SDNode*, unsigned char const*, unsigned int) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:4335:9
+#13 0x000070bbf7c24cd2 llvm::TinyGPUDAGToDAGISel::SelectCode(llvm::SDNode*) /home/sanjai/fyp/tiny-gpu-lang-backend/build/lib/Target/TinyGPU/TinyGPUGenDAGISel.inc:437:1
+#14 0x000070bbf7c20591 llvm::TinyGPUDAGToDAGISel::Select(llvm::SDNode*) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Target/TinyGPU/TinyGPUISelDAGToDAG.cpp:58:1
+#15 0x000070bbf3edf6eb llvm::SelectionDAGISel::DoInstructionSelection() /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1354:5
+#16 0x000070bbf3ede8a8 llvm::SelectionDAGISel::CodeGenAndEmitDAG() /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1123:3
+#17 0x000070bbf3edcd6f llvm::SelectionDAGISel::SelectBasicBlock(llvm::ilist_iterator_w_bits<llvm::ilist_detail::node_options<llvm::Instruction, true, false, void, true, llvm::BasicBlock>, false, true>, llvm::ilist_iterator_w_bits<llvm::ilist_detail::node_options<llvm::Instruction, true, false, void, true, llvm::BasicBlock>, false, true>, bool&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:878:1
+#18 0x000070bbf3ee2efd llvm::SelectionDAGISel::SelectAllBasicBlocks(llvm::Function const&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:1905:33
+#19 0x000070bbf3edb419 llvm::SelectionDAGISel::runOnMachineFunction(llvm::MachineFunction&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:616:7
+#20 0x000070bbf7c203ac llvm::TinyGPUDAGToDAGISel::runOnMachineFunction(llvm::MachineFunction&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/Target/TinyGPU/TinyGPUISelDAGToDAG.cpp:27:1
+#21 0x000070bbf3eda170 llvm::SelectionDAGISelLegacy::runOnMachineFunction(llvm::MachineFunction&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/SelectionDAG/SelectionDAGISel.cpp:375:40
+#22 0x000070bbf30719ae llvm::MachineFunctionPass::runOnFunction(llvm::Function&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/CodeGen/MachineFunctionPass.cpp:94:33
+#23 0x000070bbee936acc llvm::FPPassManager::runOnFunction(llvm::Function&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1406:20
+#24 0x000070bbee936da2 llvm::FPPassManager::runOnModule(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1452:13
+#25 0x000070bbee9371fa (anonymous namespace)::MPPassManager::runOnModule(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1521:20
+#26 0x000070bbee932183 llvm::legacy::PassManagerImpl::run(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:539:13
+#27 0x000070bbee937af1 llvm::legacy::PassManager::run(llvm::Module&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/lib/IR/LegacyPassManager.cpp:1649:1
+#28 0x00005b1e8c7cbd53 compileModule(char**, llvm::LLVMContext&) /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/tools/llc/llc.cpp:753:34
+#29 0x00005b1e8c7c9454 main /home/sanjai/fyp/tiny-gpu-lang-backend/llvm/tools/llc/llc.cpp:411:35
+#30 0x000070bbed22a3b8 __libc_start_call_main ./csu/../sysdeps/nptl/libc_start_call_main.h:74:3
+#31 0x000070bbed22a47b call_init ./csu/../csu/libc-start.c:128:20
+#32 0x000070bbed22a47b __libc_start_main ./csu/../csu/libc-start.c:347:5
+#33 0x00005b1e8c7c7eb5 _start (/usr/local/bin/llc+0x42eb5)

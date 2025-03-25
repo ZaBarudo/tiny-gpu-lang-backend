@@ -25,6 +25,7 @@
 #include "llvm/IR/DerivedTypes.h"
 #include "llvm/IR/GlobalVariable.h"
 #include "llvm/Support/Debug.h"
+#include "llvm/MC/MCContext.h"
 #include <cassert>
 
 using namespace llvm;
@@ -246,9 +247,50 @@ bool TinyGPUTargetLowering::CanLowerReturn(CallingConv::ID CallConv,
   return CCInfo.CheckReturn(Outs, TinyGPU_CRetConv);
 }
 
+MCSymbol *TinyGPUTargetLowering::getPostCallLabel(CallLoweringInfo &CLI) const {
+  // Generate a unique symbol for the return address
+  MCContext &Ctx = CLI.DAG.getMachineFunction().getContext();
+  return Ctx.createNamedTempSymbol("postcall");
+}
+
 SDValue TinyGPUTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
                                        SmallVectorImpl<SDValue> &InVals) const {
-  llvm_unreachable("Cannot lower call");
+ SelectionDAG &DAG = CLI.DAG;
+  SDLoc dl = CLI.DL;
+  SDValue Chain = CLI.Chain;
+  SDValue Callee = CLI.Callee;
+
+  // 1. Get stack pointer register
+  SDValue SP = DAG.getCopyFromReg(Chain, dl, TinyGPU::SP,
+                                   getPointerTy(DAG.getDataLayout()));
+
+  // 2. Allocate stack space for return address
+  SDValue NewSP = DAG.getNode(ISD::SUB, dl, getPointerTy(DAG.getDataLayout()),
+                               SP, DAG.getConstant(4, dl, MVT::i32));
+
+  // 3. Generate return address label
+  MCSymbol *RetSym = getPostCallLabel(CLI);
+  SDValue RetAddr = DAG.getMCSymbol(RetSym, getPointerTy(DAG.getDataLayout()));
+
+  // 4. Store return address to stack (SAFE: Use MachinePointerInfo)
+  MachinePointerInfo MPI = MachinePointerInfo::getStack(DAG.getMachineFunction(), 0);
+  Chain = DAG.getStore(Chain, dl, RetAddr, SP, MPI);
+
+  // 5. Update SP register
+  Chain = DAG.getCopyToReg(Chain, dl, TinyGPU::SP, NewSP);
+
+  // 6. Emit jump to callee
+  SDValue Jump = DAG.getNode(ISD::BR, dl, MVT::Other, Chain, Callee);
+
+  // 7. Handle return value (SAFELY)
+  if (!CLI.Ins.empty()) {
+    // Read from return register (e.g., $V0) instead of memory
+    SDValue RetVal = DAG.getCopyFromReg(Jump, dl, TinyGPU::R0, CLI.Ins[0].VT);
+    InVals.push_back(RetVal);
+  }
+
+  return Jump;
+  
 }
 
 SDValue
@@ -315,26 +357,79 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
 //===----------------------------------------------------------------------===//
 //  Misc Lower Operation implementation
 //===----------------------------------------------------------------------===//
-
 SDValue
 TinyGPUTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const {
-   const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
-  EVT PtrVT = Op.getValueType();
 
-  // Create a TargetGlobalAddress node.
-  SDValue Result = DAG.getTargetGlobalAddress(GV, SDLoc(Op), PtrVT);
+  const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
+  EVT VT = Op.getValueType();
+  SDLoc dl(Op);
 
-  // If the target requires a specific sequence of instructions to load a global
-  // address (e.g., using a base register and an offset), emit those instructions here.
-  // For example, TinyGPU might use a LOAD instruction to load the address into a register.
+  if (const auto *GVar = dyn_cast<GlobalVariable>(GV)) {
+    // Directly check for BlockAddress constant
+    if (const auto *BA = dyn_cast<BlockAddress>(GVar->getInitializer())) {
+      const BasicBlock *BB = BA->getBasicBlock();
+      
+      // Create basic block label
+      MCContext &Ctx = DAG.getMachineFunction().getContext();
+      MCSymbol *BBSym = Ctx.getOrCreateSymbol(BB->getName());
+      
+      return DAG.getMCSymbol(BBSym, VT);
+    }
+  }
 
-  // Example: Emit a LOAD instruction to load the global address into a register.
-  return DAG.getNode(ISD::LOAD, SDLoc(Op), PtrVT, Result);
+  // Default handling for regular globals
+  return DAG.getTargetGlobalAddress(GV, dl, VT);
+
+
+  //  const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
+  // EVT VT = Op.getValueType();
+  // SDLoc dl(Op);
+
+  // // Check if the GlobalValue is a GlobalVariable initialized with a BlockAddress
+  // if (const auto *GVar = dyn_cast<GlobalVariable>(GV)) {
+  //   if (const auto *Init = dyn_cast<ConstantExpr>(GVar->getInitializer())) {
+  //     if (Init->getOpcode() == Instruction::BlockAddress) {
+  //       const auto *BA = cast<BlockAddress>(Init->getOperand(0));
+  //       return LowerBlockAddress(BA, dl, VT, DAG);
+  //     }
+  //   }
+  // }
+
+  // // Default handling for other globals
+  // return DAG.getTargetGlobalAddress(GV, dl, VT);
+
+  
+  // const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
+  // EVT PtrVT = Op.getValueType();
+
+  // // Create a TargetGlobalAddress node.
+  // SDValue Result = DAG.getTargetGlobalAddress(GV, SDLoc(Op), PtrVT);
+
+  // // If the target requires a specific sequence of instructions to load a global
+  // // address (e.g., using a base register and an offset), emit those instructions here.
+  // // For example, TinyGPU might use a LOAD instruction to load the address into a register.
+
+  // // Example: Emit a LOAD instruction to load the global address into a register.
+  // return DAG.getNode(ISD::LOAD, SDLoc(Op), PtrVT, Result);
 }
 
 SDValue
 TinyGPUTargetLowering::LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const {
-  llvm_unreachable("Unsupported block address");
+  const GlobalAddressSDNode *GA = cast<GlobalAddressSDNode>(Op.getNode());
+  const GlobalVariable *GVar = cast<GlobalVariable>(GA->getGlobal());
+  const ConstantExpr *CE = cast<ConstantExpr>(GVar->getInitializer());
+  const BlockAddress *BA = cast<BlockAddress>(CE->getOperand(0));
+
+  // Extract the basic block and its parent function
+  const Function *Func = BA->getFunction();
+  const BasicBlock *BB = BA->getBasicBlock();
+
+  // Create a label for the basic block
+  MCContext &Ctx = DAG.getMachineFunction().getContext();
+  MCSymbol *BBSym = Ctx.getOrCreateSymbol(BB->getName());
+
+  // Return the symbol as an SDValue
+  return DAG.getMCSymbol(BBSym, Op.getValueType());
 }
 
 SDValue

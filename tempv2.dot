@@ -1,0 +1,28 @@
+digraph "isel input for _Z13callGetNumberv:entry" {
+	rankdir="BT";
+	label="isel input for _Z13callGetNumberv:entry";
+
+	Node0x621790699750 [shape=record,shape=Mrecord,label="{EntryToken|t0|{<d0>ch|<d1>glue}}"];
+	Node0x6217906b96c0 [shape=record,shape=Mrecord,label="{undef|t3|{<d0>i32}}"];
+	Node0x6217906b97a0 [shape=record,shape=Mrecord,label="{Constant\<3\>|t5|{<d0>i32}}"];
+	Node0x6217906b9880 [shape=record,shape=Mrecord,label="{FrameIndex\<0\>|t7|{<d0>i32}}"];
+	Node0x6217906b9730 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1|<s2>2}|load\<(dereferenceable load (s32) from @total)\>|t4|{<d0>i32|<d1>ch}}"];
+	Node0x6217906b9730:s0 -> Node0x621790699750:d0[color=blue,style=dashed];
+	Node0x6217906b9730:s1 -> Node0x6217906b99d0:d0;
+	Node0x6217906b9730:s2 -> Node0x6217906b96c0:d0;
+	Node0x6217906b9810 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1}|mul nsw|t6|{<d0>i32}}"];
+	Node0x6217906b9810:s0 -> Node0x6217906b9730:d0;
+	Node0x6217906b9810:s1 -> Node0x6217906b97a0:d0;
+	Node0x6217906b98f0 [shape=record,shape=Mrecord,label="{{<s0>0|<s1>1|<s2>2|<s3>3}|store\<(store (s32) into %ir.c)\>|t8|{<d0>ch}}"];
+	Node0x6217906b98f0:s0 -> Node0x6217906b9730:d1[color=blue,style=dashed];
+	Node0x6217906b98f0:s1 -> Node0x6217906b9810:d0;
+	Node0x6217906b98f0:s2 -> Node0x6217906b9880:d0;
+	Node0x6217906b98f0:s3 -> Node0x6217906b96c0:d0;
+	Node0x6217906b9960 [shape=record,shape=Mrecord,label="{{<s0>0}|TinyGPUISD::Ret|t9|{<d0>ch}}"];
+	Node0x6217906b9960:s0 -> Node0x6217906b98f0:d0[color=blue,style=dashed];
+	Node0x6217906b9650 [shape=record,shape=Mrecord,label="{TargetGlobalAddress\<ptr @total\> 0|t10|{<d0>i32}}"];
+	Node0x6217906b99d0 [shape=record,shape=Mrecord,label="{{<s0>0}|\<\<Unknown Target Node #499\>\>|t11|{<d0>i32}}"];
+	Node0x6217906b99d0:s0 -> Node0x6217906b9650:d0;
+	Node0x0[ plaintext=circle, label ="GraphRoot"];
+	Node0x0 -> Node0x6217906b9960:d0[color=blue,style=dashed];
+}
