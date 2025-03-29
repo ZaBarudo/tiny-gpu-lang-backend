@@ -253,45 +253,411 @@ MCSymbol *TinyGPUTargetLowering::getPostCallLabel(CallLoweringInfo &CLI) const {
   return Ctx.createNamedTempSymbol("postcall");
 }
 
-SDValue TinyGPUTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
-                                       SmallVectorImpl<SDValue> &InVals) const {
- SelectionDAG &DAG = CLI.DAG;
-  SDLoc dl = CLI.DL;
+SDValue TinyGPUTargetLowering::LowerCall(
+    TargetLowering::CallLoweringInfo &CLI,
+    SmallVectorImpl<SDValue> &InVals) const {
+   SelectionDAG &DAG = CLI.DAG;
+  SDLoc DL = CLI.DL;
   SDValue Chain = CLI.Chain;
-  SDValue Callee = CLI.Callee;
 
-  // 1. Get stack pointer register
-  SDValue SP = DAG.getCopyFromReg(Chain, dl, TinyGPU::SP,
-                                   getPointerTy(DAG.getDataLayout()));
-
-  // 2. Allocate stack space for return address
-  SDValue NewSP = DAG.getNode(ISD::SUB, dl, getPointerTy(DAG.getDataLayout()),
-                               SP, DAG.getConstant(4, dl, MVT::i32));
-
-  // 3. Generate return address label
-  MCSymbol *RetSym = getPostCallLabel(CLI);
-  SDValue RetAddr = DAG.getMCSymbol(RetSym, getPointerTy(DAG.getDataLayout()));
-
-  // 4. Store return address to stack (SAFE: Use MachinePointerInfo)
-  MachinePointerInfo MPI = MachinePointerInfo::getStack(DAG.getMachineFunction(), 0);
-  Chain = DAG.getStore(Chain, dl, RetAddr, SP, MPI);
-
-  // 5. Update SP register
-  Chain = DAG.getCopyToReg(Chain, dl, TinyGPU::SP, NewSP);
-
-  // 6. Emit jump to callee
-  SDValue Jump = DAG.getNode(ISD::BR, dl, MVT::Other, Chain, Callee);
-
-  // 7. Handle return value (SAFELY)
-  if (!CLI.Ins.empty()) {
-    // Read from return register (e.g., $V0) instead of memory
-    SDValue RetVal = DAG.getCopyFromReg(Jump, dl, TinyGPU::R0, CLI.Ins[0].VT);
+  // Handle return values
+  const bool HasReturn = !CLI.Ins.empty();
+  if (HasReturn) {
+    // For functions returning values, create a virtual register
+    EVT RetVT = CLI.Ins[0].VT;
+    Register Reg = RegInfo->createVirtualRegister(&TinyGPU::GPR32RegClass);
+    SDValue RetVal = DAG.getRegister(Reg, RetVT);
     InVals.push_back(RetVal);
   }
 
-  return Jump;
-  
+  // Handle direct calls
+  if (auto *G = dyn_cast<GlobalAddressSDNode>(CLI.Callee)) {
+    const GlobalValue *GV = G->getGlobal();
+
+    // Create BR instruction with proper chain handling
+    SDVTList VTs = DAG.getVTList(HasReturn ? MVT::i32 : MVT::Other, MVT::Other);
+    SDValue Ops[] = {
+        Chain,
+        DAG.getTargetGlobalAddress(GV, DL, getPointerTy(DAG.getDataLayout()))
+    };
+
+    SDValue Result = DAG.getNode(TinyGPUISD::BR_DIRECT, DL, VTs, Ops);
+
+    // Handle chain and return value
+    Chain = Result.getValue(1);
+    if (HasReturn) {
+      return DAG.getMergeValues({Result.getValue(0), Chain}, DL);
+    }
+    return Chain;
+  }
+
+  report_fatal_error("Indirect calls not supported");
 }
+// SDValue TinyGPUTargetLowering::LowerCall(
+//     TargetLowering::CallLoweringInfo &CLI,
+//     SmallVectorImpl<SDValue> &InVals) const {
+//       SelectionDAG &DAG = CLI.DAG;
+//   SDLoc dl = CLI.DL;
+//   SDValue Chain = CLI.Chain;
+//   SmallVector<SDValue, 8> Ops;
+
+//   // Retrieve argument location information
+//   CCState &CCInfo = CLI.CCInfo;
+//   const SmallVectorImpl<CCValAssign> &ArgLocs = CCInfo.getArgLocs();
+
+//   // Adjust the stack for outgoing arguments
+//   unsigned ArgSize = CCInfo.getNextStackOffset();
+//   Chain = DAG.getCALLSEQ_START(Chain, ArgSize, 0, dl);
+
+//   // Store each argument to its assigned stack location
+//   for (unsigned i = 0, e = CLI.Args.size(); i != e; ++i) {
+//     const ISD::OutputArg &OutArg = CLI.Args[i];
+//     CCValAssign &VA = ArgLocs[i];
+//     SDValue ArgVal = OutArg.Node;
+
+//     if (VA.isMemLoc()) {
+//       // Calculate stack address for this argument
+//       SDValue StackPtr = DAG.getRegister(getStackPointerRegister(), getPointerTy(DAG.getDataLayout()));
+//       SDValue Offset = DAG.getIntPtrConstant(VA.getLocMemOffset(), dl);
+//       SDValue Addr = DAG.getNode(ISD::ADD, dl, getPointerTy(DAG.getDataLayout()), StackPtr, Offset);
+//       Chain = DAG.getStore(Chain, dl, ArgVal, Addr, MachinePointerInfo::getStack(DAG.getMachineFunction(), VA.getLocMemOffset()));
+//     } else {
+//       report_fatal_error("Register arguments not supported for TinyGPU");
+//     }
+//   }
+
+//   // Prepare callee address
+//   SDValue Callee;
+//   if (GlobalAddressSDNode *G = dyn_cast<GlobalAddressSDNode>(CLI.Callee)) {
+//     Callee = DAG.getGlobalAddress(G->getGlobal(), dl, getPointerTy(DAG.getDataLayout()));
+//   } else {
+//     Callee = CLI.Callee;
+//   }
+
+//   // Build the CALL node
+//   Ops.push_back(Chain);
+//   Ops.push_back(Callee);
+//   SDVTList NodeTys = DAG.getVTList(MVT::Other, MVT::Glue);
+//   SDValue Call = DAG.getNode(TinyGPUISD::CALL, dl, NodeTys, Ops);
+//   Chain = Call.getValue(0);
+//   SDValue Glue = Call.getValue(1);
+
+//   // Handle return value (assuming return register R0)
+//   if (!CLI.RetTy->isVoidTy()) {
+//     MVT RetVT = getValueType(CLI.RetTy);
+//     SDValue RetVal = DAG.getRegister(TinyGPU::R0, RetVT);
+//     InVals.push_back(RetVal);
+//   }
+
+//   // Restore stack pointer
+//   Chain = DAG.getCALLSEQ_END(Chain, ArgSize, 0, dl);
+
+//   return Chain;
+//     }
+
+// SDValue TinyGPUTargetLowering::LowerCall(
+//     TargetLowering::CallLoweringInfo &CLI,
+//     SmallVectorImpl<SDValue> &InVals) const  {
+  
+//   SelectionDAG &DAG = CLI.DAG;
+//   SDLoc DL = CLI.DL;
+//   SmallVector<ISD::OutputArg, 32> &Outs = CLI.Outs;
+//   SmallVector<SDValue, 32> &OutVals = CLI.OutVals;
+//   SDValue Chain = CLI.Chain;
+//   SDValue Callee = CLI.Callee;
+//   bool IsVarArg = CLI.IsVarArg;
+
+//   // 1. Create return address block
+//   MachineFunction &MF = DAG.getMachineFunction();
+//   MachineBasicBlock *MBB = MF.getBlockNumbered(CLI.CB->getParent()->getNumber());
+//   MachineBasicBlock *ReturnMBB = MF.CreateMachineBasicBlock(MBB->getBasicBlock());
+//   MF.insert(std::next(MachineFunction::iterator(MBB)), ReturnMBB);
+
+//   // 2. Set return address in link register (R7)
+//   MCSymbol *RetSym = ReturnMBB->getSymbol();
+//   SDValue ReturnAddr = DAG.getTargetExternalSymbol(RetSym->getName().data(),
+//                                                   getPointerTy(DAG.getDataLayout()));
+//   Chain = DAG.getCopyToReg(Chain, DL, TinyGPU::R7, ReturnAddr);
+
+//   // 3. Handle arguments
+//   const unsigned NumRegArgs = 4;  // R0-R3 for arguments
+//   unsigned ArgIdx = 0;
+  
+//   // Pass first 4 arguments in registers
+//   for (; ArgIdx < std::min(NumRegArgs, (unsigned)Outs.size()); ArgIdx++) {
+//     EVT ArgVT = Outs[ArgIdx].VT;
+//     SDValue Arg = OutVals[ArgIdx];
+    
+//     // Handle integer promotion
+//     if (ArgVT.isInteger() && ArgVT.bitsLT(getPointerTy(DAG.getDataLayout()))) {
+//       Arg = DAG.getNode(ISD::ANY_EXTEND, DL, getPointerTy(DAG.getDataLayout()), Arg);
+//     }
+    
+//     Chain = DAG.getCopyToReg(Chain, DL, TinyGPU::R0 + ArgIdx, Arg);
+//   }
+
+//   // Pass remaining arguments on stack
+//   if (ArgIdx < Outs.size()) {
+//     MachineFrameInfo &MFI = MF.getFrameInfo();
+//     int FrameIdx = MFI.CreateFixedObject(
+//         getPointerTy(DAG.getDataLayout()).getSizeInBits() / 8,
+//         ArgIdx * 4,  // 4-byte slots
+//         true);
+    
+//     for (; ArgIdx < Outs.size(); ArgIdx++) {
+//       SDValue FIPtr = DAG.getFrameIndex(FrameIdx++, getPointerTy(DAG.getDataLayout()));
+//       Chain = DAG.getStore(Chain, DL, OutVals[ArgIdx], FIPtr, MachinePointerInfo());
+//     }
+//   }
+
+//   // 4. Direct branch to function
+//   GlobalAddressSDNode *G = cast<GlobalAddressSDNode>(Callee);
+//   SDValue TargetAddr = DAG.getTargetGlobalAddress(G->getGlobal(), DL, getPointerTy(DAG.getDataLayout()));
+
+//   SDVTList NodeTys = DAG.getVTList(MVT::Other, MVT::Glue);
+//   SDValue Ops[] = {Chain, TargetAddr};
+//   Chain = DAG.getNode(TinyGPU::BR_DIRECT, DL, NodeTys, Ops);
+
+
+//   SDValue Glue = Chain.getValue(1);
+
+//   // 5. Handle return value
+//   if (!CLI.Ins.empty()) {
+//     assert(CLI.Ins.size() == 1 && "Only single return value supported");
+//     EVT RetVT = CLI.Ins[0].VT;
+    
+//     SDValue RetVal = DAG.getCopyFromReg(Chain, DL, TinyGPU::R0, RetVT, Chain.getValue(1));
+//     InVals.push_back(RetVal);
+//     Chain = RetVal.getValue(1);
+//   }
+
+//   // 6. Add return block successor
+//   MBB->addSuccessor(ReturnMBB);
+
+//   return Chain;
+// }
+
+
+// SDValue TinyGPUTargetLowering::LowerCall(
+//     TargetLowering::CallLoweringInfo &CLI,
+//     SmallVectorImpl<SDValue> &InVals) const {
+  
+//   SelectionDAG &DAG = CLI.DAG;
+//   SDLoc DL = CLI.DL;
+//   SDValue Chain = CLI.Chain;
+//   SDValue Callee = CLI.Callee;
+
+//   // 1. Set return address (simplified to next instruction)
+//   MachineFunction &MF = DAG.getMachineFunction();
+//   MachineBasicBlock *ReturnMBB = MF.CreateMachineBasicBlock();
+//   MF.insert(MF.end(), ReturnMBB);
+  
+//   // SDValue ReturnAddr = DAG.getTargetBlockAddress(ReturnMBB, MVT::i32);
+//   MCSymbol *RetSym = ReturnMBB->getSymbol();
+//   SDValue ReturnAddr = DAG.getTargetExternalSymbol(RetSym->getName().data(), MVT::i32);
+//   SDValue ConstAddr = DAG.getNode(TinyGPUISD::CONST, DL, MVT::i32, ReturnAddr);
+//   Chain = DAG.getCopyToReg(Chain, DL, TinyGPU::R7, ConstAddr);
+
+//   // 2. Handle arguments (first 3 in R0-R2)
+//   for (unsigned i = 0; i < CLI.Outs.size() && i < 3; ++i) {
+//     Chain = DAG.getCopyToReg(Chain, DL, TinyGPU::R0 + i, CLI.OutVals[i]);
+//   }
+
+//   // 3. Create branch to function
+//   SDValue Branch = DAG.getNode(ISD::BR, DL, MVT::Other, Chain, Callee);
+  
+//   // 4. Handle return value (if any)
+//   if (!CLI.Ins.empty()) {
+//     SDValue RetVal = DAG.getCopyFromReg(Branch, DL, TinyGPU::R0, CLI.Ins[0].VT);
+//     InVals.push_back(RetVal);
+//     Chain = RetVal.getValue(1);
+//   }
+
+//   return Chain;
+// }
+
+
+// SDValue TinyGPUTargetLowering::LowerCall(
+//     TargetLowering::CallLoweringInfo &CLI,
+//     SmallVectorImpl<SDValue> &InVals) const {
+//   SelectionDAG &DAG = CLI.DAG;
+//   SDLoc dl = CLI.DL;
+//   SmallVector<SDValue, 8> Ops;
+//   SDValue Chain = CLI.Chain;
+//   SDValue Callee = CLI.Callee;
+//   MachineFunction &MF = DAG.getMachineFunction();
+
+//   // Analyze arguments and return value
+//   unsigned NumArgs = CLI.Args.size();
+//   bool HasRetVal = !CLI.Ins.empty();
+
+//   // 1. Handle function address
+//   // If callee is a global address (function name), materialize it
+//   if (GlobalAddressSDNode *GA = dyn_cast<GlobalAddressSDNode>(Callee)) {
+//     SDValue TargetGA = DAG.getTargetGlobalAddress(
+//         GA->getGlobal(), 
+//         dl, 
+//         getPointerTy(DAG.getDataLayout())
+//     );
+    
+//     // Create LOAD node with proper alignment
+//      Callee = DAG.getLoad(
+//     MVT::i32, 
+//     dl, 
+//     Chain,
+//     TargetGA,
+//     MachinePointerInfo(),
+//     Align(4) // Required alignment for i32
+// );
+//     Chain = Callee.getValue(1);
+// }
+
+//   // 2. Prepare arguments
+//   for (unsigned i = 0; i < NumArgs; ++i) {
+//     // Get argument value
+//     SDValue Arg = CLI.Args[i].Node;
+    
+//     // Handle register-based arguments (first 4 args in registers)
+//     if (i < 4) {
+//       unsigned Reg = TinyGPU::R0 + i;
+//       Chain = DAG.getCopyToReg(Chain, dl, Reg, Arg);
+//     } 
+//     // Stack-based arguments
+//     else {
+//       // Calculate stack offset
+//       int Offset = (i - 4) * 4;  // 4 bytes per argument
+//       SDValue SP = DAG.getCopyFromReg(Chain, dl, TinyGPU::SP, MVT::i32);
+//       SDValue Addr = DAG.getNode(ISD::ADD, dl, MVT::i32, SP,
+//                                 DAG.getConstant(Offset, dl, MVT::i32));
+//       Chain = DAG.getStore(Chain, dl, Arg, Addr, MachinePointerInfo());
+//     }
+//   }
+
+//   // 3. Create CALL node
+//   Ops.push_back(Chain);
+//   Ops.push_back(Callee);
+  
+//   // Add implicit register uses
+//   const uint32_t *Mask = MF.getSubtarget<TinyGPUSubtarget>()
+//                           .getRegisterInfo()
+//                           ->getCallPreservedMask(MF, CLI.CallConv);
+//   Ops.push_back(DAG.getRegisterMask(Mask));
+
+//   SDVTList NodeTys = DAG.getVTList(MVT::Other, MVT::Glue);
+//   SDValue Call = DAG.getNode(TinyGPUISD::CALL, dl, NodeTys, Ops);
+//   Chain = Call.getValue(0);
+//   SDValue Glue = Call.getValue(1);
+
+//   // 4. Handle return value
+//   if (HasRetVal) {
+//     // Return value in R0
+//     SDValue RetVal = DAG.getCopyFromReg(Chain, dl, TinyGPU::R0, CLI.Ins[0].VT);
+//     InVals.push_back(RetVal);
+//     Chain = RetVal.getValue(1);
+//   }
+
+//   // 5. Update chain
+//   return Chain;
+// }
+
+// SDValue TinyGPUTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
+//                                        SmallVectorImpl<SDValue> &InVals) const {
+
+
+
+// // SelectionDAG &DAG = CLI.DAG;
+// //   SDLoc dl = CLI.DL;
+// //   SDValue Chain = CLI.Chain;
+// //   SDValue Callee = CLI.Callee;
+
+// //   // 1. Materialize function address (if needed)
+// //   SDValue FuncAddr = DAG.getTargetGlobalAddress(
+// //       cast<GlobalAddressSDNode>(Callee)->getGlobal(), dl, MVT::i32);
+
+// //   // 2. Create CALL node instead of BR
+// //   SDValue Call = DAG.getNode(TinyGPUISD::CALL, dl, MVT::Other, Chain, FuncAddr);
+
+// //   // 3. Handle return value (critical for assertion)
+// //   if (!CLI.Ins.empty()) {
+// //     SDValue RetVal = DAG.getCopyFromReg(Call, dl, TinyGPU::R0, CLI.Ins[0].VT);
+// //     InVals.push_back(RetVal);
+// //   }
+
+// // return Call;
+
+
+// /////////////////////
+// //
+// //  SelectionDAG &DAG = CLI.DAG;
+// //   SDLoc dl = CLI.DL;
+// //   SDValue Chain = CLI.Chain;
+// //   SDValue Callee = CLI.Callee;
+
+// //   // 1. Get stack pointer register
+// //   SDValue SP = DAG.getCopyFromReg(Chain, dl, TinyGPU::SP,
+// //                                    getPointerTy(DAG.getDataLayout()));
+
+// //   // 2. Allocate stack space for return address
+// //   SDValue NewSP = DAG.getNode(ISD::SUB, dl, getPointerTy(DAG.getDataLayout()),
+// //                                SP, DAG.getConstant(4, dl, MVT::i32));
+
+// //   // 3. Generate return address label
+// //   MCSymbol *RetSym = getPostCallLabel(CLI);
+// //   SDValue RetAddr = DAG.getMCSymbol(RetSym, getPointerTy(DAG.getDataLayout()));
+
+// //   // 4. Store return address to stack (SAFE: Use MachinePointerInfo)
+// //   MachinePointerInfo MPI = MachinePointerInfo::getStack(DAG.getMachineFunction(), 0);
+// //   Chain = DAG.getStore(Chain, dl, RetAddr, SP, MPI);
+
+// //   // 5. Update SP register
+// //   Chain = DAG.getCopyToReg(Chain, dl, TinyGPU::SP, NewSP);
+
+// //   // 6. Emit jump to callee
+// //   SDValue Jump = DAG.getNode(ISD::BR, dl, MVT::Other, Chain, Callee);
+
+// //   // 7. Handle return value (SAFELY)
+// //   if (!CLI.Ins.empty()) {
+// //     // Read from return register (e.g., $V0) instead of memory
+// //     SDValue RetVal = DAG.getCopyFromReg(Jump, dl, TinyGPU::R0, CLI.Ins[0].VT);
+// //     InVals.push_back(RetVal);
+// //   }
+
+// //   return Jump;
+
+// /////////////////////////
+
+// //  SelectionDAG &DAG = CLI.DAG;
+// //   SDLoc dl = CLI.DL;
+// //   SDValue Chain = CLI.Chain;
+// //   SDValue Callee = CLI.Callee;
+
+// //   // 1. Get function address as TargetGlobalAddress
+// //   SDValue FuncAddr = DAG.getTargetGlobalAddress(
+// //       cast<GlobalAddressSDNode>(Callee)->getGlobal(), dl, MVT::i32);
+
+// //   // 2. Load address into a register (e.g., MOVI)
+// //   SDValue AddrReg = DAG.getNode(TinyGPU::CONST, dl, MVT::i32, FuncAddr);
+
+// //   // 3. Create BR instruction using the register
+// //   SDValue Br = DAG.getNode(ISD::BR, dl, MVT::Other, Chain, AddrReg);
+
+
+// //   SDValue Glue = DAG.getNode(ISD::BR, dl, MVT::Other, Chain, Callee);
+
+// //   // 3. Handle return value (critical fix)
+// //   if (!CLI.Ins.empty()) {
+// //     // Determine return register (e.g., $V0 for TinyGPU)
+// //     EVT RetVT = CLI.Ins[0].VT;
+// //     SDValue RetVal = DAG.getCopyFromReg(Glue, dl, TinyGPU::R0, RetVT);
+
+// //     // Add return value to InVals
+// //     InVals.push_back(RetVal);
+// //   }
+
+//   // 4. Return the final chain
+//   // return Glue;
+  
+// }
 
 SDValue
 TinyGPUTargetLowering::LowerReturn(SDValue Chain,
@@ -360,57 +726,42 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
 SDValue
 TinyGPUTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const {
 
-  const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
+  const GlobalAddressSDNode *GA = cast<GlobalAddressSDNode>(Op.getNode());
+  const GlobalValue *GV = GA->getGlobal();
   EVT VT = Op.getValueType();
   SDLoc dl(Op);
 
+  // Handle blockaddress conversion
   if (const auto *GVar = dyn_cast<GlobalVariable>(GV)) {
-    // Directly check for BlockAddress constant
-    if (const auto *BA = dyn_cast<BlockAddress>(GVar->getInitializer())) {
-      const BasicBlock *BB = BA->getBasicBlock();
+    if (GVar->hasInitializer()) {
+      const Constant *Init = GVar->getInitializer();
       
-      // Create basic block label
-      MCContext &Ctx = DAG.getMachineFunction().getContext();
-      MCSymbol *BBSym = Ctx.getOrCreateSymbol(BB->getName());
-      
-      return DAG.getMCSymbol(BBSym, VT);
+      // Unwrap constant expressions
+      while (const auto *CE = dyn_cast<ConstantExpr>(Init)) {
+        if (CE->isCast()) {
+          Init = CE->getOperand(0);
+        } else {
+          break;
+        }
+      }
+
+      // Convert to blockaddress if found
+      if (const auto *BA = dyn_cast<BlockAddress>(Init)) {
+        const BasicBlock *BB = BA->getBasicBlock();
+        
+        // Create basic block label
+        MCContext &Ctx = DAG.getMachineFunction().getContext();
+        MCSymbol *BBSym = Ctx.getOrCreateSymbol(BB->getName());
+        
+        // Return as MCSymbol reference
+        return DAG.getMCSymbol(BBSym, VT);
+      }
     }
   }
 
-  // Default handling for regular globals
+  // Fallback to regular global address handling
   return DAG.getTargetGlobalAddress(GV, dl, VT);
 
-
-  //  const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
-  // EVT VT = Op.getValueType();
-  // SDLoc dl(Op);
-
-  // // Check if the GlobalValue is a GlobalVariable initialized with a BlockAddress
-  // if (const auto *GVar = dyn_cast<GlobalVariable>(GV)) {
-  //   if (const auto *Init = dyn_cast<ConstantExpr>(GVar->getInitializer())) {
-  //     if (Init->getOpcode() == Instruction::BlockAddress) {
-  //       const auto *BA = cast<BlockAddress>(Init->getOperand(0));
-  //       return LowerBlockAddress(BA, dl, VT, DAG);
-  //     }
-  //   }
-  // }
-
-  // // Default handling for other globals
-  // return DAG.getTargetGlobalAddress(GV, dl, VT);
-
-  
-  // const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
-  // EVT PtrVT = Op.getValueType();
-
-  // // Create a TargetGlobalAddress node.
-  // SDValue Result = DAG.getTargetGlobalAddress(GV, SDLoc(Op), PtrVT);
-
-  // // If the target requires a specific sequence of instructions to load a global
-  // // address (e.g., using a base register and an offset), emit those instructions here.
-  // // For example, TinyGPU might use a LOAD instruction to load the address into a register.
-
-  // // Example: Emit a LOAD instruction to load the global address into a register.
-  // return DAG.getNode(ISD::LOAD, SDLoc(Op), PtrVT, Result);
 }
 
 SDValue
@@ -501,6 +852,32 @@ TinyGPUTargetLowering::LowerShlParts(SDValue Op, SelectionDAG &DAG) const {
 
   SDValue Ops[2] = {Lo, Hi};
   return DAG.getMergeValues(Ops, DL);
+}
+
+SDValue TinyGPUTargetLowering::LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const {
+  SDLoc dl(Op);
+  SDValue Chain = Op.getOperand(0);
+  SDValue DestReg = Op.getOperand(1);
+  SDValue SrcVal = Op.getOperand(2);
+
+  // Handle constant materialization
+  if (ConstantSDNode *CN = dyn_cast<ConstantSDNode>(SrcVal)) {
+    SDValue ConstVal = DAG.getTargetConstant(CN->getSExtValue(), dl, MVT::i32);
+    return DAG.getNode(ISD::STORE, dl, 
+                      DAG.getVTList(MVT::Other, MVT::Glue),
+                      Chain, DestReg, ConstVal);
+  }
+
+  // Handle register copies via ADD/SUB 0
+  if (SrcVal.getOpcode() == ISD::Register) {
+    return DAG.getNode(ISD::ADD, dl, 
+                      DAG.getVTList(MVT::Other, MVT::Glue),
+                      Chain, DestReg, SrcVal,
+                      DAG.getTargetConstant(0, dl, MVT::i32));
+  }
+
+  // Fallback to default handling
+  return SDValue();
 }
 
 SDValue
@@ -612,6 +989,7 @@ SDValue
 TinyGPUTargetLowering::LowerOperation(SDValue Op, SelectionDAG &DAG) const {
   switch (Op.getOpcode()) {
   default:                        llvm_unreachable("unimplemented operand");
+  // case ISD::CopyToReg:            return LowerCopyToReg(Op, DAG);
   case ISD::GlobalAddress:        return LowerGlobalAddress(Op, DAG);
   case ISD::BlockAddress:         return LowerBlockAddress(Op, DAG);
   case ISD::ConstantPool:         return LowerConstantPool(Op, DAG);

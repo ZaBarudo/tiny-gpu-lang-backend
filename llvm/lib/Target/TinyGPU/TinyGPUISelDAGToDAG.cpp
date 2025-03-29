@@ -50,6 +50,12 @@ void TinyGPUDAGToDAGISel::Select(SDNode *Node) {
     }
     break;
   }
+   case TinyGPUISD::CALL: {
+    SDValue Callee = Node->getOperand(1);
+    SDLoc dl(Node);
+    ReplaceNode(Node, CurDAG->getMachineNode(ISD::BR, dl, MVT::Other, Callee, Node->getOperand(0)));
+    return;
+  }
   default: break;
   }
 

@@ -265,6 +265,22 @@ class RWInstU<TinyGPUOpcode opcode, dag outs, dag ins, string opcodestr,
   let Opcode = opcode.Value;
 }
 
+class InstTinyGPU<dag outs, dag ins, string asmstr>
+: Instruction {
+  field bits<32> Inst;
+  let Namespace = "TinyGPU";
+  
+  dag OutOperandList = outs;
+  dag InOperandList = ins;
+  let AsmString = asmstr;
+  
+  let Size = 4;
+  bits<8> Opcode;
+  
+  let DecoderNamespace = "TinyGPU";
+}
+
+
 // class BranchInst<bits<3> funct3, TinyGPUOpcode opcode, dag outs, dag ins,
 //                  string opcodestr1, string opcodestr2, string argstr1,
 //                  string argstr2>

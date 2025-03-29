@@ -28,6 +28,8 @@ enum NodeType {
   // BR,
   // CMP,
   // Return
+  CONST,
+  CALL,
   Ret,
 };
 }
@@ -36,6 +38,8 @@ class TinyGPUSubtarget;
 
 class TinyGPUTargetLowering : public TargetLowering  {
 public:
+  SDValue LowerCopyToReg(SDValue Op, SelectionDAG &DAG) const ;
+
   explicit TinyGPUTargetLowering(const TargetMachine &TM,
                               const TinyGPUSubtarget &STI);
 

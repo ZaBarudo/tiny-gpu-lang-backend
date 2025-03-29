@@ -190,6 +190,10 @@ class BRANCH_r2<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWJInstR2<funct7, funct3, OPC_OP, (outs), (ins GPR:$rs2, simm13_lsb0:$rs),
               opcodestr, "$rs">;
 
+class BRANCH_r3<bits<7> funct7, bits<3> funct3, string opcodestr>
+    : RWJInstR<funct7, funct3, OPC_OP, (outs), (ins simm12:$rs),
+              opcodestr, "$rs">;
+
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class STR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWInstRR<funct7, funct3, OPC_STORE, (outs), (ins GPR:$rd, GPR:$rs),
@@ -284,6 +288,9 @@ def BRNCH : BRANCH_r<0b0000011, 0b000, "BR">,
 
 def BRNCH_2 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
+def BRNCH_3 : BRANCH_r3<0b0000011, 0b000, "BR">,
+              Sched<[ReadLoad]>;
+
 def BRNCHN : BRANCH_r2<0b0000011, 0b000, "BRn">,
               Sched<[ReadLoad]>;
 def BRNCHP : BRANCH_r2<0b0000011, 0b000, "BRp">,
@@ -367,7 +374,11 @@ class PatGprUimmLog2WSize<SDPatternOperator OpNode, RWInstIShift Inst>
 class PatGpr<SDPatternOperator OpNode, RWInstRR Inst>
     : Pat<(OpNode GPR:$rs), (Inst GPR:$rs)>;
 
-
+def func_addr : Operand<i32> {
+  let PrintMethod = "printGlobalAddress";  // Custom printer for addresses
+  let EncoderMethod = "encodeGlobalAddress";  // Custom encoder
+  let MIOperandInfo = (ops ptr_rc:$addr);  // Operand type metadata
+}
 /// Immediates
 
 // def : Pat<(simm12:$imm), (ADDI R0, simm12:$imm)>;
@@ -387,6 +398,60 @@ def : Pat<(store simm12:$imm12, GPR:$rs), (CONST simm12:$imm12, GPR:$rs)>;
 // def : Pat<(store i32:$src, (frameindex FI)),
 //           (SW i32:$src, (add SP, (i32 (simm32 FI))), 0)>;
 
+// def to_tblockaddr : SDNodeXForm<tglobaladdr, [{
+//   const GlobalAddressSDNode *GA = cast<GlobalAddressSDNode>(N);
+//   const GlobalValue *GV = GA->getGlobal();
+//   EVT VT = GA->getValueType(0);
+//   SDLoc dl(N);
+
+//   // Check if this global is a blockaddress wrapper
+//   if (const auto *GVar = dyn_cast<GlobalVariable>(GV)) {
+//     const Constant *Init = GVar->getInitializer();
+    
+//     // Unwrap constant casts (bitcast/ptrtoint)
+//     while (const auto *CE = dyn_cast<ConstantExpr>(Init)) {
+//       if (CE->isCast()) 
+//         Init = CE->getOperand(0);
+//       else 
+//         break;
+//     }
+
+//     // Convert BlockAddress to immediate label
+//     if (const auto *BA = dyn_cast<BlockAddress>(Init)) {
+//       const BasicBlock *BB = BA->getBasicBlock();
+//       MCContext &Ctx = CurDAG->getContext();
+//       MCSymbol *BBSym = Ctx.getOrCreateSymbol(BB->getName());
+      
+//       // Return as target-specific immediate (basic block label)
+//       return CurDAG->getTargetBlockAddress(BBSym, VT);
+//     }
+//   }
+
+//   // Fallback: regular global address
+//   return CurDAG->getTargetGlobalAddress(GV, dl, VT);
+// }]>;
+
+def to_funcptr : SDNodeXForm<tglobaladdr, [{
+  const GlobalAddressSDNode *GA = cast<GlobalAddressSDNode>(N);
+  
+  // Get symbol name (e.g., @_Z9getNumberii becomes "_Z9getNumberii")
+  std::string SymName = GA->getGlobal()->getName().str();
+  
+  // Create target-specific symbol reference
+  return CurDAG->getTargetExternalSymbol(SymName.c_str(), N->getValueType(0));
+}]>;
+
+// Direct branch to global symbol
+// def BR_DIRECT : InstTinyGPU<(outs), (ins GPR:$dst),"br $dst",[(br tglobaladdr:$dst)]>;
+def BR_DIRECT : InstTinyGPU<(outs), 
+                          (ins GPR:$dst),  // Changed from GPR to tglobaladdr
+                          "br $dst"> {  // Match call nodes with global addresses
+  let isBranch = 1;
+  let isTerminator = 1;
+  let isCall = 1;
+  let hasDelaySlot = 0;
+  let Defs = [R7];  // If return address is stored in R7
+}
 
 /// Simple arithmetic operations
 
@@ -402,6 +467,10 @@ def : Pat<(setgt GPR:$lhs, GPR:$rhs), (SUB GPR:$lhs, GPR:$rhs)>;
 def : Pat<(seteq GPR:$lhs, GPR:$rhs), (MUL GPR:$lhs, GPR:$rhs)>;
 def : Pat<(setne GPR:$lhs, GPR:$rhs), (MUL GPR:$lhs, GPR:$rhs)>;
 def : Pat<(br bb:$dst), (BRNCH bb:$dst)>;
+// def : Pat<(TinyGPU::CALL (i32 tglobaladdr:$dst)),
+//           (BRNCH $dst)>;
+// def : Pat<(call tglobaladdr: $dst), (BRNCH tglobaladdr:$dst)>;
+// def CALL : SDNode<"TinyGPUISD::CALL", SDTBr, [SDNPHasChain]>;
 
 
 
@@ -413,6 +482,7 @@ def : Pat<(brcc SETGE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHPZ (CMP GPR:$lhs, G
 def : Pat<(brcc SETNE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHNP (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
 def : Pat<(brcc SETEQ,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHZ (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
 
+// def BRN : InstTinyGPU<(outs), (ins (i32(func_addr:$dst))), "br $dst", [(CALL func_addr:$dst)]>;
 
 
 
