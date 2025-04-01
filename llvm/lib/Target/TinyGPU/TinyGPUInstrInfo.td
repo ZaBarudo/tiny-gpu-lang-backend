@@ -19,6 +19,9 @@
 def TinyGPU_ret : SDNode<"TinyGPUISD::Ret", SDTNone,
                        [SDNPHasChain, SDNPOptInGlue, SDNPVariadic]>;
 
+def TinyGPU_brncz : SDNode<"TinyGPUISD::BRNCZ", SDTNone,
+                       [SDNPHasChain, SDNPOutGlue]>;
+
 // Procedure calling
 def SDT_CallSeqStart : SDCallSeqStart<[SDTCisVT<0, i32>,
                                        SDTCisVT<1, i32>]>;
@@ -284,6 +287,10 @@ def BRNCH : BRANCH_r<0b0000011, 0b000, "BR">,
 
 def BRNCH_2 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
+def BRNCH_3 : BRANCH_r2<0b0000011, 0b000, "BR">,
+              Sched<[ReadLoad]>;
+
+
 def BRNCHN : BRANCH_r2<0b0000011, 0b000, "BRn">,
               Sched<[ReadLoad]>;
 def BRNCHP : BRANCH_r2<0b0000011, 0b000, "BRp">,
@@ -319,6 +326,7 @@ def JALR : RWInstI<0b000, OPC_JALR, (outs GPR:$rd),
 let isReturn = 1, isBarrier = 1, isTerminator = 1 in
 def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>,
                 PseudoInstExpansion<(JALR R0, R1, 0)>;
+
 
 // def : InstAlias<"mv $rd, $rs",   (ADDI GPR:$rd, GPR:$rs,       0)>;
 // def : InstAlias<"not $rd, $rs",  (XORI GPR:$rd, GPR:$rs,      -1)>;
@@ -413,6 +421,10 @@ def : Pat<(brcc SETGE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHPZ (CMP GPR:$lhs, G
 def : Pat<(brcc SETNE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHNP (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
 def : Pat<(brcc SETEQ,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHZ (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
 
+
+
+def PseudoBRNCH : Pseudo<(outs), (ins), [(TinyGPU_brncz)]>,
+                PseudoInstExpansion<(JALR R0, R2, 0)>;
 
 
 

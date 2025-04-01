@@ -29,6 +29,7 @@ enum NodeType {
   // CMP,
   // Return
   Ret,
+  BRNCZ
 };
 }
 

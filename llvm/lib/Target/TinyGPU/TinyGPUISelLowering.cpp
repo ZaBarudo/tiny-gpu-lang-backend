@@ -85,6 +85,7 @@ TinyGPUTargetLowering::TinyGPUTargetLowering(const TargetMachine &TM,
 const char *TinyGPUTargetLowering::getTargetNodeName(unsigned Opcode) const {
   switch (Opcode) {
   case TinyGPUISD::Ret: return "TinyGPUISD::Ret";
+  case TinyGPUISD::BRNCZ: return "TinyGPUISD::BRNCZ";
   default:            return NULL;
   }
 }
@@ -248,7 +249,45 @@ bool TinyGPUTargetLowering::CanLowerReturn(CallingConv::ID CallConv,
 
 SDValue TinyGPUTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
                                        SmallVectorImpl<SDValue> &InVals) const {
-  llvm_unreachable("Cannot lower call");
+ SelectionDAG &DAG = CLI.DAG;
+  SDLoc DL = CLI.DL;
+  SmallVector<SDValue, 8> Ops;
+
+  // 1. Handle Arguments
+  for (unsigned i = 0; i < CLI.Args.size(); ++i) {
+    const TargetLoweringBase::ArgListEntry &Arg = CLI.Args[i];
+    SDValue ArgValue = Arg.Node; // Extract SDValue from ArgListEntry
+
+    // Assign to registers R0, R1, etc.
+    unsigned Reg = TinyGPU::R0 + i;
+    SDValue Chain = CLI.Chain;
+
+    // Copy argument to physical register
+    Chain = DAG.getCopyToReg(Chain, DL, Reg, ArgValue);
+    Ops.push_back(Chain);
+  }
+
+  // 2. Add Callee (function address)
+  GlobalAddressSDNode *G = cast<GlobalAddressSDNode>(CLI.Callee);
+  SDValue Callee = DAG.getTargetGlobalAddress(G->getGlobal(), DL, MVT::i32);
+  Ops.push_back(Callee);
+
+  // 3. Create BR node for the call
+  Ops.push_back(CLI.Chain);
+  SDVTList VTs = DAG.getVTList(MVT::Other);
+  SDValue Call = DAG.getNode(TinyGPUISD::BRNCZ, DL, VTs, Ops);
+
+  // 4. Handle return value (if any)
+ if (!CLI.RetTy->isVoidTy()) {
+  // Convert LLVM Type* to EVT
+  EVT RetVT = getValueType(DAG.getDataLayout(), CLI.RetTy);
+  
+  // Get the register with the correct EVT
+  SDValue RetVal = DAG.getRegister(TinyGPU::R0, RetVT);
+  InVals.push_back(RetVal);
+}
+
+  return Call;
 }
 
 SDValue
@@ -318,18 +357,9 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
 
 SDValue
 TinyGPUTargetLowering::LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const {
-   const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
+  const GlobalValue *GV = cast<GlobalAddressSDNode>(Op)->getGlobal();
   EVT PtrVT = Op.getValueType();
-
-  // Create a TargetGlobalAddress node.
-  SDValue Result = DAG.getTargetGlobalAddress(GV, SDLoc(Op), PtrVT);
-
-  // If the target requires a specific sequence of instructions to load a global
-  // address (e.g., using a base register and an offset), emit those instructions here.
-  // For example, TinyGPU might use a LOAD instruction to load the address into a register.
-
-  // Example: Emit a LOAD instruction to load the global address into a register.
-  return DAG.getNode(ISD::LOAD, SDLoc(Op), PtrVT, Result);
+  return DAG.getTargetGlobalAddress(GV, SDLoc(Op), PtrVT);
 }
 
 SDValue

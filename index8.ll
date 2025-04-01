@@ -30,7 +30,7 @@ entry:
   %0 = load i32, ptr %a, align 4
   %1 = load i32, ptr %b, align 4
   %call = call noundef i32 @_Z10callerFuncii(i32 noundef %0, i32 noundef %1)
-  store i32 %call, ptr %c, align 4
+  ; store i32 %call, ptr %c, align 4
   ret i32 0
 }
 
@@ -42,4 +42,4 @@ attributes #1 = { mustprogress noinline norecurse nounwind optnone "frame-pointe
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git 58fea6382f88cfeed94a0c285bebdb2e9c247b34)"}
+!2 = !{!"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git c0de804f110d315ffffcdf76444b930775998196)"}
