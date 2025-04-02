@@ -189,6 +189,16 @@ class BRANCH_r<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWJInstR<funct7, funct3, OPC_OP, (outs), (ins simm13_lsb0:$rs),
               opcodestr, "$rs">;
 
+// let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+// class BRANCH_r<bits<7> funct7, bits<3> funct3, string opcodestr>
+//     : RWJInstR<funct7, funct3, OPC_OP, (outs), (ins simm13_lsb0:$rs, ins simm13_lsb0:$rd),
+//               opcodestr, "$rs">;
+
+let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
+class BRANCH_rtg<bits<7> funct7, bits<3> funct3, string opcodestr>
+    : RWJInstR<funct7, funct3, OPC_OP, (outs), (ins i32imm:$rs),
+              opcodestr, "$rs">;
+
 class BRANCH_r2<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWJInstR2<funct7, funct3, OPC_OP, (outs), (ins GPR:$rs2, simm13_lsb0:$rs),
               opcodestr, "$rs">;
@@ -284,6 +294,8 @@ def STR : STR_rr<0b0000010, 0b001, "STR">,
 def CONST : STR_ir<0b001,"CONST">;
 def BRNCH : BRANCH_r<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
+def BRNCH_RTG : BRANCH_rtg<0b0000011, 0b000, "BR">,
+              Sched<[ReadLoad]>;
 
 def BRNCH_2 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
@@ -326,6 +338,8 @@ def JALR : RWInstI<0b000, OPC_JALR, (outs GPR:$rd),
 let isReturn = 1, isBarrier = 1, isTerminator = 1 in
 def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>,
                 PseudoInstExpansion<(JALR R0, R1, 0)>;
+// def PseudoBRNCH : Pseudo<(outs), (ins), [(TinyGPU_brncz)]>,
+//                 PseudoInstExpansion<(JALR R0, R2, 0)>;
 
 
 // def : InstAlias<"mv $rd, $rs",   (ADDI GPR:$rd, GPR:$rs,       0)>;
@@ -410,6 +424,8 @@ def : Pat<(setgt GPR:$lhs, GPR:$rhs), (SUB GPR:$lhs, GPR:$rhs)>;
 def : Pat<(seteq GPR:$lhs, GPR:$rhs), (MUL GPR:$lhs, GPR:$rhs)>;
 def : Pat<(setne GPR:$lhs, GPR:$rhs), (MUL GPR:$lhs, GPR:$rhs)>;
 def : Pat<(br bb:$dst), (BRNCH bb:$dst)>;
+// def : Pat<(br (i32 tglobaladdr:$dst)), (BRNCH bb:$dst)>;
+
 
 
 
@@ -422,9 +438,6 @@ def : Pat<(brcc SETNE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHNP (CMP GPR:$lhs, G
 def : Pat<(brcc SETEQ,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHZ (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
 
 
-
-def PseudoBRNCH : Pseudo<(outs), (ins), [(TinyGPU_brncz)]>,
-                PseudoInstExpansion<(JALR R0, R2, 0)>;
 
 
 
@@ -484,3 +497,5 @@ def ADJCALLSTACKUP   : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
                               [(callseq_end timm:$amt1, timm:$amt2)]>;
 } // end Defs = [X2], Uses = [X2]
 
+
+// def : Pat<(br bb:$func), (LDR GPR:$func)>;

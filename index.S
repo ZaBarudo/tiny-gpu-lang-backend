@@ -31,15 +31,13 @@ main:                                   ; @main
 	CONST	R0, #16
 	ADD	SP, SP, R0
 	CONST	R1 , #-4
-	ADD	R0, SP, R1
+	ADD	R2, SP, R1
 	CONST	-8, #0
-	ADD	R0, SP, R1
+	ADD	R2, SP, R1
 	CONST	-12, #1
 	ADD	R1, SP, R1
 	CONST	R1, #2
-	LDR	R0, R0
-	LDR	R1, R1
-	jalr	R0, 0(R2)
+	BR	_Z10callerFuncii
 	CONST	R0, #16
 	ADD	SP, SP, R0
 	RET
