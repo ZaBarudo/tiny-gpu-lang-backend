@@ -6,13 +6,11 @@ _Z10callerFuncii:                       ; @_Z10callerFuncii
 ; %bb.0:                                ; %entry
 	CONST	R0, #8
 	ADD	SP, SP, R0
-	STR	R2, R1
-	STR	R3, R0
 	CONST	R1 , #-4
 	ADD	R0, SP, R1
-	STR	R3, -8
+	STR	R8, -8
 	ADD	R1, SP, R1
-	STR	R2, R1
+	STR	R9, R1
 	LDR	R0, R0
 	LDR	R1, R1
 	ADD	R0, R0, R1
@@ -37,6 +35,8 @@ main:                                   ; @main
 	CONST	-12, #1
 	ADD	R1, SP, R1
 	CONST	R1, #2
+	LDR	R2, R2
+	LDR	R1, R1
 	BR	_Z10callerFuncii
 	CONST	R0, #16
 	ADD	SP, SP, R0

@@ -253,19 +253,19 @@ SDValue TinyGPUTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   SDLoc DL = CLI.DL;
   SmallVector<SDValue, 8> Ops;
 
-  // // 1. Handle Arguments
-  // for (unsigned i = 0; i < CLI.Args.size(); ++i) {
-  //   const TargetLoweringBase::ArgListEntry &Arg = CLI.Args[i];
-  //   SDValue ArgValue = Arg.Node; // Extract SDValue from ArgListEntry
+  // 1. Handle Arguments
+  for (unsigned i = 0; i < CLI.Args.size(); ++i) {
+    const TargetLoweringBase::ArgListEntry &Arg = CLI.Args[i];
+    SDValue ArgValue = Arg.Node; // Extract SDValue from ArgListEntry
 
-  //   // Assign to registers R0, R1, etc.
-  //   unsigned Reg = TinyGPU::R0 + i;
-  //   SDValue Chain = CLI.Chain;
+    // Assign to registers R0, R1, etc.
+    unsigned Reg = TinyGPU::R0 + i;
+    SDValue Chain = CLI.Chain;
 
-  //   // Copy argument to physical register
-  //   Chain = DAG.getCopyToReg(Chain, DL, Reg, ArgValue);
-  //   Ops.push_back(Chain);
-  // }
+    // Copy argument to physical register
+    Chain = DAG.getCopyToReg(Chain, DL, Reg, ArgValue);
+    Ops.push_back(Chain);
+  }
 
   // 2. Add Callee (function address)
   GlobalAddressSDNode *G = cast<GlobalAddressSDNode>(CLI.Callee);

@@ -52,7 +52,7 @@ void TinyGPUDAGToDAGISel::Select(SDNode *Node) {
   }
   case TinyGPUISD::BRNCZ:{
     SDValue Chain = Node->getOperand(1);
-    SDValue Target = Node->getOperand(0);
+    SDValue Target = Node->getOperand(2);
     auto Br = CurDAG->getMachineNode(TinyGPU::BRNCH_RTG, DL, MVT::Other, Target, Chain );
     ReplaceNode(Node, Br);
     return;
