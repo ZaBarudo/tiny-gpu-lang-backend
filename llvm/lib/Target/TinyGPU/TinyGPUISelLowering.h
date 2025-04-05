@@ -25,11 +25,8 @@ namespace TinyGPUISD {
 enum NodeType {
   // Start the numbering from where ISD NodeType finishes.
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
-  // BR,
-  // CMP,
-  // Return
-  Ret,
-  BRNCZ
+  Ret,    // Return instruction
+  BRNCZ   // Branch if not zero instruction
 };
 }
 
@@ -37,10 +34,13 @@ class TinyGPUSubtarget;
 
 class TinyGPUTargetLowering : public TargetLowering  {
 public:
+  // Constructor: Initializes the target lowering object with the target machine
+  // and subtarget information.
   explicit TinyGPUTargetLowering(const TargetMachine &TM,
                               const TinyGPUSubtarget &STI);
 
-  const char *getTargetNodeName(unsigned Opcode) const override;
+  // Returns the name of the target
+    const char *getTargetNodeName(unsigned Opcode) const override;
 
   SDValue LowerOperation(SDValue Op, SelectionDAG &DAG) const override;
   void ReplaceNodeResults(SDNode *N,
@@ -76,8 +76,6 @@ private:
   SDValue LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerShlParts(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerShrParts(SDValue Op, SelectionDAG &DAG, bool arith) const;
-  SDValue LowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
-  SDValue LowerBRCOND(SDValue Op, SelectionDAG &DAG) const;
 };
 }
 

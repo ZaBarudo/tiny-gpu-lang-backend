@@ -13,6 +13,9 @@
 
 using namespace llvm;
 
+// This method initializes the TinyGPUTargetObjectFile by calling the
+// base class's Initialize method. It sets up the MCContext and
+// TargetMachine for the TinyGPU target.
 void
 TinyGPUTargetObjectFile::Initialize(MCContext &Ctx, const TargetMachine &TM) {
   TargetLoweringObjectFileELF::Initialize(Ctx, TM);

@@ -19,20 +19,27 @@
 #include "llvm/CodeGen/MachineFunction.h"
 
 namespace llvm {
+
+// Instruction selector class for TinyGPU target, inheriting from SelectionDAGISel.
 class TinyGPUDAGToDAGISel : public SelectionDAGISel {
 public:
+  // Constructor for TinyGPUDAGToDAGISel.
+  // Takes a reference to TinyGPUTargetMachine and optimization level as arguments.
   explicit TinyGPUDAGToDAGISel(TinyGPUTargetMachine &TM, CodeGenOptLevel OL)
       : SelectionDAGISel(TM, OL), Subtarget(nullptr) {}
 
+  // Runs the instruction selection pass on the given MachineFunction.
+  // Returns true if the MachineFunction was modified.
   bool runOnMachineFunction(MachineFunction &MF) override;
-
+  // Selects the appropriate machine instruction for the given SDNode.
   void Select(SDNode *Node) override;
 
-#include "TinyGPUGenDAGISel.inc"
+#include "TinyGPUGenDAGISel.inc" // Include the auto-generated instruction selector.
 
 private:
-  const TinyGPUSubtarget *Subtarget;
+  const TinyGPUSubtarget *Subtarget; // Pointer to the subtarget information.
 };
-}
+
+} // namespace llvm
 
 #endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUISELDAGTODAG_H

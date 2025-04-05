@@ -189,11 +189,6 @@ class BRANCH_r<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWJInstR<funct7, funct3, OPC_OP, (outs), (ins simm13_lsb0:$rs),
               opcodestr, "$rs">;
 
-// let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
-// class BRANCH_r<bits<7> funct7, bits<3> funct3, string opcodestr>
-//     : RWJInstR<funct7, funct3, OPC_OP, (outs), (ins simm13_lsb0:$rs, ins simm13_lsb0:$rd),
-//               opcodestr, "$rs">;
-
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class BRANCH_rtg<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWJInstR<funct7, funct3, OPC_OP, (outs), (ins i32imm:$rs),
@@ -212,11 +207,6 @@ let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class STR_ir<bits<3> funct3, string opcodestr>
     : RWInstRI<funct3, OPC_OP_IMM, (outs), (ins simm12:$imm12, GPR:$rs),
               opcodestr, "$rs, #$imm12">,Sched<[WriteIALU]>;
-
-// let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
-// class ALLOCA_ir<bits<3> funct3, string opcodestr>
-//     : RWInstRI<funct3, OPC_OP_IMM, (outs GPR:$rs), (ins ),
-//               opcodestr, "$rs , #0">,Sched<[WriteIALU]>;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class ALLOCA_i<bits<3> funct3, string opcodestr>
@@ -237,72 +227,46 @@ def AUIPC : RWInstU<OPC_AUIPC, (outs GPR:$rd), (ins uimm20_auipc:$imm20),
 
 // ADDI isn't always rematerializable, but isReMaterializable will be used as
 // a hint which is verified in isReallyTriviallyReMaterializable.
+
+
+// Arithmetic instructions
 let isReMaterializable = 1, isAsCheapAsAMove = 1 in{
   def ADDI  : ALU_ri<0b000, "ADDI">;
   def ADDri  : ALU_ri<0b000, "addi">;
   def SUBri  : ALU_ri<0b000, "subi">;
 }
 
-// def SLTI  : ALU_ri<0b010, "slti">;
-// def SLTIU : ALU_ri<0b011, "sltiu">;
-
-// let isReMaterializable = 1, isAsCheapAsAMove = 1 in {
-// // def XORI  : ALU_ri<0b100, "xori">;
-// def ORI   : ALU_ri<0b110, "ori">;
-// }
-
-// def ANDI  : ALU_ri<0b111, "andi">;
-
-// def SLLI : Shift_ri<0, 0b001, "slli">;
-// def SRLI : Shift_ri<0, 0b101, "srli">;
-// def SRAI : Shift_ri<1, 0b101, "srai">;
-
 def ADD  : ALU_rr<0b0000000, 0b000, "ADD">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 def ADDrr  : ALU_rr<0b0000000, 0b000, "ADD">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 def SUB  : ALU_rr<0b0100000, 0b000, "SUB">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 def SUBrr  : ALU_rr<0b0100000, 0b000, "SUB">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 
-def CMP  : CMP_rr<0b0000000, 0b000, "CMP">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
-
-
-// def SLL  : ALU_rr<0b0000000, 0b001, "sll">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
-// def SLT  : ALU_rr<0b0000000, 0b010, "slt">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
-// def SLTU : ALU_rr<0b0000000, 0b011, "sltu">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
-// def XOR  : ALU_rr<0b0000000, 0b100, "xor">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
-// def SRL  : ALU_rr<0b0000000, 0b101, "srl">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
-// def SRA  : ALU_rr<0b0100000, 0b101, "sra">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
-// def OR   : ALU_rr<0b0000000, 0b110, "or">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
-// def AND  : ALU_rr<0b0000000, 0b111, "and">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
-
-// M extension
 def MUL     : ALU_rr<0b0000001, 0b000, "MUL">, Sched<[WriteIMul, ReadIMul, ReadIMul]>;
-// def MULH    : ALU_rr<0b0000001, 0b001, "mulh">, Sched<[WriteIMul, ReadIMul, ReadIMul]>;
-// def MULHSU  : ALU_rr<0b0000001, 0b010, "mulhsu">, Sched<[WriteIMul, ReadIMul, ReadIMul]>;
-// def MULHU   : ALU_rr<0b0000001, 0b011, "mulhu">, Sched<[WriteIMul, ReadIMul, ReadIMul]>;
 def DIV     : ALU_rr<0b0000001, 0b100, "DIV">,
               Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
-// def DIVU    : ALU_rr<0b0000001, 0b101, "divu">,
-//               Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
-// def REM     : ALU_rr<0b0000001, 0b110, "rem">,
-//               Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
-// def REMU    : ALU_rr<0b0000001, 0b111, "remu">,
-//               Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
+
+// Load, Store and Constant Instructions 
 def LDR : LDR_rr<0b0000010, 0b000, "LDR">,
               Sched<[WriteLoad, ReadLoad]>;
 def STR : STR_rr<0b0000010, 0b001, "STR">,
               Sched<[ReadLoad, WriteLoad]>;
 def CONST : STR_ir<0b001,"CONST">;
+
+
+// Branch instructions
 def BRNCH : BRANCH_r<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
 def BRNCH_RTG : BRANCH_rtg<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
-
 def BRNCH_2 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
 def BRNCH_3 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
 
+// Compare Statements
+def CMP  : CMP_rr<0b0000000, 0b000, "CMP">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
 
+// Branch instructions with different conditions
 def BRNCHN : BRANCH_r2<0b0000011, 0b000, "BRn">,
               Sched<[ReadLoad]>;
 def BRNCHP : BRANCH_r2<0b0000011, 0b000, "BRp">,
@@ -319,10 +283,10 @@ def BRNCHNZP : BRANCH_r2<0b0000011, 0b000, "BRnzp">,
               Sched<[ReadLoad]>;
 
 
-// def CONST_ALLOCA : ALLOCA_ir<0b001,"CONST">;
+// Const instructions allocation for immediate instructions
 def I_ALLOCA : ALLOCA_i<0b011,"CONST">;
 
-/* Procedure calling instructions */
+// Dummy instruction for return statement
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 let isCall = 1 in
 def JALR : RWInstI<0b000, OPC_JALR, (outs GPR:$rd),
@@ -331,39 +295,11 @@ def JALR : RWInstI<0b000, OPC_JALR, (outs GPR:$rd),
            Sched<[WriteJalr, ReadJalr]>;
 }
 
-//===----------------------------------------------------------------------===//
-// Assembler Pseudo Instructions (User-Level ISA, Version 2.2, Chapter 20)
-//===----------------------------------------------------------------------===//
 
+// Return Instruction
 let isReturn = 1, isBarrier = 1, isTerminator = 1 in
 def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>,
                 PseudoInstExpansion<(JALR R0, R1, 0)>;
-// def PseudoBRNCH : Pseudo<(outs), (ins), [(TinyGPU_brncz)]>,
-//                 PseudoInstExpansion<(JALR R0, R2, 0)>;
-
-
-// def : InstAlias<"mv $rd, $rs",   (ADDI GPR:$rd, GPR:$rs,       0)>;
-// def : InstAlias<"not $rd, $rs",  (XORI GPR:$rd, GPR:$rs,      -1)>;
-// def : InstAlias<"neg $rd, $rs",  (SUB  GPR:$rd,      R0, GPR:$rs)>;
-
-// def : InstAlias<"seqz $rd, $rs", (SLTIU GPR:$rd, GPR:$rs,       1)>;
-// def : InstAlias<"snez $rd, $rs", (SLTU  GPR:$rd,      R0, GPR:$rs)>;
-// def : InstAlias<"sltz $rd, $rs", (SLT   GPR:$rd, GPR:$rs,      R0)>;
-// def : InstAlias<"sgtz $rd, $rs", (SLT   GPR:$rd,      R0, GPR:$rs)>;
-
-// def : InstAlias<"alloca $rd, $rs", (SLT   GPR:$rd,      R0, GPR:$rs)>;
-
-// sgt/sgtu are recognised by the GNU assembler but the canonical slt/sltu
-// form will always be printed. Therefore, set a zero weight.
-// def : InstAlias<"sgt $rd, $rs, $rt", (SLT GPR:$rd, GPR:$rt, GPR:$rs), 0>;
-// def : InstAlias<"sgtu $rd, $rs, $rt", (SLTU GPR:$rd, GPR:$rt, GPR:$rs), 0>;
-
-// let EmitPriority = 0 in {
-// def : InstAlias<"slt $rd, $rs1, $imm12",
-                // (SLTI  GPR:$rd, GPR:$rs1, simm12:$imm12)>;
-// def : InstAlias<"sltu $rd, $rs1, $imm12",
-                // (SLTIU  GPR:$rd, GPR:$rs1, simm12:$imm12)>;
-// }
 
 def : InstAlias<"RET",(JALR R0,  R1, 0), 4>;
 
@@ -411,9 +347,12 @@ def : Pat<(store simm12:$imm12, GPR:$rs), (CONST simm12:$imm12, GPR:$rs)>;
 
 
 /// Simple arithmetic operations
-
+def : PatGprGpr<sub, SUB>;
+def : PatGprGpr<mul, MUL>;
+def : PatGprGpr<sdiv, DIV>;
 def : PatGprGpr<add, ADD>;
-// def : PatGprSimm12<add, ADDI>;
+
+// Arithmetic instructions with one immediate operand
 def : Pat<(add GPR:$rs1, simm12:$imm12), (ADD GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
 def : Pat<(sub GPR:$rs1, simm12:$imm12), (SUB GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
 def : Pat<(mul GPR:$rs1, simm12:$imm12), (MUL GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
@@ -424,6 +363,7 @@ def : Pat<(sub simm12:$imm12, GPR:$rs1), (SUB GPR:$rs1, (I_ALLOCA simm12:$imm12)
 def : Pat<(mul simm12:$imm12, GPR:$rs1), (MUL GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
 def : Pat<(sdiv simm12:$imm12, GPR:$rs1), (DIV GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
 
+// Comparison statements
 def : Pat<(setlt GPR:$lhs, GPR:$rhs), (ADD GPR:$lhs, GPR:$rhs)>;
 def : Pat<(setgt GPR:$lhs, GPR:$rhs), (SUB GPR:$lhs, GPR:$rhs)>;
 def : Pat<(seteq GPR:$lhs, GPR:$rhs), (MUL GPR:$lhs, GPR:$rhs)>;
@@ -439,14 +379,13 @@ def : Pat<(setgt GPR:$lhs, simm12:$rhs), (SUB GPR:$lhs, (I_ALLOCA simm12:$rhs))>
 def : Pat<(seteq GPR:$lhs, simm12:$rhs), (MUL GPR:$lhs, (I_ALLOCA simm12:$rhs))>;
 def : Pat<(setne GPR:$lhs, simm12:$rhs), (MUL GPR:$lhs, (I_ALLOCA simm12:$rhs))>;
 
-
+// Unconditional branches
 def : Pat<(br bb:$dst), (BRNCH bb:$dst)>;
-// def : Pat<(br (i32 tglobaladdr:$dst)), (BRNCH bb:$dst)>;
 
 
 
 
-// def : Pat<(brcc BPF_CC_EQ, GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCH_2 (ADD GPR:$lhs, GPR:$rhs), bb:$dst)>;
+// Branch condition with comparison
 def : Pat<(brcc SETLE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHNZ (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
 def : Pat<(brcc SETLT,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHN (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
 def : Pat<(brcc SETGT,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHP (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
@@ -470,42 +409,14 @@ def : Pat<(brcc SETNE,   GPR:$lhs, simm12:$rhs, bb:$dst), (BRNCHNP (CMP GPR:$lhs
 def : Pat<(brcc SETEQ,   GPR:$lhs, simm12:$rhs, bb:$dst), (BRNCHZ (CMP GPR:$lhs, (I_ALLOCA simm12:$rhs)), bb:$dst)>;
 
 
-
-// def : Pat<(setcc GPR:$lhs, GPR:$rhs, setgt), (ADD GPR:$lhs, GPR:$rhs)>;
-def : PatGprGpr<sub, SUB>;
-
+// Frame Lowering
 def to_tframeindex : SDNodeXForm<frameindex, [{
   return CurDAG->getTargetFrameIndex(N->getIndex(), N->getValueType(0));
 }]>;
 
-//THIS WORKS
-// def : Pat<(frameindex:$fi), (ADDI (to_tframeindex $fi), 0)>;
 def : Pat<(frameindex:$fi), (ADD (to_tframeindex $fi), (I_ALLOCA 0))>;
 
-// def : Pat<(frameindex:$fi), (ADD (to_tframeindex $fi), (I_ALLOCA 0))>;
-// def : Pat<(frameindex:$fi), ( (to_tframeindex $fi), (I_ALLOCA 0))>
 
-
-
-
-// def : PatGprGpr<or, OR>;
-// def : PatGprSimm12<or, ORI>;
-// def : PatGprGpr<and, AND>;
-// def : PatGprSimm12<and, ANDI>;
-// def : PatGprGpr<xor, XOR>;
-// def : PatGprSimm12<xor, XORI>;
-// def : PatGprUimmLog2WSize<shl, SLLI>;
-// def : PatGprUimmLog2WSize<srl, SRLI>;
-// def : PatGprUimmLog2WSize<sra, SRAI>;
-
-def : PatGprGpr<mul, MUL>;
-// def : PatGprGpr<mulhs, MULH>;
-// def : PatGprGpr<mulhu, MULHU>;
-// No ISDOpcode for mulhsu
-def : PatGprGpr<sdiv, DIV>;
-// def : PatGprGpr<udiv, DIVU>;
-// def : PatGprGpr<srem, REM>;
-// def : PatGprGpr<urem, REMU>;
 
 // Match both a plain shift and one where the shift amount is masked (this is
 // typically introduced when the legalizer promotes the shift amount and
@@ -516,9 +427,6 @@ class shiftop<SDPatternOperator operator>
                [(operator node:$val, node:$count),
                 (operator node:$val, (and node:$count, immbottomwsizeset))]>;
 
-// def : PatGprGpr<shiftop<shl>, SLL>;
-// def : PatGprGpr<shiftop<srl>, SRL>;
-// def : PatGprGpr<shiftop<sra>, SRA>;
 
 let Defs = [R2], Uses = [R2] in {
 def ADJCALLSTACKDOWN : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),

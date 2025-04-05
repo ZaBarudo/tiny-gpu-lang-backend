@@ -29,7 +29,7 @@ def TinyGPU_CCallingConv : CallingConv<[
 def TinyGPU_CRetConv : CallingConv<[
   CCIfType<[i1, i8, i16], CCPromoteToType<i32>>,
 
-  // i32 are returned in registers X0, X1
+  // i32 are returned in registers R0, R1, R2, R3
   CCIfType<[i32], CCAssignToReg<[R0, R1, R2, R3]>>,
 
   // Integer values get stored in stack slots that are 4 bytes in size and
@@ -37,4 +37,8 @@ def TinyGPU_CRetConv : CallingConv<[
   CCIfType<[i32], CCAssignToStack<4, 4>>
 ]>;
 
+// This definition specifies the callee-saved registers for the TinyGPU target.
+// Callee-saved registers are those that a called function is responsible for preserving
+// across function calls. In this case, registers R8 and R9 are designated as callee-saved
+// for the TinyGPU target.
 def TinyGPU_CalleeSavedRegs : CalleeSavedRegs<(add R8, R9)>;

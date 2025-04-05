@@ -264,22 +264,3 @@ class RWInstU<TinyGPUOpcode opcode, dag outs, dag ins, string opcodestr,
   let Inst{11-8} = rd;
   let Opcode = opcode.Value;
 }
-
-// class BranchInst<bits<3> funct3, TinyGPUOpcode opcode, dag outs, dag ins,
-//                  string opcodestr1, string opcodestr2, string argstr1,
-//                  string argstr2>
-//     : JumpInst<outs, ins, opcodestr1, opcodestr2, argstr1, argstr2, [],
-//                InstFormatB> {
-//   // bits<12> imm12;
-//   bits<4> rs2;
-//   bits<4> rs1;
-
-//   // let Inst{31} = imm12{11};
-//   // let Inst{30-25} = imm12{10-5};
-//   let Inst{24-21} = rs2;
-//   let Inst{20-16} = rs1;
-//   let Inst{14-12} = funct3;
-//   let Inst{11-8} = imm12{4-1};
-//   let Inst{7} = imm12{12};
-//   let Opcode = opcode.Value;
-// }
