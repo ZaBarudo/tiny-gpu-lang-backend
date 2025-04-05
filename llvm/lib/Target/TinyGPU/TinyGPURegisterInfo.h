@@ -1,4 +1,5 @@
-//===-- TinyGPURegisterInfo.h - TinyGPU Register Information Impl -----*- C++ -*-===//
+//===-- TinyGPURegisterInfo.h - TinyGPU Register Information Impl -----*- C++
+//-*-===//
 //
 //                     The LLVM Compiler Infrastructure
 //
@@ -7,12 +8,13 @@
 //
 //===----------------------------------------------------------------------===//
 //
-// This file contains the TinyGPU implementation of the TargetRegisterInfo class.
+// This file contains the TinyGPU implementation of the TargetRegisterInfo
+// class.
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_TINYGPUREGISTERINFO_H
-#define LLVM_LIB_TARGET_TINYGPU_TINYGPUREGISTERINFO_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPUREGISTERINFO_H
+#define LLVM_LIB_TARGET_TinyGPU_TinyGPUREGISTERINFO_H
 
 #include "llvm/CodeGen/TargetRegisterInfo.h"
 
@@ -29,6 +31,7 @@ protected:
 public:
   TinyGPURegisterInfo(const TinyGPUSubtarget &Subtarget);
 
+  /// Code Generation virtual methods...
   const MCPhysReg *getCalleeSavedRegs(const MachineFunction *MF) const override;
 
   const uint32_t *getCallPreservedMask(const MachineFunction &MF,
@@ -39,11 +42,11 @@ public:
   bool requiresRegisterScavenging(const MachineFunction &MF) const override;
   bool requiresFrameIndexScavenging(const MachineFunction &MF) const override;
   bool requiresFrameIndexReplacementScavenging(
-                                    const MachineFunction &MF) const override;
+      const MachineFunction &MF) const override;
 
   bool trackLivenessAfterRegAlloc(const MachineFunction &MF) const override;
 
-  void eliminateFrameIndex(MachineBasicBlock::iterator II, int SPAdj,
+  bool eliminateFrameIndex(MachineBasicBlock::iterator MI, int SPAdj,
                            unsigned FIOperandNum,
                            RegScavenger *RS = nullptr) const override;
 
@@ -54,4 +57,4 @@ public:
 
 } // end namespace llvm
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_TINYGPUREGISTERINFO_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUREGISTERINFO_H

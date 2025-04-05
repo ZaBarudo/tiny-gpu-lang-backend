@@ -12,17 +12,21 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_TINYGPU_H
-#define LLVM_LIB_TARGET_TINYGPU_TINYGPU_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPU_H
+#define LLVM_LIB_TARGET_TinyGPU_TinyGPU_H
 
 #include "MCTargetDesc/TinyGPUMCTargetDesc.h"
 #include "llvm/Target/TargetMachine.h"
 
 namespace llvm {
   class FunctionPass;
+  class PassRegistry;
+  class TinyGPUTargetMachine;
 
-  // Declare functions to create passes here!
+  void initializeTinyGPUDAGToDAGISelLegacyPass(PassRegistry &);
 
+  FunctionPass *createTinyGPUISelDag(TinyGPUTargetMachine &TM,
+                                   CodeGenOptLevel OptLevel);
 } // end namespace llvm;
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_TINYGPU_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPU_H

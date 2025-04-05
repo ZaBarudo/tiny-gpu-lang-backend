@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_TINYGPUMACHINEFUNCTION_H
-#define LLVM_LIB_TARGET_TINYGPU_TINYGPUMACHINEFUNCTION_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPUMACHINEFUNCTION_H
+#define LLVM_LIB_TARGET_TinyGPU_TinyGPUMACHINEFUNCTION_H
 
 #include "llvm/CodeGen/MachineFunction.h"
 
@@ -30,4 +30,4 @@ public:
 
 } // end of namespace llvm
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_TINYGPUMACHINEFUNCTION_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUMACHINEFUNCTION_H

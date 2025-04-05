@@ -11,8 +11,10 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_MCTARGETDESC_TINYGPUMCTARGETDESC_H
-#define LLVM_LIB_TARGET_TINYGPU_MCTARGETDESC_TINYGPUMCTARGETDESC_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_MCTARGETDESC_TinyGPUMCTARGETDESC_H
+#define LLVM_LIB_TARGET_TinyGPU_MCTARGETDESC_TinyGPUMCTARGETDESC_H
+
+#include "TinyGPUBaseInfo.h"
 
 // Defines symbolic names for TinyGPU registers. This defines a mapping from
 // register name to register number.
@@ -26,4 +28,4 @@
 #define GET_SUBTARGETINFO_ENUM
 #include "TinyGPUGenSubtargetInfo.inc"
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_MCTARGETDESC_TINYGPUMCTARGETDESC_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_MCTARGETDESC_TinyGPUMCTARGETDESC_H

@@ -11,8 +11,8 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_TINYGPUFRAMELOWERING_H
-#define LLVM_LIB_TARGET_TINYGPU_TINYGPUFRAMELOWERING_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPUFRAMELOWERING_H
+#define LLVM_LIB_TARGET_TinyGPU_TinyGPUFRAMELOWERING_H
 
 #include "llvm/CodeGen/TargetFrameLowering.h"
 
@@ -41,9 +41,12 @@ public:
 
   void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
                             RegScavenger *RS) const override;
+uint64_t computeStackSize(MachineFunction &MF) const;
 
-  bool hasFP(const MachineFunction &MF) const override;
+  
+private:
+  bool hasFPImpl(const MachineFunction &MF) const override;
 };
 } // end llvm namespace
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_TINYGPUFRAMELOWERING_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUFRAMELOWERING_H

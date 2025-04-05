@@ -11,25 +11,26 @@
 //
 //===----------------------------------------------------------------------===//
 
-#ifndef LLVM_LIB_TARGET_TINYGPU_TINYGPUTARGETMACHINE_H
-#define LLVM_LIB_TARGET_TINYGPU_TINYGPUTARGETMACHINE_H
+#ifndef LLVM_LIB_TARGET_TinyGPU_TinyGPUTARGETMACHINE_H
+#define LLVM_LIB_TARGET_TinyGPU_TinyGPUTARGETMACHINE_H
 
 #include "TinyGPUSubtarget.h"
 #include "llvm/CodeGen/Passes.h"
 #include "llvm/CodeGen/SelectionDAGISel.h"
 #include "llvm/CodeGen/TargetFrameLowering.h"
 #include "llvm/Target/TargetMachine.h"
+#include "llvm/CodeGen/CodeGenTargetMachineImpl.h"
 
 namespace llvm {
-class TinyGPUTargetMachine : public LLVMTargetMachine {
+class TinyGPUTargetMachine : public CodeGenTargetMachineImpl {
   std::unique_ptr<TargetLoweringObjectFile> TLOF;
   mutable StringMap<std::unique_ptr<TinyGPUSubtarget>> SubtargetMap;
 
 public:
   TinyGPUTargetMachine(const Target &T, const Triple &TT, StringRef CPU,
                     StringRef FS, const TargetOptions &Options,
-                    Optional<Reloc::Model> RM, Optional<CodeModel::Model> CM,
-                    CodeGenOpt::Level OL, bool JIT);
+                    std::optional<Reloc::Model> RM, std::optional<CodeModel::Model> CM,
+                    CodeGenOptLevel OL, bool JIT);
 
   const TinyGPUSubtarget *getSubtargetImpl(const Function &F) const override;
   const TinyGPUSubtarget *getSubtargetImpl() const = delete;
@@ -42,4 +43,4 @@ public:
 };
 }
 
-#endif // end LLVM_LIB_TARGET_TINYGPU_TINYGPUTARGETMACHINE_H
+#endif // end LLVM_LIB_TARGET_TinyGPU_TinyGPUTARGETMACHINE_H
