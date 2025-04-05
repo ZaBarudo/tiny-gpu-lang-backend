@@ -416,6 +416,16 @@ def to_tframeindex : SDNodeXForm<frameindex, [{
 
 def : Pat<(frameindex:$fi), (ADD (to_tframeindex $fi), (I_ALLOCA 0))>;
 
+def shl_to_mul_imm : SDNodeXForm<imm, [{
+  if (auto *CN = dyn_cast<ConstantSDNode>(N)) {
+    uint64_t ShiftVal = CN->getZExtValue();
+    return CurDAG->getTargetConstant(1 << ShiftVal, SDLoc(N), MVT::i32);
+  }
+}]>;
+
+def : Pat< (shl GPR:$src, imm:$shift),
+          (MUL GPR:$src, (I_ALLOCA (shl_to_mul_imm imm:$shift)))>;
+
 
 
 // Match both a plain shift and one where the shift amount is masked (this is
