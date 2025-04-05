@@ -419,10 +419,27 @@ def : Pat<(sub GPR:$rs1, simm12:$imm12), (SUB GPR:$rs1, (I_ALLOCA simm12:$imm12)
 def : Pat<(mul GPR:$rs1, simm12:$imm12), (MUL GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
 def : Pat<(sdiv GPR:$rs1, simm12:$imm12), (DIV GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
 
+def : Pat<(add simm12:$imm12, GPR:$rs1), (ADD GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
+def : Pat<(sub simm12:$imm12, GPR:$rs1), (SUB GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
+def : Pat<(mul simm12:$imm12, GPR:$rs1), (MUL GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
+def : Pat<(sdiv simm12:$imm12, GPR:$rs1), (DIV GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
+
 def : Pat<(setlt GPR:$lhs, GPR:$rhs), (ADD GPR:$lhs, GPR:$rhs)>;
 def : Pat<(setgt GPR:$lhs, GPR:$rhs), (SUB GPR:$lhs, GPR:$rhs)>;
 def : Pat<(seteq GPR:$lhs, GPR:$rhs), (MUL GPR:$lhs, GPR:$rhs)>;
 def : Pat<(setne GPR:$lhs, GPR:$rhs), (MUL GPR:$lhs, GPR:$rhs)>;
+
+def : Pat<(setlt simm12:$lhs, GPR:$rhs), (ADD (I_ALLOCA simm12:$lhs), GPR:$rhs)>;
+def : Pat<(setgt simm12:$lhs, GPR:$rhs), (SUB (I_ALLOCA simm12:$lhs), GPR:$rhs)>;
+def : Pat<(seteq simm12:$lhs, GPR:$rhs), (MUL (I_ALLOCA simm12:$lhs), GPR:$rhs)>;
+def : Pat<(setne simm12:$lhs, GPR:$rhs), (MUL (I_ALLOCA simm12:$lhs), GPR:$rhs)>;
+
+def : Pat<(setlt GPR:$lhs, simm12:$rhs), (ADD GPR:$lhs, (I_ALLOCA simm12:$rhs))>;
+def : Pat<(setgt GPR:$lhs, simm12:$rhs), (SUB GPR:$lhs, (I_ALLOCA simm12:$rhs))>;
+def : Pat<(seteq GPR:$lhs, simm12:$rhs), (MUL GPR:$lhs, (I_ALLOCA simm12:$rhs))>;
+def : Pat<(setne GPR:$lhs, simm12:$rhs), (MUL GPR:$lhs, (I_ALLOCA simm12:$rhs))>;
+
+
 def : Pat<(br bb:$dst), (BRNCH bb:$dst)>;
 // def : Pat<(br (i32 tglobaladdr:$dst)), (BRNCH bb:$dst)>;
 
@@ -438,6 +455,19 @@ def : Pat<(brcc SETNE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHNP (CMP GPR:$lhs, G
 def : Pat<(brcc SETEQ,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHZ (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
 
 
+def : Pat<(brcc SETLE,   simm12:$lhs, GPR:$rhs, bb:$dst), (BRNCHNZ (CMP (I_ALLOCA simm12:$lhs), GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETLT,   simm12:$lhs, GPR:$rhs, bb:$dst), (BRNCHN (CMP (I_ALLOCA simm12:$lhs), GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETGT,   simm12:$lhs, GPR:$rhs, bb:$dst), (BRNCHP (CMP (I_ALLOCA simm12:$lhs), GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETGE,   simm12:$lhs, GPR:$rhs, bb:$dst), (BRNCHPZ (CMP (I_ALLOCA simm12:$lhs), GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETNE,   simm12:$lhs, GPR:$rhs, bb:$dst), (BRNCHNP (CMP (I_ALLOCA simm12:$lhs), GPR:$rhs), bb:$dst)>;
+def : Pat<(brcc SETEQ,   simm12:$lhs, GPR:$rhs, bb:$dst), (BRNCHZ (CMP (I_ALLOCA simm12:$lhs), GPR:$rhs), bb:$dst)>;
+
+def : Pat<(brcc SETLE,   GPR:$lhs, simm12:$rhs, bb:$dst), (BRNCHNZ (CMP GPR:$lhs, (I_ALLOCA simm12:$rhs)), bb:$dst)>;
+def : Pat<(brcc SETLT,   GPR:$lhs, simm12:$rhs, bb:$dst), (BRNCHN (CMP GPR:$lhs, (I_ALLOCA simm12:$rhs)), bb:$dst)>;
+def : Pat<(brcc SETGT,   GPR:$lhs, simm12:$rhs, bb:$dst), (BRNCHP (CMP GPR:$lhs, (I_ALLOCA simm12:$rhs)), bb:$dst)>;
+def : Pat<(brcc SETGE,   GPR:$lhs, simm12:$rhs, bb:$dst), (BRNCHPZ (CMP GPR:$lhs, (I_ALLOCA simm12:$rhs)), bb:$dst)>;
+def : Pat<(brcc SETNE,   GPR:$lhs, simm12:$rhs, bb:$dst), (BRNCHNP (CMP GPR:$lhs, (I_ALLOCA simm12:$rhs)), bb:$dst)>;
+def : Pat<(brcc SETEQ,   GPR:$lhs, simm12:$rhs, bb:$dst), (BRNCHZ (CMP GPR:$lhs, (I_ALLOCA simm12:$rhs)), bb:$dst)>;
 
 
 
