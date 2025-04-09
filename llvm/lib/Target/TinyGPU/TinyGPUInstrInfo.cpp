@@ -45,7 +45,7 @@ void TinyGPUInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
                MCRegister DestReg, MCRegister SrcReg, bool KillSrc,
                bool RenamableDest,
                bool RenamableSrc)  const {
-  // Emit a move instruction (TinyGPU::STR) to copy the value from SrcReg to DestReg.
+  // Emit a move instruction (TinyGPU) to copy the value from SrcReg to DestReg.
   // The `BuildMI` function is used to construct the machine instruction.
   // - `MBB`: The machine basic block where the instruction is inserted.
   // - `MI`: The position in the block where the instruction is inserted.

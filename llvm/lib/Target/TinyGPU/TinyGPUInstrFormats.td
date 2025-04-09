@@ -129,6 +129,31 @@ class RWInst<dag outs, dag ins, string opcodestr, string argstr,
   let TSFlags{4-0} = format.Value;
 }
 
+class RWInst2<dag outs, dag ins, string opcodestr, string argstr,
+             list<dag> pattern, InstFormat format>
+    : Instruction {
+  field bits<32> Inst;
+  // SoftFail is a field the disassembler can use to provide a way for
+  // instructions to not match without killing the whole decode process. It is
+  // mainly used for ARM, but Tablegen expects this field to exist or it fails
+  // to build the decode table.
+  field bits<32> SoftFail = 0;
+  let Size = 4;
+
+  bits<7> Opcode = 0;
+
+  let Inst{6-0} = Opcode;
+
+  let Namespace = "TinyGPU";
+
+  dag OutOperandList = outs;
+  dag InOperandList = ins;
+  let AsmString = "CMP R0 R0"  # "\n \t" # opcodestr # "\t" # argstr;
+  let Pattern = pattern;
+
+  let TSFlags{4-0} = format.Value;
+}
+
 // Pseudo instructions
 class Pseudo<dag outs, dag ins, list<dag> pattern, string opcodestr = "",
              string argstr = "">
@@ -207,6 +232,22 @@ class RWJInstR<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
   let Inst{14-12} = funct3;
   let Opcode = opcode.Value;
 }
+
+class RWJInstR22<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
+              dag ins, string opcodestr, string argstr>
+    : RWInst2<outs, ins, opcodestr, argstr, [], InstFormatR> {
+  bits<4> rs;
+
+  let isBranch = 1;
+  let isTerminator = 1;
+  let hasDelaySlot = 0;
+
+  let Inst{31-25} = funct7;
+  let Inst{19-16} = rs;
+  let Inst{14-12} = funct3;
+  let Opcode = opcode.Value;
+}
+
 
 
 class RWInstI<bits<3> funct3, TinyGPUOpcode opcode, dag outs, dag ins,

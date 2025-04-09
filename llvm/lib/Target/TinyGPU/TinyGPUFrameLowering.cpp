@@ -143,7 +143,7 @@ void TinyGPUFrameLowering::emitPrologue(MachineFunction &MF,
   // Generate a CONST instruction to load the stack size into a temporary
   // register (TinyGPU::R0).
   auto ConstInst = BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::CONST))
-    .addReg(TinyGPU::R0) // Specify the destination register.
+    .addReg(TinyGPU::GPR) // Specify the destination register.
     .addImm(StackSize); // Add the immediate stack size value.
 
   // Retrieve the register that holds the result of the CONST instruction.
@@ -199,7 +199,7 @@ void TinyGPUFrameLowering::emitEpilogue(MachineFunction &MF,
   // If the offset fits in an immediate, generate a CONST instruction to load
   // the stack size into a temporary register (TinyGPU::R0).
   auto ConstInst = BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::CONST))
-    .addReg(TinyGPU::R0) // Specify the destination register.
+    .addReg(TinyGPU::GPR) // Specify the destination register.
     .addImm(StackSize); // Add the immediate stack size value.
 
   // Retrieve the register that holds the result of the CONST instruction.

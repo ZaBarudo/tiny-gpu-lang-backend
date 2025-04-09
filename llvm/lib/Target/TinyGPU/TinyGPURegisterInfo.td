@@ -39,5 +39,5 @@ def R15 : TinyGPUReg<15, "R15", ["ti"]>, DwarfRegNum<[15]>;
 // Registers are listed in the order caller-save, callee-save, specials.
 def GPR : RegisterClass<"TinyGPU", [i32], 32, (sequence "R%u", 0, 10)>;
 def NZP : RegisterClass<"TinyGPU", [i32], 32, (add R2)>;
-def SP : TinyGPUReg<12, "SP", ["sp"]>, DwarfRegNum<[12]>;
-def LR : TinyGPUReg<11, "LR", ["lr"]>, DwarfRegNum<[11]>;
+def LR : TinyGPUReg<11, "R11", ["lr"]>, DwarfRegNum<[11]>;
+def SP : TinyGPUReg<12, "R12", ["sp"]>, DwarfRegNum<[12]>;

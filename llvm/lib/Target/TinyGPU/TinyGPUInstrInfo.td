@@ -186,12 +186,12 @@ class LDR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class BRANCH_r<bits<7> funct7, bits<3> funct3, string opcodestr>
-    : RWJInstR<funct7, funct3, OPC_OP, (outs), (ins simm13_lsb0:$rs),
+    : RWJInstR22<funct7, funct3, OPC_OP, (outs), (ins simm13_lsb0:$rs),
               opcodestr, "$rs">;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in
 class BRANCH_rtg<bits<7> funct7, bits<3> funct3, string opcodestr>
-    : RWJInstR<funct7, funct3, OPC_OP, (outs), (ins i32imm:$rs),
+    : RWJInstR22<funct7, funct3, OPC_OP, (outs), (ins i32imm:$rs),
               opcodestr, "$rs">;
 
 class BRANCH_r2<bits<7> funct7, bits<3> funct3, string opcodestr>
@@ -254,9 +254,9 @@ def CONST : STR_ir<0b001,"CONST">;
 
 
 // Branch instructions
-def BRNCH : BRANCH_r<0b0000011, 0b000, "BR">,
+def BRNCH : BRANCH_r<0b0000011, 0b000, "BRz">,
               Sched<[ReadLoad]>;
-def BRNCH_RTG : BRANCH_rtg<0b0000011, 0b000, "BR">,
+def BRNCH_RTG : BRANCH_rtg<0b0000011, 0b000, "BRz">,
               Sched<[ReadLoad]>;
 def BRNCH_2 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
