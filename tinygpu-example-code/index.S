@@ -6,15 +6,15 @@ _Z9dummyFuncii:                         ; @_Z9dummyFuncii
 ; %bb.0:                                ; %entry
 	CONST	R0, #8
 	ADD	SP, SP, R0
-	CONST	R1 , #-4
-	ADD	R0, SP, R1
+	CONST	 R1, #-4
+	ADD	R0, R1, SP
 	STR	R8, -8
-	ADD	R1, SP, R1
+	ADD	R1, R1, SP
 	STR	R9, R1
 	LDR	R0, R0
 	LDR	R1, R1
 	ADD	R0, R0, R1
-	CONST	R1 , #1
+	CONST	 R1, #1
 	ADD	R0, R0, R1
 	CONST	R0, #8
 	ADD	SP, SP, R0
@@ -28,12 +28,12 @@ main:                                   ; @main
 ; %bb.0:                                ; %entry
 	CONST	R0, #12
 	ADD	SP, SP, R0
-	CONST	R1 , #-4
-	ADD	R2, SP, R1
-	CONST	-8, #0
-	ADD	R2, SP, R1
-	CONST	-12, #1
-	ADD	R1, SP, R1
+	CONST	 R1, #-4
+	ADD	R2, R1, SP
+	CONST	R2, #-8
+	ADD	R2, R1, SP
+	CONST	R2, #-12
+	ADD	R1, R1, SP
 	CONST	R1, #2
 	CONST	R0, #12
 	ADD	SP, SP, R0
@@ -41,5 +41,5 @@ main:                                   ; @main
 .Lfunc_end1:
 	.size	main, .Lfunc_end1-main
                                         ; -- End function
-	.ident	"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git 58fea6382f88cfeed94a0c285bebdb2e9c247b34)"
+	.ident	"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git a92829cf3f96796dbf49d989d3e210ed11bed91b)"
 	.section	".note.GNU-stack","",@progbits

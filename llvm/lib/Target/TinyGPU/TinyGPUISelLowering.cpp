@@ -87,6 +87,21 @@ TinyGPUTargetLowering::TinyGPUTargetLowering(const TargetMachine &TM,
   setPrefLoopAlignment(Align(1)); // Preferred loop alignment of 2^1 = 2 bytes
 }
 
+SDValue TinyGPUTargetLowering::LowerINTRINSIC_WO_CHAIN(
+    SDValue Op, SelectionDAG &DAG) const {
+//   unsigned IntrinsicID = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
+  
+//   switch (IntrinsicID) {
+//   case Intrinsic::tinygpu_cmp: {  // NOT yourtarget_cmp
+//   SDVTList VTs = DAG.getVTList(MVT::Glue);
+//   SDValue Ops[] = { Op.getOperand(1), Op.getOperand(2) };
+//   // return DAG.getNode(TinyGPUISD::CMP, DL, VTs, Ops);
+//   return SDValue();
+// }
+//   }
+  return SDValue();
+}
+
 /// getTargetNodeName - This method returns the name of a target-specific 
 /// SelectionDAG node based on its opcode. It is used for debugging and 
 /// visualization purposes to provide meaningful names for custom opcodes.
@@ -321,16 +336,16 @@ SDValue TinyGPUTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 
   // 1. Handle Arguments
   for (unsigned i = 0; i < CLI.Args.size(); ++i) {
-  const TargetLoweringBase::ArgListEntry &Arg = CLI.Args[i]; // Get the argument
-  SDValue ArgValue = Arg.Node; // Extract the SDValue from the argument
+    const TargetLoweringBase::ArgListEntry &Arg = CLI.Args[i]; // Get the argument
+    SDValue ArgValue = Arg.Node; // Extract the SDValue from the argument
 
-  // Assign the argument to physical registers R0, R1, etc.
-  unsigned Reg = TinyGPU::R0 + i;
-  SDValue Chain = CLI.Chain;
+    // Assign the argument to physical registers R0, R1, etc.
+    unsigned Reg = TinyGPU::R0 + i;
+    SDValue Chain = CLI.Chain;
 
-  // Copy the argument value to the physical register
-  Chain = DAG.getCopyToReg(Chain, DL, Reg, ArgValue);
-  Ops.push_back(Chain); // Add the updated chain to the operands
+    // Copy the argument value to the physical register
+    Chain = DAG.getCopyToReg(Chain, DL, Reg, ArgValue);
+    Ops.push_back(Chain); // Add the updated chain to the operands
   }
 
   // 2. Add Callee (function address)

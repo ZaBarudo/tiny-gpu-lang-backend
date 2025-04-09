@@ -40,3 +40,4 @@ def R15 : TinyGPUReg<15, "R15", ["ti"]>, DwarfRegNum<[15]>;
 def GPR : RegisterClass<"TinyGPU", [i32], 32, (sequence "R%u", 0, 10)>;
 def NZP : RegisterClass<"TinyGPU", [i32], 32, (add R2)>;
 def SP : TinyGPUReg<12, "SP", ["sp"]>, DwarfRegNum<[12]>;
+def LR : TinyGPUReg<11, "LR", ["lr"]>, DwarfRegNum<[11]>;

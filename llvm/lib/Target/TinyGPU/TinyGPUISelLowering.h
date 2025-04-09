@@ -69,6 +69,9 @@ private:
                       LLVMContext &Context) const ;
   SDValue LowerCall(TargetLowering::CallLoweringInfo &CLI,
                     SmallVectorImpl<SDValue> &InVals) const override;
+  SDValue LowerINTRINSIC_WO_CHAIN(
+    SDValue Op, SelectionDAG &DAG) const ;
+
 
   SDValue LowerGlobalAddress(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerBlockAddress(SDValue Op, SelectionDAG &DAG) const;

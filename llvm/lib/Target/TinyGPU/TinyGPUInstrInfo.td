@@ -205,13 +205,13 @@ class STR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class STR_ir<bits<3> funct3, string opcodestr>
-    : RWInstRI<funct3, OPC_OP_IMM, (outs), (ins simm12:$imm12, GPR:$rs),
+    : RWInstRI<funct3, OPC_OP_IMM, (outs), (ins GPR:$rs, simm12:$imm12),
               opcodestr, "$rs, #$imm12">,Sched<[WriteIALU]>;
 
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class ALLOCA_i<bits<3> funct3, string opcodestr>
     : RWInstRI<funct3, OPC_OP_IMM, (outs GPR:$rs), (ins simm12:$imm12),
-              opcodestr, "$rs , #$imm12">,Sched<[WriteIALU]>;
+              opcodestr, " $rs, #$imm12">,Sched<[WriteIALU]>;
 //===----------------------------------------------------------------------===//
 // Instructions
 //===----------------------------------------------------------------------===//
@@ -334,7 +334,7 @@ def : Pat<(simm32hi20:$imm), (LUI (HI20 imm:$imm))>;
 
 def : PatGpr<load, LDR>;
 def : Pat<(store GPR:$rd, GPR:$rs), (STR $rd, $rs)>;
-def : Pat<(store simm12:$imm12, GPR:$rs), (CONST simm12:$imm12, GPR:$rs)>;
+def : Pat<(store simm12:$imm12, GPR:$rs), (CONST  GPR:$rs, simm12:$imm12)>;
 // def : Pat<(alloca), (CONST_ALLOCA)>;
 
 // // Match load from FrameIndex
@@ -414,7 +414,7 @@ def to_tframeindex : SDNodeXForm<frameindex, [{
   return CurDAG->getTargetFrameIndex(N->getIndex(), N->getValueType(0));
 }]>;
 
-def : Pat<(frameindex:$fi), (ADD (to_tframeindex $fi), (I_ALLOCA 0))>;
+def : Pat<(frameindex:$fi), (ADD (I_ALLOCA 0), (to_tframeindex $fi))>;
 
 def shl_to_mul_imm : SDNodeXForm<imm, [{
   if (auto *CN = dyn_cast<ConstantSDNode>(N)) {

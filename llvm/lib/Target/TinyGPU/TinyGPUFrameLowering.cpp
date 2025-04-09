@@ -143,11 +143,11 @@ void TinyGPUFrameLowering::emitPrologue(MachineFunction &MF,
   // Generate a CONST instruction to load the stack size into a temporary
   // register (TinyGPU::R0).
   auto ConstInst = BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::CONST))
-    .addImm(StackSize) // Add the immediate stack size value.
-    .addReg(TinyGPU::R0); // Specify the destination register.
+    .addReg(TinyGPU::R0) // Specify the destination register.
+    .addImm(StackSize); // Add the immediate stack size value.
 
   // Retrieve the register that holds the result of the CONST instruction.
-  auto resultRegister = ConstInst->getOperand(1).getReg();
+  auto resultRegister = ConstInst->getOperand(0).getReg();
 
   // Define the stack pointer register (TinyGPU::SP).
   unsigned StackReg = TinyGPU::SP;
@@ -199,11 +199,11 @@ void TinyGPUFrameLowering::emitEpilogue(MachineFunction &MF,
   // If the offset fits in an immediate, generate a CONST instruction to load
   // the stack size into a temporary register (TinyGPU::R0).
   auto ConstInst = BuildMI(MBB, MBBI, dl, TII.get(TinyGPU::CONST))
-    .addImm(StackSize) // Add the immediate stack size value.
-    .addReg(TinyGPU::R0); // Specify the destination register.
+    .addReg(TinyGPU::R0) // Specify the destination register.
+    .addImm(StackSize); // Add the immediate stack size value.
 
   // Retrieve the register that holds the result of the CONST instruction.
-  auto resultRegister = ConstInst->getOperand(1).getReg();
+  auto resultRegister = ConstInst->getOperand(0).getReg();
 
   // Generate an ADDrr instruction to restore the stack pointer by adding
   // the stack size (stored in the temporary register) to the current SP value.

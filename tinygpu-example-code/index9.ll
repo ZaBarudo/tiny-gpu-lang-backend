@@ -37,4 +37,4 @@ attributes #1 = { mustprogress noinline norecurse nounwind optnone "frame-pointe
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git 58fea6382f88cfeed94a0c285bebdb2e9c247b34)"}
+!2 = !{!"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git a92829cf3f96796dbf49d989d3e210ed11bed91b)"}
