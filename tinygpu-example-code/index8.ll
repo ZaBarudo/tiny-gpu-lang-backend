@@ -24,22 +24,26 @@ entry:
   %a = alloca i32, align 4
   %b = alloca i32, align 4
   %c = alloca i32, align 4
+  %d = alloca i32, align 4
+  %e = alloca i32, align 4
   store i32 0, ptr %retval, align 4
   store i32 1, ptr %a, align 4
   store i32 2, ptr %b, align 4
   %0 = load i32, ptr %a, align 4
   %1 = load i32, ptr %b, align 4
   %call = call noundef i32 @_Z10callerFuncii(i32 noundef %0, i32 noundef %1)
-  ; store i32 %call, ptr %c, align 4
+  store i32 %call, ptr %c, align 4
+  store i32 2, ptr %d, align 4
+  store i32 2, ptr %e, align 4
   ret i32 0
 }
 
-attributes #0 = { mustprogress noinline nounwind optnone "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
-attributes #1 = { mustprogress noinline norecurse nounwind optnone "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+attributes #0 = { mustprogress noinline nounwind  "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+attributes #1 = { mustprogress noinline norecurse nounwind "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
 
 !llvm.module.flags = !{!0, !1}
 !llvm.ident = !{!2}
 
 !0 = !{i32 1, !"wchar_size", i32 4}
 !1 = !{i32 7, !"frame-pointer", i32 2}
-!2 = !{!"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git c0de804f110d315ffffcdf76444b930775998196)"}
+!2 = !{!"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git 5b593a4baab3a75f5e6b102b4e4a07f6249d75c8)"}

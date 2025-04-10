@@ -360,13 +360,13 @@ SDValue TinyGPUTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
 
   // 4. Handle return value (if any)
   if (!CLI.RetTy->isVoidTy()) {
-  // Convert the LLVM return type to an EVT
-  EVT RetVT = getValueType(DAG.getDataLayout(), CLI.RetTy);
-
-  // Get the return value from the appropriate register (R0)
-  SDValue RetVal = DAG.getRegister(TinyGPU::R0, RetVT);
-  InVals.push_back(RetVal); // Add the return value to the input values
+    // Convert the LLVM return type to an EVT
+    EVT RetVT = getValueType(DAG.getDataLayout(), CLI.RetTy);
+    // Get the return value from the appropriate register (R0)
+    SDValue RetVal = DAG.getRegister(TinyGPU::R0, RetVT);
+    InVals.push_back(RetVal); // Add the return value to the input values
   }
+
 
   return Call; // Return the call node
 }
