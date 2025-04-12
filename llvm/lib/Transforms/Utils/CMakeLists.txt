@@ -33,6 +33,7 @@ add_llvm_component_library(LLVMTransformUtils
   GuardUtils.cpp
   HelloWorld.cpp
   TinyGPUFunction.cpp
+  PeepholePass.cpp
   InlineFunction.cpp
   InjectTLIMappings.cpp
   InstructionNamer.cpp
