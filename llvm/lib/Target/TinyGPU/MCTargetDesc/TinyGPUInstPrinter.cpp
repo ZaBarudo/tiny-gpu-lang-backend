@@ -33,6 +33,10 @@ TinyGPUInstPrinter::TinyGPUInstPrinter(const MCAsmInfo &MAI, const MCInstrInfo &
     : MCInstPrinter(MAI, MII, MRI) {}
 
 void TinyGPUInstPrinter::printRegName(raw_ostream &OS, MCRegister RegNo) {
+  if (RegNo == 14 || RegNo == 15 || RegNo == 16) { 
+    OS << StringRef(getRegisterName(RegNo));
+    return;
+  }
   OS << StringRef(getRegisterName(RegNo)).upper();
 }
 

@@ -16,7 +16,9 @@ _Z10callerFuncii:                       ; @_Z10callerFuncii
 	ADD	R0, R0, R1
 	CONST	 R1, #1
 	ADD	R0, R0, R1
-	BR R11	
+	CONST	R11, #8
+	ADD	R12, R12, R11
+	RET
 .Lfunc_end0:
 	.size	_Z10callerFuncii, .Lfunc_end0-_Z10callerFuncii
                                         ; -- End function
@@ -34,21 +36,18 @@ main:                                   ; @main
 	ADD	R1, R1, R12
 	CONST	R1, #2
 	LDR	R2, R2
-	LDR	R1, R1
-	CONST	R11, #.LBB1_1
+	LDR	R2, R1
+	STR	R1, R2
 	CMP R0 R0
  	BRz	_Z10callerFuncii
+	ADD	R2, R1, R2
+	ADD	R1, R2, R2
+	ADD	R1, R1, R2
 	CMP R0 R0
- 	BRz	.LBB1_1
-.LBB1_1:                                ; %entry.afterCall
-	CONST	 R1, #-16
-	ADD	R3, R1, R12
-	STR	R2, -20
-	ADD	R2, R1, R12
-	CONST	R2, #-24
-	ADD	R1, R1, R12
-	CONST	R1, #2
-	BR R11	
+ 	BRz	_Z10callerFuncii
+	CONST	R11, #28
+	ADD	R12, R12, R11
+	RET
 .Lfunc_end1:
 	.size	main, .Lfunc_end1-main
                                         ; -- End function

@@ -408,7 +408,8 @@ if (CLI.CB && CLI.CB->getCalledFunction()) {
   // 3. Create BR node for the call
   Ops.push_back(CLI.Chain); // Add the chain as the last operand
   SDVTList VTs = DAG.getVTList(MVT::Other); // Specify the return value type list
-  SDValue Call = DAG.getNode(TinyGPUISD::BRNCZ2, DL, VTs, Ops); // Create the call node
+  // SDValue Call = DAG.getNode(TinyGPUISD::BRNCZ2, DL, VTs, Ops); // Create the call node
+  SDValue Call = DAG.getNode(TinyGPUISD::BRNCZ, DL, VTs, Ops); // Create the call node
 
   // 4. Handle return value (if any)
   if (!CLI.RetTy->isVoidTy()) {
@@ -503,7 +504,7 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
   RetOps.push_back(Flag);
 
   // Create the return node with the updated chain and return values.
-  return DAG.getNode(TinyGPUISD::Ret2, dl, MVT::Other, RetOps);
+  return DAG.getNode(TinyGPUISD::Ret, dl, MVT::Other, RetOps);
 }
 
 //===----------------------------------------------------------------------===//

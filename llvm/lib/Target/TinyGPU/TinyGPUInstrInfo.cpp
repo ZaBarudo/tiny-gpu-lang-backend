@@ -176,46 +176,46 @@ void TinyGPUInstrInfo::copyPhysReg(MachineBasicBlock &MBB,
 }
 
 
-bool TinyGPUInstrInfo::expandPostRAPseudo(MachineInstr &MI) const {
-   LLVM_DEBUG({
-    dbgs() << "\n=== Pseudo Instruction Expansion ===\n";
-    dbgs() << "Opcode: " << MI.getOpcode() 
-           << " (" << getName(MI.getOpcode()) << ")\n";
-    dumpOperandDetails(MI);
-    dbgs() << "In BB: " << MI.getParent()->getName() 
-           << " (Function: " << MI.getParent()->getParent()->getName() << ")\n";
-    dumpOperandDetails(MI);
+// bool TinyGPUInstrInfo::expandPostRAPseudo(MachineInstr &MI) const {
+//    LLVM_DEBUG({
+//     dbgs() << "\n=== Pseudo Instruction Expansion ===\n";
+//     dbgs() << "Opcode: " << MI.getOpcode() 
+//            << " (" << getName(MI.getOpcode()) << ")\n";
+//     dumpOperandDetails(MI);
+//     dbgs() << "In BB: " << MI.getParent()->getName() 
+//            << " (Function: " << MI.getParent()->getParent()->getName() << ")\n";
+//     dumpOperandDetails(MI);
     
-    dbgs() << "  Expansion Time \n ";
-  });
-  if (MI.getOpcode() == TinyGPU::CALLL) {
-    auto res = expandCallPseudo(MI);
-    return res;
-  }
-  return true;
-}
+//     dbgs() << "  Expansion Time \n ";
+//   });
+//   if (MI.getOpcode() == TinyGPU::CALLL) {
+//     auto res = expandCallPseudo(MI);
+//     return res;
+//   }
+//   return true;
+// }
 
-bool TinyGPUInstrInfo::expandRETPseudo(MachineInstr &MI) const {
-  MachineBasicBlock *MBB = MI.getParent();
-  MachineFunction *MF = MBB->getParent();
-  DebugLoc DL = MI.getDebugLoc();
-  BuildMI(*MBB, MI.getIterator(), DL, get(TinyGPU::BRNCH), TinyGPU::LR);
-  MI.eraseFromParent();
-  return false;
-}
+// bool TinyGPUInstrInfo::expandRETPseudo(MachineInstr &MI) const {
+//   MachineBasicBlock *MBB = MI.getParent();
+//   MachineFunction *MF = MBB->getParent();
+//   DebugLoc DL = MI.getDebugLoc();
+//   BuildMI(*MBB, MI.getIterator(), DL, get(TinyGPU::BRNCH), TinyGPU::LR);
+//   MI.eraseFromParent();
+//   return false;
+// }
 
 
-bool TinyGPUInstrInfo::expandCallPseudo(MachineInstr &MI) const {
-  MachineBasicBlock *MBB = MI.getParent();
-  MachineFunction *MF = MBB->getParent();
-  DebugLoc DL = MI.getDebugLoc();
-  MachineBasicBlock *PostCallMBB = MBB->getSingleSuccessor();
-  BuildMI(*MBB, MI.getIterator(), DL, get(TinyGPU::CONST), TinyGPU::LR)
-    .addMBB(PostCallMBB);
-  const MachineOperand &CalleeOp = MI.getOperand(0);
-  const GlobalValue *GV = CalleeOp.getGlobal();
-  BuildMI(*MBB, MI.getIterator(), DL, get(TinyGPU::BRNCH))
-    .addGlobalAddress(GV, CalleeOp.getOffset());
-  MI.eraseFromParent();
-  return true;
-}
+// bool TinyGPUInstrInfo::expandCallPseudo(MachineInstr &MI) const {
+//   MachineBasicBlock *MBB = MI.getParent();
+//   MachineFunction *MF = MBB->getParent();
+//   DebugLoc DL = MI.getDebugLoc();
+//   MachineBasicBlock *PostCallMBB = MBB->getSingleSuccessor();
+//   BuildMI(*MBB, MI.getIterator(), DL, get(TinyGPU::CONST), TinyGPU::LR)
+//     .addMBB(PostCallMBB);
+//   const MachineOperand &CalleeOp = MI.getOperand(0);
+//   const GlobalValue *GV = CalleeOp.getGlobal();
+//   BuildMI(*MBB, MI.getIterator(), DL, get(TinyGPU::BRNCH))
+//     .addGlobalAddress(GV, CalleeOp.getOffset());
+//   MI.eraseFromParent();
+//   return true;
+// }

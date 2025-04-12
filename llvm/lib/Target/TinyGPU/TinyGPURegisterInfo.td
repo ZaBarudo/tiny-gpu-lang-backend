@@ -30,7 +30,7 @@ def R7 : TinyGPUReg<7, "R7", ["t2"]>, DwarfRegNum<[7]>;
 def R8 : TinyGPUReg<8, "R8", ["s0", "fp"]>, DwarfRegNum<[8]>;
 def R9 : TinyGPUReg<9, "R9", ["s1"]>, DwarfRegNum<[9]>;
 def R10 : TinyGPUReg<10, "R10", ["a0"]>, DwarfRegNum<[10]>;
-def R11 : TinyGPUReg<11, "R11", ["a1"]>, DwarfRegNum<[11]>;
+
 def R13 : TinyGPUReg<13, "%blockIdx", ["bi"]>, DwarfRegNum<[13]>;
 def R14 : TinyGPUReg<14, "%blockDim", ["bd"]>, DwarfRegNum<[14]>;
 def R15 : TinyGPUReg<15, "%threadIdx", ["ti"]>, DwarfRegNum<[15]>;

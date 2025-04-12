@@ -57,9 +57,9 @@ public:
       const TargetRegisterInfo *TRI, Register VReg,
       MachineInstr::MIFlag Flags = MachineInstr::NoFlags) const;
 
-  bool expandPostRAPseudo(MachineInstr &MI) const;
-  bool expandCallPseudo(MachineInstr &MI) const;
-  bool expandRETPseudo(MachineInstr &MI) const; 
+  // bool expandPostRAPseudo(MachineInstr &MI) const;
+  // bool expandCallPseudo(MachineInstr &MI) const;
+  // bool expandRETPseudo(MachineInstr &MI) const; 
 
 protected:
   // Reference to the subtarget information for TinyGPU.

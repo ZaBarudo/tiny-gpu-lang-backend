@@ -266,8 +266,14 @@ def BRNCH_2 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
 def BRNCH_3 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
-def RETT : BRANCH_rnone<0b0000011, 0b000, "BR R11">,
+// def RETT : BRANCH_rnone<0b0000011, 0b000, "BR R11">,
+              // Sched<[ReadLoad]>;
+
+def RETT : BRANCH_rnone<0b0000011, 0b000, "RET">,
               Sched<[ReadLoad]>;
+
+
+
 
 // Compare Statements
 def CMP  : CMP_rr<0b0000000, 0b000, "CMP">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
@@ -301,10 +307,14 @@ def JALR : RWInstI<0b000, OPC_JALR, (outs GPR:$rd),
            Sched<[WriteJalr, ReadJalr]>;
 }
 
+// def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>,
+//                  PseudoInstExpansion<(JALR R0, R1, 0)>;
 
 // Return Instruction
 let isReturn = 1, isBarrier = 1, isTerminator = 1 in
-def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>;
+def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>,
+                 PseudoInstExpansion<(JALR R0, R1, 0)>;
+// def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>;
 
 def : InstAlias<"RET",(JALR R0,  R1, 0), 4>;
 
