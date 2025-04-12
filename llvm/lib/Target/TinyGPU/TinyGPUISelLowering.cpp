@@ -334,6 +334,57 @@ SDValue TinyGPUTargetLowering::LowerCall(TargetLowering::CallLoweringInfo &CLI,
   SDLoc DL = CLI.DL;           // Debug location for the call
   SmallVector<SDValue, 8> Ops; // Vector to store operands for the call
 
+// Handle OpenCL built-ins
+if (CLI.CB && CLI.CB->getCalledFunction()) {
+  StringRef Name = CLI.CB->getCalledFunction()->getName();
+  
+  if (Name.starts_with("_Z")) { // OpenCL built-ins
+    SDValue Dim = CLI.Args[0].Node;
+    bool isDim0 = false;
+    if (auto *C = dyn_cast<ConstantSDNode>(Dim))
+      isDim0 = (C->getZExtValue() == 0);
+
+    // Handle get_local_id (direct register access)
+    if (Name == "_Z12get_local_idj") {
+      if (isDim0) {
+        InVals.push_back(DAG.getRegister(TinyGPU::R15, MVT::i32)); // threadIdx
+        return CLI.Chain;
+      }
+    }
+    // Handle get_group_id (direct register access)
+    else if (Name == "_Z12get_group_idj") {
+      if (isDim0) {
+        InVals.push_back(DAG.getRegister(TinyGPU::R13, MVT::i32)); // blockIdx
+        return CLI.Chain;
+      }
+    }
+    // Handle get_local_size (direct register access)
+    else if (Name == "_Z14get_local_sizej") {
+      if (isDim0) {
+        InVals.push_back(DAG.getRegister(TinyGPU::R14, MVT::i32)); // blockDim
+        return CLI.Chain;
+      }
+    }
+    // Handle get_global_id (requires calculation)
+    else if (Name == "_Z13get_global_idj") {
+      if (isDim0) {
+        // global_id = group_id * group_size + local_id
+        SDValue GroupID = DAG.getRegister(TinyGPU::R13, MVT::i32);
+        SDValue GroupSize = DAG.getRegister(TinyGPU::R14, MVT::i32);
+        SDValue LocalID = DAG.getRegister(TinyGPU::R15, MVT::i32);
+        
+        // Multiply group ID by group size
+        SDValue Mul = DAG.getNode(ISD::MUL, DL, MVT::i32, GroupID, GroupSize);
+        // Add local ID
+        SDValue GlobalID = DAG.getNode(ISD::ADD, DL, MVT::i32, Mul, LocalID);
+        
+        InVals.push_back(GlobalID);
+        return CLI.Chain;
+      }
+    }
+  }
+}
+
   // 1. Handle Arguments
   for (unsigned i = 0; i < CLI.Args.size(); ++i) {
     const TargetLoweringBase::ArgListEntry &Arg = CLI.Args[i]; // Get the argument
