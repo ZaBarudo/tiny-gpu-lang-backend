@@ -1,9 +1,9 @@
-; ModuleID = 'index8.cpp'
+; ModuleID = './index8.ll'
 source_filename = "index8.cpp"
 target datalayout = "e-m:e-p:32:32-i64:64-n32-S128"
 target triple = "tinygpu"
 
-; Function Attrs: mustprogress noinline nounwind optnone
+; Function Attrs: mustprogress noinline nounwind
 define dso_local noundef i32 @_Z10callerFuncii(i32 noundef %a, i32 noundef %b) #0 {
 entry:
   %a.addr = alloca i32, align 4
@@ -17,7 +17,7 @@ entry:
   ret i32 %add1
 }
 
-; Function Attrs: mustprogress noinline norecurse nounwind optnone
+; Function Attrs: mustprogress noinline norecurse nounwind
 define dso_local noundef i32 @main() #1 {
 entry:
   %retval = alloca i32, align 4
@@ -31,19 +31,17 @@ entry:
   store i32 2, ptr %b, align 4
   %0 = load i32, ptr %a, align 4
   %1 = load i32, ptr %b, align 4
-  call noundef i32 @_Z10callerFuncii(i32 noundef %0, i32 noundef %1)
-  %add = add nsw i32 %0, %1
-  %add2 = add nsw i32 %add, %add
-  %add3 = add nsw i32 %add2, %add
-  call noundef i32 @_Z10callerFuncii(i32 noundef %add2, i32 noundef %add3)
+  %call = call noundef i32 @_Z10callerFuncii(i32 noundef %0, i32 noundef %1)
+  br label %entry.afterCall
 
-  ; store i32 %call, ptr %c, align 4
-  ; store i32 2, ptr %d, align 4
-  ; store i32 2, ptr %e, align 4
+entry.afterCall:                                  ; preds = %entry
+  store i32 %call, ptr %c, align 4
+  store i32 2, ptr %d, align 4
+  store i32 2, ptr %e, align 4
   ret i32 0
 }
 
-attributes #0 = { mustprogress noinline nounwind  "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
+attributes #0 = { mustprogress noinline nounwind "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
 attributes #1 = { mustprogress noinline norecurse nounwind "frame-pointer"="all" "no-trapping-math"="true" "stack-protector-buffer-size"="8" }
 
 !llvm.module.flags = !{!0, !1}

@@ -45,6 +45,22 @@ public:
                    bool RenamableDest = false,
                    bool RenamableSrc = false) const;
 
+  void loadRegFromStackSlot(
+    MachineBasicBlock &MBB, MachineBasicBlock::iterator MI, Register DestReg,
+    int FrameIndex, const TargetRegisterClass *RC,
+    const TargetRegisterInfo *TRI, Register VReg,
+    MachineInstr::MIFlag Flags) const;
+
+  void storeRegToStackSlot(
+      MachineBasicBlock &MBB, MachineBasicBlock::iterator MI, Register SrcReg,
+      bool isKill, int FrameIndex, const TargetRegisterClass *RC,
+      const TargetRegisterInfo *TRI, Register VReg,
+      MachineInstr::MIFlag Flags = MachineInstr::NoFlags) const;
+
+  bool expandPostRAPseudo(MachineInstr &MI) const;
+  bool expandCallPseudo(MachineInstr &MI) const;
+  bool expandRETPseudo(MachineInstr &MI) const; 
+
 protected:
   // Reference to the subtarget information for TinyGPU.
   const TinyGPUSubtarget &Subtarget;

@@ -198,6 +198,10 @@ class BRANCH_r2<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWJInstR2<funct7, funct3, OPC_OP, (outs), (ins GPR:$rs2, simm13_lsb0:$rs),
               opcodestr, "$rs">;
 
+class BRANCH_rnone<bits<7> funct7, bits<3> funct3, string opcodestr>
+    : RWJInstRNone<funct7, funct3, OPC_OP, (outs), (ins),
+              opcodestr, "">;
+
 let hasSideEffects = 0, mayLoad = 0, mayStore = 1 in
 class STR_rr<bits<7> funct7, bits<3> funct3, string opcodestr>
     : RWInstRR<funct7, funct3, OPC_STORE, (outs), (ins GPR:$rd, GPR:$rs),
@@ -262,6 +266,8 @@ def BRNCH_2 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
 def BRNCH_3 : BRANCH_r2<0b0000011, 0b000, "BR">,
               Sched<[ReadLoad]>;
+def RETT : BRANCH_rnone<0b0000011, 0b000, "BR R11">,
+              Sched<[ReadLoad]>;
 
 // Compare Statements
 def CMP  : CMP_rr<0b0000000, 0b000, "CMP">, Sched<[WriteIALU, ReadIALU, ReadIALU]>;
@@ -298,8 +304,7 @@ def JALR : RWInstI<0b000, OPC_JALR, (outs GPR:$rd),
 
 // Return Instruction
 let isReturn = 1, isBarrier = 1, isTerminator = 1 in
-def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>,
-                PseudoInstExpansion<(JALR R0, R1, 0)>;
+def PseudoRET : Pseudo<(outs), (ins), [(TinyGPU_ret)]>;
 
 def : InstAlias<"RET",(JALR R0,  R1, 0), 4>;
 
@@ -445,5 +450,12 @@ def ADJCALLSTACKUP   : Pseudo<(outs), (ins i32imm:$amt1, i32imm:$amt2),
                               [(callseq_end timm:$amt1, timm:$amt2)]>;
 } // end Defs = [X2], Uses = [X2]
 
+
+let isCall = 1 in {
+  def CALLL : Pseudo<(outs), (ins i32imm:$func),[]> {
+    let isCall = 1;              // Mark as a call instruction
+    let hasDelaySlot = 0;
+  }
+}
 
 // def : Pat<(br bb:$func), (LDR GPR:$func)>;

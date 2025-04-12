@@ -16,9 +16,7 @@ _Z10callerFuncii:                       ; @_Z10callerFuncii
 	ADD	R0, R0, R1
 	CONST	 R1, #1
 	ADD	R0, R0, R1
-	CONST	R11, #8
-	ADD	R12, R12, R11
-	RET
+	BR R11	
 .Lfunc_end0:
 	.size	_Z10callerFuncii, .Lfunc_end0-_Z10callerFuncii
                                         ; -- End function
@@ -26,7 +24,7 @@ _Z10callerFuncii:                       ; @_Z10callerFuncii
 	.type	main,@function
 main:                                   ; @main
 ; %bb.0:                                ; %entry
-	CONST	R11, #16
+	CONST	R11, #28
 	ADD	R12, R12, R11
 	CONST	 R1, #-4
 	ADD	R2, R1, R12
@@ -37,13 +35,22 @@ main:                                   ; @main
 	CONST	R1, #2
 	LDR	R2, R2
 	LDR	R1, R1
+	CONST	R11, #.LBB1_1
 	CMP R0 R0
  	BRz	_Z10callerFuncii
-	CONST	R11, #16
-	ADD	R12, R12, R11
-	RET
+	CMP R0 R0
+ 	BRz	.LBB1_1
+.LBB1_1:                                ; %entry.afterCall
+	CONST	 R1, #-16
+	ADD	R3, R1, R12
+	STR	R2, -20
+	ADD	R2, R1, R12
+	CONST	R2, #-24
+	ADD	R1, R1, R12
+	CONST	R1, #2
+	BR R11	
 .Lfunc_end1:
 	.size	main, .Lfunc_end1-main
                                         ; -- End function
-	.ident	"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git c0de804f110d315ffffcdf76444b930775998196)"
+	.ident	"clang version 20.0.0git (git@github.com:ZaBarudo/tiny-gpu-lang-backend.git 5b593a4baab3a75f5e6b102b4e4a07f6249d75c8)"
 	.section	".note.GNU-stack","",@progbits

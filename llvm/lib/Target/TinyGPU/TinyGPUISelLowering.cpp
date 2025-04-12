@@ -89,16 +89,17 @@ TinyGPUTargetLowering::TinyGPUTargetLowering(const TargetMachine &TM,
 
 SDValue TinyGPUTargetLowering::LowerINTRINSIC_WO_CHAIN(
     SDValue Op, SelectionDAG &DAG) const {
-//   unsigned IntrinsicID = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
+  unsigned IntrinsicID = cast<ConstantSDNode>(Op.getOperand(0))->getZExtValue();
   
-//   switch (IntrinsicID) {
-//   case Intrinsic::tinygpu_cmp: {  // NOT yourtarget_cmp
-//   SDVTList VTs = DAG.getVTList(MVT::Glue);
-//   SDValue Ops[] = { Op.getOperand(1), Op.getOperand(2) };
-//   // return DAG.getNode(TinyGPUISD::CMP, DL, VTs, Ops);
-//   return SDValue();
-// }
-//   }
+  // switch (IntrinsicID) {
+  //  case Intrinsic::tinygpu_cmp: { 
+  //   SDLoc dl(Op);
+  //   SDValue Op1 = Op.getOperand(1);
+  //   SDValue Op2 = Op.getOperand(2);
+  //   return DAG.getNode(TinyGPU::CMP, dl, MVT::Glue, Op1, Op2);
+  //   // return SDValue();
+  // }
+  // }
   return SDValue();
 }
 
@@ -407,7 +408,7 @@ if (CLI.CB && CLI.CB->getCalledFunction()) {
   // 3. Create BR node for the call
   Ops.push_back(CLI.Chain); // Add the chain as the last operand
   SDVTList VTs = DAG.getVTList(MVT::Other); // Specify the return value type list
-  SDValue Call = DAG.getNode(TinyGPUISD::BRNCZ, DL, VTs, Ops); // Create the call node
+  SDValue Call = DAG.getNode(TinyGPUISD::BRNCZ2, DL, VTs, Ops); // Create the call node
 
   // 4. Handle return value (if any)
   if (!CLI.RetTy->isVoidTy()) {
@@ -502,7 +503,7 @@ TinyGPUTargetLowering::LowerReturn(SDValue Chain,
   RetOps.push_back(Flag);
 
   // Create the return node with the updated chain and return values.
-  return DAG.getNode(TinyGPUISD::Ret, dl, MVT::Other, RetOps);
+  return DAG.getNode(TinyGPUISD::Ret2, dl, MVT::Other, RetOps);
 }
 
 //===----------------------------------------------------------------------===//

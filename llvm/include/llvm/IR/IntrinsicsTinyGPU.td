@@ -1,0 +1,1 @@
+// def int_tinygpu_cmp : Intrinsic<[], [llvm_i32_ty, llvm_i32_ty],[]>;

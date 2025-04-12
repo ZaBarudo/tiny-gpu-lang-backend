@@ -218,6 +218,20 @@ class RWJInstR2<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
   let Opcode = opcode.Value;
 }
 
+class RWJInstRNone<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
+              dag ins, string opcodestr, string argstr>
+    : RWInst<outs, ins, opcodestr, argstr, [], InstFormatR> {
+
+  let isBranch = 1;
+  let isTerminator = 1;
+  let hasDelaySlot = 0;
+
+  let Inst{31-25} = funct7;
+  let Inst{14-12} = funct3;
+
+  let Opcode = opcode.Value;
+}
+
 class RWJInstR<bits<7> funct7, bits<3> funct3, TinyGPUOpcode opcode, dag outs,
               dag ins, string opcodestr, string argstr>
     : RWInst<outs, ins, opcodestr, argstr, [], InstFormatR> {

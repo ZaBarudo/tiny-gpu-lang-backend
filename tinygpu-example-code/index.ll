@@ -6,6 +6,7 @@ target triple = "tinygpu"
 ; Function Attrs: mustprogress nofree norecurse nosync nounwind willreturn memory(none)
 define dso_local noundef  i1 @_Z3addii(i32 noundef %a, i32 noundef %b) local_unnamed_addr #0 {
 entry:
+  call void @llvm.tinygpu.cmp(i32 %a, i32 %b)
   %add = add i32 %a, 1
   %add1 = add i32 %add, %b
   %cmp = icmp slt i32 %add, %add1

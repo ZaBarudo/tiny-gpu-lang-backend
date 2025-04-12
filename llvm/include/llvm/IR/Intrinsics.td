@@ -2786,6 +2786,7 @@ def int_ptrauth_blend :
 def int_ptrauth_sign_generic :
   DefaultAttrsIntrinsic<[llvm_i64_ty], [llvm_i64_ty, llvm_i64_ty], [IntrNoMem]>;
 
+// def int_tinygpu_cmp : DefaultAttrsIntrinsic<[], [llvm_i32_ty, llvm_i32_ty],[]>;
 //===----------------------------------------------------------------------===//
 //===------- Convergence Intrinsics ---------------------------------------===//
 
@@ -2817,5 +2818,6 @@ include "llvm/IR/IntrinsicsSPIRV.td"
 include "llvm/IR/IntrinsicsVE.td"
 include "llvm/IR/IntrinsicsDirectX.td"
 include "llvm/IR/IntrinsicsLoongArch.td"
+// include "llvm/IR/IntrinsicsTinyGPU.td"
 
 #endif // TEST_INTRINSICS_SUPPRESS_DEFS

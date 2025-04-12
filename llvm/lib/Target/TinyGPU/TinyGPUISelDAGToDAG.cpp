@@ -74,6 +74,21 @@ void TinyGPUDAGToDAGISel::Select(SDNode *Node) {
     ReplaceNode(Node, Br); // Replace the current node with the new machine node.
     return;
   }
+  case TinyGPUISD::BRNCZ2: {
+    // Handle the custom TinyGPU BRNCZ (branch for function call lowering) instruction.
+    SDValue Chain = Node->getOperand(1); // Get the chain operand.
+    SDValue Target = Node->getOperand(2); // Get the target operand.
+    // Create a machine node for the BRNCH_RTG instruction.
+    auto Br = CurDAG->getMachineNode(TinyGPU::CALLL, DL, MVT::Other, Target, Chain);
+    ReplaceNode(Node, Br); // Replace the current node with the new machine node.
+    return;
+  }
+   case TinyGPUISD::Ret2: {
+    SDValue Chain = Node->getOperand(0); // Get the chain operand.
+    auto Ret = CurDAG->getMachineNode(TinyGPU::RETT, DL, MVT::Other,Chain);
+    ReplaceNode(Node, Ret); // Replace the current node with the new machine node.
+    return;
+  }
   default:
     break; // For all other opcodes, fall through to default handling.
   }

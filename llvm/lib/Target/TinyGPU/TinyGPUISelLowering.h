@@ -26,7 +26,9 @@ enum NodeType {
   // Start the numbering from where ISD NodeType finishes.
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
   Ret,    // Return instruction
-  BRNCZ   // Branch if not zero instruction
+  Ret2,    // Return instruction
+  BRNCZ,
+  BRNCZ2   // Branch if not zero instruction
 };
 }
 
