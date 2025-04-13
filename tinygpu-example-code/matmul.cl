@@ -1,4 +1,4 @@
-__kernel void vector_add(__global const int* A,
+__kernel void mainn(__global const int* A,
                         __global const int* B,
                         __global int* C) {
     // Calculate global thread ID (equivalent to your assembly calculation)
