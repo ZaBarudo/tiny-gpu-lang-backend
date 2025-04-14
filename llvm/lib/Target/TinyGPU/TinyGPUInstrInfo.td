@@ -223,10 +223,10 @@ class ALLOCA_i<bits<3> funct3, string opcodestr>
 let hasSideEffects = 0, mayLoad = 0, mayStore = 0 in {
 let isReMaterializable = 1, isAsCheapAsAMove = 1 in
 def LUI : RWInstU<OPC_LUI, (outs GPR:$rd), (ins uimm20_lui:$imm20),
-                  "lui", "$rd, $imm20">, Sched<[WriteIALU]>;
+                  "CONST", "$rd, #$imm20">, Sched<[WriteIALU]>;
 
 def AUIPC : RWInstU<OPC_AUIPC, (outs GPR:$rd), (ins uimm20_auipc:$imm20),
-                    "auipc", "$rd, $imm20">, Sched<[WriteIALU]>;
+                    "CONST", "$rd, #$imm20">, Sched<[WriteIALU]>;
 } // hasSideEffects = 0, mayLoad = 0, mayStore = 0
 
 // ADDI isn't always rematerializable, but isReMaterializable will be used as

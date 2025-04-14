@@ -56,13 +56,13 @@ void TinyGPUDAGToDAGISel::Select(SDNode *Node) {
   case ISD::Constant: {
     // Handle constant values. If the constant is zero, replace the node with
     // a copy from the R0 register, which is assumed to hold zero.
-    auto ConstNode = cast<ConstantSDNode>(Node);
-    if (ConstNode->isZero()) {
-      SDValue New = CurDAG->getCopyFromReg(CurDAG->getEntryNode(), SDLoc(Node),
-                                           TinyGPU::R0, MVT::i32);
-      ReplaceNode(Node, New.getNode()); // Replace the current node with the new one.
-      return;
-    }
+    // auto ConstNode = cast<ConstantSDNode>(Node);
+    // if (ConstNode->isZero()) {
+    //   SDValADDIue New = CurDAG->getCopyFromReg(CurDAG->getEntryNode(), SDLoc(Node),
+    //                                        TinyGPU::R0, MVT::i32);
+    //   ReplaceNode(Node, New.getNode()); // Replace the current node with the new one.
+    //   return;
+    // }
     break; // For non-zero constants, fall through to default handling.
   }
   case TinyGPUISD::BRNCZ: {

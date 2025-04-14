@@ -120,13 +120,15 @@ void TinyGPUInstrInfo::loadRegFromStackSlot(
     const TargetRegisterInfo *TRI, Register VReg,
     MachineInstr::MIFlag Flags) const {
   
-  // DebugLoc DL;
-  // if (MI != MBB.end()) DL = MI->getDebugLoc();
+  DebugLoc DL;
+  if (MI != MBB.end()) DL = MI->getDebugLoc();
   
-  // // Emit LDR instruction: ldr DestReg, [SP + FrameIndex]
-  // BuildMI(MBB, MI, DL, get(TinyGPU::LDR), DestReg)
-  //   .addFrameIndex(FrameIndex)  // Stack slot index
-  //   .setMIFlags(Flags);
+  // Emit LDR instruction: ldr DestReg, [SP + FrameIndex]
+
+  BuildMI(MBB, MI, DL, get(TinyGPU::CONST), DestReg)
+    .addImm(10)
+    // .addFrameIndex(FrameIndex)  // Stack slot index
+    .setMIFlags(Flags);
 }
 
 void TinyGPUInstrInfo::storeRegToStackSlot(
@@ -134,14 +136,14 @@ void TinyGPUInstrInfo::storeRegToStackSlot(
     bool IsKill, int FrameIndex, const TargetRegisterClass *RC,
     const TargetRegisterInfo *TRI, Register VReg,MachineInstr::MIFlag Flags) const {
   
-  // DebugLoc DL;
-  // if (MI != MBB.end()) DL = MI->getDebugLoc();
+  DebugLoc DL;
+  if (MI != MBB.end()) DL = MI->getDebugLoc();
   
-  // // Emit STR instruction: str SrcReg, [SP + FrameIndex]
-  // BuildMI(MBB, MI, DL, get(TinyGPU::STR))
-  //   .addReg(SrcReg, getKillRegState(IsKill))
-  //   .addFrameIndex(FrameIndex)  // Stack slot index
-  //   .setMIFlags(Flags);
+  // Emit STR instruction: str SrcReg, [SP + FrameIndex]
+  BuildMI(MBB, MI, DL, get(TinyGPU::STR))
+    .addReg(SrcReg, getKillRegState(IsKill))
+    .addImm(FrameIndex)  // Stack slot index
+    .setMIFlags(Flags);
 }
 
 

@@ -66,7 +66,7 @@ static MCAsmInfo *createTinyGPUMCAsmInfo(const MCRegisterInfo &MRI,
                                        const MCTargetOptions &Options) {
   MCAsmInfo *MAI = new TinyGPUMCAsmInfo(TT);
 
-  unsigned WP = MRI.getDwarfRegNum(TinyGPU::R2, true);
+  unsigned WP = MRI.getDwarfRegNum(TinyGPU::GPR, true);
   MCCFIInstruction Inst = MCCFIInstruction::cfiDefCfa(nullptr, WP, 0);
   MAI->addInitialFrameState(Inst);
 
