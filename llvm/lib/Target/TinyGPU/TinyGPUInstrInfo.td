@@ -349,7 +349,7 @@ def : Pat<(simm32hi20:$imm), (LUI (HI20 imm:$imm))>;
 
 def : PatGpr<load, LDR>;
 def : Pat<(store GPR:$rd, GPR:$rs), (STR $rs, $rd)>;
-def : Pat<(store simm12:$imm12, GPR:$rs), (CONST  GPR:$rs, simm12:$imm12)>;
+def : Pat<(store simm12:$imm12, GPR:$rs), (STR  GPR:$rs, (I_ALLOCA simm12:$imm12))>;
 // def : Pat<(alloca), (CONST_ALLOCA)>;
 
 // // Match load from FrameIndex
