@@ -149,9 +149,9 @@ void TinyGPUTargetLowering::ReplaceNodeResults(SDNode *N,
 // for passing function arguments before spilling to the stack.
 static const MCPhysReg GPRArgRegs[] = {
   TinyGPU::R0, // First argument register
-  TinyGPU::R1, // Second argument register
-  TinyGPU::R2, // Third argument register
-  TinyGPU::R3  // Fourth argument register
+  // TinyGPU::R1, // Second argument register
+  // TinyGPU::R2, // Third argument register
+  // TinyGPU::R3  // Fourth argument register
 };
 
 /// LowerFormalArguments - This function is responsible for lowering the formal

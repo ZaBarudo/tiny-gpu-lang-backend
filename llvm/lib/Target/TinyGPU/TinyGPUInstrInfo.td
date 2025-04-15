@@ -249,6 +249,10 @@ def MUL     : ALU_rr<0b0000001, 0b000, "MUL">, Sched<[WriteIMul, ReadIMul, ReadI
 def DIV     : ALU_rr<0b0000001, 0b100, "DIV">,
               Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
 
+// Add this with the other ALU instructions
+def REM     : ALU_rr<0b0000001, 0b110, "REM">,
+              Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
+
 // Load, Store and Constant Instructions 
 def LDR : LDR_rr<0b0000010, 0b000, "LDR">,
               Sched<[WriteLoad, ReadLoad]>;
@@ -398,7 +402,20 @@ def : Pat<(setne GPR:$lhs, simm12:$rhs), (MUL GPR:$lhs, (I_ALLOCA simm12:$rhs))>
 def : Pat<(br bb:$dst), (BRNCH bb:$dst)>;
 
 
+// Modulus between two registers
+def : PatGprGpr<srem, REM>;
 
+// Modulus with immediate operands
+def : Pat<(srem GPR:$rs1, simm12:$imm12), (REM GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
+def : Pat<(srem simm12:$imm12, GPR:$rs1), (REM (I_ALLOCA simm12:$imm12), GPR:$rs1)>;
+
+def REMU    : ALU_rr<0b0000001, 0b111, "REMU">,
+              Sched<[WriteIDiv, ReadIDiv, ReadIDiv]>;
+
+// Unsigned modulus patterns
+def : PatGprGpr<urem, REMU>;
+def : Pat<(urem GPR:$rs1, simm12:$imm12), (REMU GPR:$rs1, (I_ALLOCA simm12:$imm12))>;
+def : Pat<(urem simm12:$imm12, GPR:$rs1), (REMU (I_ALLOCA simm12:$imm12), GPR:$rs1)>;
 
 // Branch condition with comparison
 def : Pat<(brcc SETLE,   GPR:$lhs, GPR:$rhs, bb:$dst), (BRNCHNZ (CMP GPR:$lhs, GPR:$rhs), bb:$dst)>;
@@ -441,7 +458,15 @@ def shl_to_mul_imm : SDNodeXForm<imm, [{
 def : Pat< (shl GPR:$src, imm:$shift),
           (MUL GPR:$src, (I_ALLOCA (shl_to_mul_imm imm:$shift)))>;
 
-
+def sra_to_div_imm : SDNodeXForm<imm, [{
+  if (auto *CN = dyn_cast<ConstantSDNode>(N)) {
+    uint64_t ShiftVal = CN->getZExtValue();
+    return CurDAG->getTargetConstant(1 << ShiftVal, SDLoc(N), MVT::i32);
+  }
+}]>;
+// Simple but less efficient SRA pattern
+def : Pat< (sra GPR:$src, imm:$shift),
+          (DIV GPR:$src, (I_ALLOCA (sra_to_div_imm imm:$shift)))>;
 
 // Match both a plain shift and one where the shift amount is masked (this is
 // typically introduced when the legalizer promotes the shift amount and
