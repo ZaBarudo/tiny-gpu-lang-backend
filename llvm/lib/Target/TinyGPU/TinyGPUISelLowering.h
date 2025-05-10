@@ -25,9 +25,11 @@ namespace TinyGPUISD {
 enum NodeType {
   // Start the numbering from where ISD NodeType finishes.
   FIRST_NUMBER = ISD::BUILTIN_OP_END,
-
+  // BR,
+  // CMP,
   // Return
   Ret,
+  BRNCZ
 };
 }
 
@@ -74,6 +76,8 @@ private:
   SDValue LowerRETURNADDR(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerShlParts(SDValue Op, SelectionDAG &DAG) const;
   SDValue LowerShrParts(SDValue Op, SelectionDAG &DAG, bool arith) const;
+  SDValue LowerBR_CC(SDValue Op, SelectionDAG &DAG) const;
+  SDValue LowerBRCOND(SDValue Op, SelectionDAG &DAG) const;
 };
 }
 

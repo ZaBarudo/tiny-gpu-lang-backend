@@ -33,7 +33,7 @@ TinyGPUInstPrinter::TinyGPUInstPrinter(const MCAsmInfo &MAI, const MCInstrInfo &
     : MCInstPrinter(MAI, MII, MRI) {}
 
 void TinyGPUInstPrinter::printRegName(raw_ostream &OS, MCRegister RegNo) {
-  OS << StringRef(getRegisterName(RegNo)).lower();
+  OS << StringRef(getRegisterName(RegNo)).upper();
 }
 
 void TinyGPUInstPrinter::printInst(const MCInst *MI, uint64_t Address,
@@ -61,4 +61,14 @@ void TinyGPUInstPrinter::printOperand(const MCInst *MI, unsigned OpNo,
 
   assert(Op.isExpr() && "unknown operand kind in printOperand");
   Op.getExpr()->print(O, &MAI, true);
+}
+
+void TinyGPUInstPrinter::printBrTarget(const MCInst *MI, unsigned OpNo,
+                                      raw_ostream &O) {
+  const MCOperand &MO = MI->getOperand(OpNo);
+  if (MO.isExpr()) {
+    const MCExpr *Expr = MO.getExpr();
+    const MCSymbolRefExpr *SRE = cast<MCSymbolRefExpr>(Expr);
+    O << SRE->getSymbol();
+  }
 }

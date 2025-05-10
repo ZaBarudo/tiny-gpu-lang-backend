@@ -1050,6 +1050,7 @@ EmitMachineNode(SDNode *Node, bool IsClone, bool IsCloned,
     assert(NumMIOperands >= II.getNumOperands() &&
            "Too few operands for a variadic node!");
   else
+    
     assert(NumMIOperands >= II.getNumOperands() &&
            NumMIOperands <=
                II.getNumOperands() + II.implicit_defs().size() + NumImpUses &&

@@ -41,6 +41,8 @@ public:
 
   void determineCalleeSaves(MachineFunction &MF, BitVector &SavedRegs,
                             RegScavenger *RS) const override;
+uint64_t computeStackSize(MachineFunction &MF) const;
+
   
 private:
   bool hasFPImpl(const MachineFunction &MF) const override;
